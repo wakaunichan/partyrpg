@@ -537,7 +537,7 @@
                                 targetType: 'enemy',
                                 description: '敵一体に物理ダメージを与える。30%の確率で会心の一撃になる。'
                             },
-                            image: 'sgd_1.png',
+                            bgClass: 'bg-char-akari',
                             unlockableSkillLv4: {
                                 name: '乱舞',
                                 cost: 25,
@@ -586,7 +586,7 @@
                                 targetType: 'enemy',
                                 description: '残りMPを全て消費し、敵一体に超特大の魔法ダメージを与える。'
                             },
-                            image: 'sgd_2.png',
+                            bgClass: 'bg-char-hikari',
                             themeColor: 'purple',
                         }, {
                             name: 'シズカ',
@@ -626,7 +626,7 @@
                                 effects: ['provoke', 'regeneration'],
                                 description: '敵の注意を引きつけつつ、3ターンの間HPが自動回復する。'
                             },
-                            image: 'sgd_3.png',
+                            bgClass: 'bg-char-shizuka',
                             themeColor: 'amber',
                         }, {
                             name: 'ユイ',
@@ -667,7 +667,7 @@
                                 growth: 5,
                                 description: '味方全体のHPを全回復し、状態異常を治し、身長を5cm伸ばす聖域を作り出す。'
                             },
-                            image: 'sgd_4.png',
+                            bgClass: 'bg-char-yui',
                             themeColor: 'green',
                         }, {
                             name: 'ベアトリス',
@@ -710,7 +710,7 @@
                                 targetType: 'enemy',
                                 description: '敵一体に錬金術の爆発で大ダメージを与える。'
                             },
-                            image: 'sgd_5.png',
+                            bgClass: 'bg-char-beatrice',
                             themeColor: 'indigo',
                         }, {
                             name: 'リリカ',
@@ -751,7 +751,7 @@
                                 targetType: 'party',
                                 description: '味方全体の攻撃力と素早さを一時的に上昇させる。'
                             },
-                            image: 'sgd_6.png',
+                            bgClass: 'bg-char-ririka',
                             themeColor: 'pink',
                         }, {
                             name: 'サクヤ',
@@ -793,7 +793,7 @@
                                 targetType: 'enemy',
                                 description: '自身のHPを大きく消費し、敵一体に絶大な物理ダメージを与える。'
                             },
-                            image: 'sgd_7.png',
+                            bgClass: 'bg-char-sakuya',
                             themeColor: 'cyan',
                         }, {
                             name: 'シャオメイ',
@@ -836,7 +836,7 @@
                                 targetType: 'enemy',
                                 description: '敵の防御力を無視して物理ダメージを与える。'
                             },
-                            image: 'sgd_8.png',
+                            bgClass: 'bg-char-shaomei',
                             themeColor: 'orange',
                         }, {
                             name: 'エリザ',
@@ -879,7 +879,7 @@
                                 targetType: 'enemies',
                                 description: '敵全体に毒、麻痺、鈍化のいずれかの状態異常を引き起こすウイルスを散布する。'
                             },
-                            image: 'sgd_9.png',
+                            bgClass: 'bg-char-eriza',
                             themeColor: 'teal',
                         }, {
                             name: 'ルナ',
@@ -918,7 +918,7 @@
                                 targetType: 'party',
                                 description: '奇跡を信じて全てを賭ける。低確率で味方全体が全回復＆強化されるが、ほとんどの場合は何も起こらない。'
                             },
-                            image: 'sgd_10.png',
+                            bgClass: 'bg-char-runa',
                             themeColor: 'fuchsia',
                         }, {
                             name: 'クロエ',
@@ -960,7 +960,7 @@
                                 targetType: 'enemies',
                                 description: '敵全体に冥府の鎌を振るう。自身の身長が初期値より低いほど威力が増す。'
                             },
-                            image: 'sgd_11.png',
+                            bgClass: 'bg-char-chloe',
                             themeColor: 'slate',
                         }, {
                             name: 'ミコ',
@@ -1003,7 +1003,7 @@
                                 targetType: 'self',
                                 description: '自身の最大HPと同じHPを持つ、より強力なゴーレムを召喚する。'
                             },
-                            image: 'sgd_12.png',
+                            bgClass: 'bg-char-miko',
                             themeColor: 'lime',
                         }, {
                             name: 'セレスティア',
@@ -1038,7 +1038,7 @@
                                 targetType: 'enemies',
                                 description: '天からの光で、敵全体に聖なる魔法ダメージを与える。'
                             },
-                            image: 'sgd_17.png',
+                            bgClass: 'bg-char-celestia',
                             themeColor: 'yellow',
                         }, {
                             name: 'レンカ',
@@ -1080,7 +1080,7 @@
                                 targetType: 'ally',
                                 description: '戦闘不能の味方一人をHP100%の状態で復活させる禁断の蘇生術。'
                             },
-                            image: 'sgd_13.png',
+                            bgClass: 'bg-char-renka',
                             themeColor: 'gray',
                         }, {
                             name: 'イオリ',
@@ -1122,7 +1122,7 @@
                                 targetType: 'party',
                                 description: '味方全体に、自身の最大HPの40%の耐久値を持つ防壁を生成する。'
                             },
-                            image: 'sgd_14.png',
+                            bgClass: 'bg-char-iori',
                             themeColor: 'stone',
                         }, {
                             name: 'コハル',
@@ -1162,7 +1162,7 @@
                                 targetType: 'party',
                                 description: '味方全体に奇跡の贈り物を届ける。HPとMPが全回復し、3ターン攻撃力と防御力が上昇する。ごく稀に失敗する。'
                             },
-                            image: 'sgd_15.png',
+                            bgClass: 'bg-char-koharu',
                             themeColor: 'rose',
                         }, {
                             name: 'オリビア',
@@ -1203,7 +1203,7 @@
                                 targetType: 'party',
                                 description: '味方全体に、3ターンの間HPが自動で回復する祝福を与える。'
                             },
-                            image: 'sgd_16.png',
+                            bgClass: 'bg-char-olivia',
                             themeColor: 'sky',
                         },
 
