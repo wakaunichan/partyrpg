@@ -2919,25 +2919,24 @@
                             return; // モーダル表示のため、ここで処理を中断
                         }
 
-
                         // ゲームモードによる分岐
                         if (gameState.gameMode === 'monster_march') {
                             const isBossFloor = gameState.floor === 30 || gameState.floor === 50;
                             startBattle(isBossFloor);
                         } else if (gameState.gameMode === 'endgame' && gameState.floor === 1) {
                             startBattle(true); // 1階でボス戦
-                        } else if (gameState.gameMode === 'brawl' && gameState.floor % 2 === 0) {
-                            startBattle(); // 2フロアごとに戦闘
                         } else if (gameState.gameMode === 'endless') { // 無限モードの判定を修正
                             if (gameState.floor > 0 && gameState.floor % 30 === 0) {
                                 startBattle(true); // 無限モードのボス戦
+                            } else if (gameState.floor % 5 === 0) {
+                                startBattle(); // 5フロアごとに戦闘
                             } else {
-                                // 通常の戦闘・イベント判定を行う
-                                if (gameState.floor % 5 === 0) startBattle();
-                                else triggerRandomEvent();
+                                triggerRandomEvent(); // それ以外の階はランダムイベント
                             }
+                        } else if (gameState.gameMode === 'brawl' && gameState.floor % 2 === 0) {
+                            startBattle(); // 2フロアごとに戦闘
                         } else if (gameState.floor === 30 && gameState.gameMode !== 'endless' && gameState.gameMode !== 'monster_march') startBattle(true);
-                        else if (gameState.floor % 5 === 0 && gameState.gameMode !== 'brawl' && gameState.gameMode !== 'endless') {
+                        else if (gameState.floor % 5 === 0) {
                             startBattle();
                         } else if (gameState.gameMode === 'fixed_path') {
                             triggerSelectableEvent();
