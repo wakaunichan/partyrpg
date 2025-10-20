@@ -46,29 +46,40 @@
             min-height: 160px;
             /* 少し高さを増やして見栄えを調整 */
             position: relative;
+            overflow: hidden;
+            /* 疑似要素をはみ出させない */
             display: flex;
             align-items: flex-end;
             /* 子要素を下揃えにする */
+        }
+        
+        .character-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: var(--char-bg-image);
             background-size: cover;
-            /* 画像が要素を完全に覆うように調整 */
             background-position: center;
-            /* 画像を中央に配置 */
+            opacity: 0.3;
+            /* 背景画像の透明度を調整 */
+            z-index: 0;
         }
         
         .character-card.targeted {
             border-color: #3b82f6;
         }
         
-        .enemy-card {
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-        }
-        
         .character-stats {
+            position: relative;
+            /* 疑似要素より手前に表示 */
+            z-index: 1;
             padding: 0.25rem;
             border-radius: 0.25rem;
             /* 文字の視認性確保のためにテキストシャドウを追加 */
-            text-shadow: 0px 0px 4px rgba(0, 0, 0, 1), 0px 0px 4px rgba(0, 0, 0, 1);
+            text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.7), -1px -1px 3px rgba(255, 255, 255, 0.7), 1px -1px 3px rgba(255, 255, 255, 0.7), -1px 1px 3px rgba(255, 255, 255, 0.7);
         }
         
         .targeted {
@@ -76,6 +87,11 @@
             box-shadow: 0 0 15px rgba(255, 100, 100, 0.8);
             /* 敵選択時のスタイル */
             border-color: #ef4444;
+        }
+        
+        .enemy-card {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
         }
         
         .damage-popup {
@@ -257,71 +273,71 @@
         /* キャラクター背景画像 */
         
         .bg-char-akari {
-            background-image: url('sgd_1.png');
+            --char-bg-image: url('sgd_1.png');
         }
         
         .bg-char-hikari {
-            background-image: url('sgd_2.png');
+            --char-bg-image: url('sgd_2.png');
         }
         
         .bg-char-shizuka {
-            background-image: url('sgd_3.png');
+            --char-bg-image: url('sgd_3.png');
         }
         
         .bg-char-yui {
-            background-image: url('sgd_4.png');
+            --char-bg-image: url('sgd_4.png');
         }
         
         .bg-char-beatrice {
-            background-image: url('sgd_5.png');
+            --char-bg-image: url('sgd_5.png');
         }
         
         .bg-char-ririka {
-            background-image: url('sgd_6.png');
+            --char-bg-image: url('sgd_6.png');
         }
         
         .bg-char-sakuya {
-            background-image: url('sgd_7.png');
+            --char-bg-image: url('sgd_7.png');
         }
         
         .bg-char-shaomei {
-            background-image: url('sgd_8.png');
+            --char-bg-image: url('sgd_8.png');
         }
         
         .bg-char-eriza {
-            background-image: url('sgd_9.png');
+            --char-bg-image: url('sgd_9.png');
         }
         
         .bg-char-runa {
-            background-image: url('sgd_10.png');
+            --char-bg-image: url('sgd_10.png');
         }
         
         .bg-char-chloe {
-            background-image: url('sgd_11.png');
+            --char-bg-image: url('sgd_11.png');
         }
         
         .bg-char-miko {
-            background-image: url('sgd_12.png');
+            --char-bg-image: url('sgd_12.png');
         }
         
         .bg-char-renka {
-            background-image: url('sgd_13.png');
+            --char-bg-image: url('sgd_13.png');
         }
         
         .bg-char-iori {
-            background-image: url('sgd_14.png');
+            --char-bg-image: url('sgd_14.png');
         }
         
         .bg-char-koharu {
-            background-image: url('sgd_15.png');
+            --char-bg-image: url('sgd_15.png');
         }
         
         .bg-char-olivia {
-            background-image: url('sgd_16.png');
+            --char-bg-image: url('sgd_16.png');
         }
         
         .bg-char-celestia {
-            background-image: url('sgd_17.png');
+            --char-bg-image: url('sgd_17.png');
         }
     </style>
 </head>
