@@ -456,7 +456,7 @@
                     </div>
                 </div>
                 <div id="what-if-list" class="space-y-3 max-h-60 overflow-y-auto pr-2">
-                    <button data-mode="trial" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-blue-700">腕試し</strong><span class="block text-sm text-gray-600">好きな仲間を選んで、通常ルールで冒険を開始する。</span></button>
+                    <button data-mode="trial" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-blue-700">腕試し</strong><span class="block text-sm text-gray-600">通常ルールで冒険を開始する。</span></button>
                     <button data-mode="veterans" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-purple-700">歴戦の勇者たち</strong><span class="block text-sm text-gray-600">全員レベル4の状態で冒険を開始する。</span></button>
                     <button data-mode="dwarves" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-green-700">小人族の戦い</strong><span class="block text-sm text-gray-600">全員の身長が10cmの状態で冒険を開始する。</span></button>
                     <button data-mode="brawl" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-red-700">武闘の宴</strong><span class="block text-sm text-gray-600">2フロアごとに必ず戦闘が発生する。</span></button>
@@ -1448,6 +1448,14 @@
                             effect: 'shrink_party_and_debuff_enemies',
                             power: 20, // 身長減少量
                             battleOnly: true
+                        },
+                        'fairy_syrup': {
+                            name: 'フェアリーシロップ',
+                            description: '味方ひとりの身長を1cmにし、その冒険中、身長が1cmで固定される。',
+                            target: 'ally',
+                            effect: 'lock_height_to_one',
+                            battleOnly: false,
+                            rare: true
                         },
                     };
 
@@ -2604,11 +2612,13 @@
                             currentMp: c.mp,
                             initialHeight: c.height,
                             buffs: {},
+                            heightLocked: false, // 追加
                             level: 1,
                             isDefending: false,
                             hate: 0,
                             statusEffects: {}, // 状態異常
                         })); // ファイター, ソーサラー, ナイト, メディック
+                        gameState.party.forEach(p => p.heightLocked = false); // 身長固定フラグを初期化
                         gameState.golem = null;
                         gameState.inventory = [];
 
@@ -3113,6 +3123,10 @@
 
                     function triggerShrinkTrap() {
                         const target = getRandomPartyMember();
+                        if (target.heightLocked) {
+                            log(`${target.name}は不思議な力で守られており、罠の効果を受けなかった！`);
+                            return;
+                        }
                         const shrinkAmount = Math.floor(Math.random() * 11) + 10; // 10〜20cm縮む
                         animateStatChange(target, 'height', -shrinkAmount, 'decrease');
                         flashCard(target, 'yellow'); // Flash the card itself
@@ -3121,6 +3135,10 @@
 
                     function triggerGrowTrap() {
                         const target = getRandomPartyMember();
+                        if (target.heightLocked) {
+                            log(`${target.name}は不思議な力で守られており、光の影響を受けなかった！`);
+                            return;
+                        }
                         const growAmount = Math.floor(Math.random() * 11) + 10; // 10〜20cm伸びる
                         animateStatChange(target, 'height', growAmount, 'increase');
                         flashCard(target, 'yellow');
@@ -3183,21 +3201,23 @@
                     }
 
                     function foundEquipment() {
-                        const partyRoles = gameState.party.map(p => p.role);
-                        const availableEquipmentIds = getRemainingEquipment().filter(id => {
-                            const equipment = equipmentBlueprints[id];
-                            // 装備の対象ロールが現在のパーティに存在するかチェック
-                            return partyRoles.includes(equipment.targetRole);
-                        });
+                        // パーティ内に未発見の装備を持つキャラがいるかチェック
+                        const partyRolesWithRemainingEquipment = gameState.party
+                            .filter(p => p.currentHp > 0) // 生存しているキャラのみ
+                            .map(p => p.role)
+                            .filter(role => getRemainingEquipment().some(id => equipmentBlueprints[id].targetRole === role));
 
-                        if (availableEquipmentIds.length === 0) {
-                            nothingHappened(); // 念のため、装備がない場合は何もしない
+                        if (partyRolesWithRemainingEquipment.length === 0) {
+                            nothingHappened(); // 装備を見つけられるキャラがいない場合は何もしない
                             return;
                         }
 
-                        const foundId = availableEquipmentIds[Math.floor(Math.random() * availableEquipmentIds.length)];
+                        // 装備を見つけられる可能性のあるロールからランダムに一つ選ぶ
+                        const targetRole = partyRolesWithRemainingEquipment[Math.floor(Math.random() * partyRolesWithRemainingEquipment.length)];
+                        const availableEquipmentForRole = getRemainingEquipment().filter(id => equipmentBlueprints[id].targetRole === targetRole);
+                        const foundId = availableEquipmentForRole[Math.floor(Math.random() * availableEquipmentForRole.length)];
                         const equipment = equipmentBlueprints[foundId];
-                        const targetCharacter = gameState.party.find(p => p.role === equipment.targetRole);
+                        const targetCharacter = gameState.party.find(p => p.role === targetRole && p.currentHp > 0);
 
                         if (targetCharacter) {
                             log(`古い宝箱から ${equipment.name} を見つけた！ ${equipment.description}`);
@@ -3905,10 +3925,21 @@
                                 log(`${caster.name}は${skill.name}！力を溜めている…！`);
                                 break;
                             case 'special_heal': // 献身
+                                if (caster.heightLocked) {
+                                    log(`${caster.name}は献身を使おうとしたが、体が変化を拒んだ！`);
+                                    caster.currentMp += skill.cost; // MPを消費しない
+                                    break;
+                                }
                                 const costHeight = Math.min(20, caster.height - 1);
                                 if (costHeight < 1) {
                                     log(`${caster.name}は献身を使おうとしたが、身長が足りなかった！`);
                                     break; // 身長が1cmだと使えない
+                                }
+                                // 献身使用後に身長が1cm未満になる場合は使用不可
+                                if (caster.height - costHeight < 1) {
+                                    log(`${caster.name}は献身を使おうとしたが、これ以上身長を捧げられなかった！`);
+                                    caster.currentMp += skill.cost; // MPを消費しない
+                                    break;
                                 }
                                 await animateStatChange(caster, 'height', -costHeight, 'decrease');
                                 log(`${caster.name}は身長を${costHeight}cm捧げて、味方を癒した！`);
@@ -3954,6 +3985,10 @@
                                 break;
                             case 'party_restore_growth': // サンクチュアリ
                                 log(`${caster.name}は${skill.name}を唱えた！聖なる光がパーティを包み込む！`);
+                                if (caster.heightLocked) {
+                                    log(`しかし、${caster.name}の体は聖なる力による成長を受け付けなかった！`);
+                                }
+
                                 gameState.party.forEach(p => {
                                     if (p.currentHp > 0) {
                                         animateStatChange(p, 'hp', p.maxHp, 'increase'); // 全回復
@@ -4012,11 +4047,21 @@
                                 log(`${caster.name}の${skill.name}！ ${target.name}に${monkDamage}の防御無視ダメージ！`);
                                 break;
                             case 'growth_ally': // 成長促進剤
+                                if (target.heightLocked) {
+                                    log(`${caster.name}は${target.name}に薬を投与したが、体が変化を拒んだ！`);
+                                    caster.currentMp += skill.cost; // MPを消費しない
+                                    break;
+                                }
                                 await animateStatChange(target, 'height', skill.power, 'increase');
                                 flashCard(target, 'yellow');
                                 log(`${caster.name}は${target.name}に${skill.name}を投与した！ ${target.name}の体が巨大化した！(身長+${skill.power}cm)`);
                                 break;
                             case 'shrink_ally': // 縮小薬
+                                if (target.heightLocked) {
+                                    log(`${caster.name}は${target.name}に薬を投与したが、体が変化を拒んだ！`);
+                                    caster.currentMp += skill.cost; // MPを消費しない
+                                    break;
+                                }
                                 await animateStatChange(target, 'height', -skill.power, 'decrease');
                                 flashCard(target, 'yellow');
                                 log(`${caster.name}は${target.name}に${skill.name}を投与した！ 身長が${skill.power}cm縮んだ！`);
@@ -4085,6 +4130,11 @@
                                     log(`幸運の星が輝き、${target.name}の攻撃力が上がった！`);
                                 } else { // 10% 身長アップ
                                     const growthAmount = Math.floor(Math.random() * 21) + 10; // 10-30cm
+                                    if (target.heightLocked) {
+                                        log(`幸運の星が輝いたが、${target.name}の体は変化を拒んだ！`);
+                                        caster.currentMp += skill.cost; // MPを消費しない
+                                        break;
+                                    }
                                     await animateStatChange(target, 'height', growthAmount, 'increase');
                                     log(`幸運の星が輝き、${target.name}の身長が${growthAmount}cm伸びた！`);
                                 }
@@ -4298,6 +4348,10 @@
 
                         switch (itemInfo.effect) {
                             case 'shrink': // リトルスープの特殊処理
+                                if (target && !target.isEnemy && target.heightLocked) {
+                                    log(`${target.name}は不思議な力で守られており、スープを飲んでも変化がなかった！`);
+                                    return false; // アイテム消費しない
+                                }
                                 if (target && target.isEnemy) {
                                     // 敵に使った場合
                                     target.buffs = target.buffs || {};
@@ -4331,12 +4385,20 @@
                                 }
                                 break;
                             case 'reset_height':
+                                if (target.heightLocked) {
+                                    log(`${target.name}は不思議な力で守られており、ミルクを飲んでも変化がなかった！`);
+                                    return false; // アイテム消費しない
+                                }
                                 const resetDiff = target.initialHeight - target.height;
                                 await animateStatChange(target, 'height', resetDiff, 'increase');
                                 flashCard(target, 'yellow');
                                 log(`${target.name}の身長が元に戻った！`);
                                 break;
                             case 'set_height':
+                                if (target.heightLocked) {
+                                    log(`${target.name}は不思議な力で守られており、ギフトを受け取っても変化がなかった！`);
+                                    return false; // アイテム消費しない
+                                }
                                 const setDiff = itemInfo.power - target.height;
                                 const type = setDiff < 0 ? 'decrease' : 'increase';
                                 await animateStatChange(target, 'height', setDiff, type); // Await height animation
@@ -4375,6 +4437,10 @@
                                 log(`${target.name}の最大MPが${itemInfo.power}上がった！`);
                                 break;
                             case 'increase_height_and_initial':
+                                if (target.heightLocked) {
+                                    log(`${target.name}は不思議な力で守られており、エールを飲んでも変化がなかった！`);
+                                    return false; // アイテム消費しない
+                                }
                                 let growthAmount = itemInfo.power;
                                 if (target.height < target.initialHeight) {
                                     // 初期値より低い場合、まず初期値に戻す分の増加量を加える
@@ -4397,11 +4463,22 @@
                                 log(`${target.name}は意識を取り戻した！`);
                                 break;
                             case 'shrink_party_and_debuff_enemies':
+                                let anyShrunk = false;
                                 log(`シュリンクアロマの香りが戦場に広がる！`);
                                 // 味方全員の身長を縮める
                                 for (const p of gameState.party) {
                                     if (p.currentHp > 0) {
+                                        if (p.heightLocked) {
+                                            log(`${p.name}は体の変化を拒んだ！`);
+                                            continue;
+                                        }
+                                        anyShrunk = true;
                                         await animateStatChange(p, 'height', -itemInfo.power, 'decrease');
+                                    }
+                                }
+                                if (anyShrunk) {
+                                    for (const p of gameState.party) {
+                                        if (p.currentHp > 0 && !p.heightLocked) await animateStatChange(p, 'height', -itemInfo.power, 'decrease');
                                     }
                                 }
                                 // 敵全員にデバフを付与
@@ -4410,7 +4487,16 @@
                                         e.statusEffects.stat_down = true;
                                     }
                                 }
-                                log(`味方の体が少し縮み、敵が大幅に弱体化した！`);
+                                log(`敵が大幅に弱体化した！`);
+                                break;
+                            case 'lock_height_to_one':
+                                if (target.heightLocked) {
+                                    log(`${target.name}の体はすでに固定されているため、何も起こらなかった。`);
+                                    return false; // アイテム消費しない
+                                }
+                                target.heightLocked = true;
+                                await animateStatChange(target, 'height', 1 - target.height, 'decrease');
+                                log(`${target.name}の体が妖精のように小さくなり、その姿で固定された！`);
                                 break;
                         }
                         // 献身の内部呼び出しではUIを更新しない
@@ -4845,6 +4931,10 @@
                                 log("勝利の余韻に浸る間もなく、パーティの体が不安定に変化する…！");
                                 await new Promise(resolve => setTimeout(resolve, 1500)); // メッセージ表示のための待機
                                 const aliveParty = gameState.party.filter(p => p.currentHp > 0);
+                                if (aliveParty.every(p => p.heightLocked)) {
+                                    log("…しかし、全員の体が変化を拒んだ！");
+                                    await new Promise(resolve => setTimeout(resolve, 1500));
+                                }
                                 for (const char of aliveParty) {
                                     const change = Math.floor(Math.random() * 101) - 50; // -50 から +50
                                     const type = change >= 0 ? 'increase' : 'decrease';
@@ -5117,6 +5207,10 @@
                             id: 'becomeCute',
                             text: (target) => `${target.name}がかわいくなる`,
                             effect: (target) => {
+                                if (target.heightLocked) {
+                                    log(`突然の光に包まれたが、${target.name}の体は変化を拒んだ！`);
+                                    return;
+                                }
                                 const diff = 1 - target.height;
                                 animateStatChange(target, 'height', diff, 'decrease');
                                 log(`突然の光に包まれ、${target.name}の身長が1cmになってしまった！`);
@@ -5198,8 +5292,15 @@
                         if (card) {
                             const className = `flash-${type}`;
                             card.classList.add(className);
+                            // 敵のカードの場合、z-indexを一時的に上げてフラッシュが手前に表示されるようにする
+                            if (target.isEnemy) {
+                                card.style.zIndex = '10';
+                            }
                             setTimeout(() => {
                                 card.classList.remove(className);
+                                if (target.isEnemy) {
+                                    card.style.zIndex = 'auto';
+                                }
                             }, 500); // アニメーション時間と合わせる
                         }
                     }
@@ -5207,6 +5308,11 @@
                     // Renamed and extended flashStat to handle both visual flash and number animation
                     async function animateStatChange(target, statName, changeAmount, type) {
                         if (target.isEnemy) return; // 敵のステータスは表示されていないので何もしない
+                        // 身長固定フラグをチェック
+                        if (statName === 'height' && target.heightLocked) {
+                            // ログは呼び出し元で出すのでここでは不要
+                            return;
+                        }
 
                         const card = document.getElementById(`party-card-${gameState.party.indexOf(target)}`);
                         if (!card) return;
@@ -5534,7 +5640,7 @@
                 gameState.gameMode = mode;
 
                 // メンバー選択が必要なモードで、まだメンバーが選ばれていない場合 (聖女の行進は除く)
-                if ((mode === 'solo' || mode === 'indecent' || mode === 'trial' || (toggleSelectTeam.checked && mode !== 'normal')) && !selectedMembers && mode !== 'saint_march') {
+                if ((mode === 'solo' || mode === 'indecent' || (mode === 'trial' && toggleSelectTeam.checked) || (toggleSelectTeam.checked && mode !== 'normal')) && !selectedMembers && mode !== 'saint_march') {
                     whatIfModal.classList.add('hidden');
                     showSelectTeamModal(mode); // モードを引き継いで選択画面へ
                     return;
