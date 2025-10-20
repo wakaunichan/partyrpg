@@ -510,6 +510,17 @@
             </div>
         </div>
 
+        <!-- 無限モードボーナス選択モーダル -->
+        <div id="endless-bonus-modal" class="hidden absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-lg p-8 text-center shadow-2xl max-w-2xl w-full">
+                <h2 class="text-2xl font-bold mb-2">勝利ボーナス！</h2>
+                <p class="mb-6">生存者全員がレベルアップした！<br>さらに、以下のボーナスから一つを選択してください。</p>
+                <div id="endless-bonus-buttons" class="grid grid-cols-2 gap-4">
+                    <!-- ボタンがここに挿入される -->
+                </div>
+            </div>
+        </div>
+
         <div id="menu-modal" class="hidden absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
             <div class="bg-white rounded-lg p-8 text-center shadow-2xl max-w-xs w-full">
                 <h2 class="text-2xl font-bold mb-6">メニュー</h2>
@@ -597,6 +608,10 @@
                     const celestiaEventTitle = document.getElementById('celestia-event-title');
                     const celestiaEventText = document.getElementById('celestia-event-text');
                     const celestiaEventButtons = document.getElementById('celestia-event-buttons');
+
+                    const endlessBonusModal = document.getElementById('endless-bonus-modal');
+                    const endlessBonusButtons = document.getElementById('endless-bonus-buttons');
+
 
                     let gameState = {
                         floor: 0,
@@ -4817,9 +4832,8 @@
                                 log(`さらに、 ${foundItems.join('、')} を手に入れた！`);
                             }
                             // 無限モードのボス撃破後
-                            else if (gameState.gameMode === 'endless' && gameState.floor > 0 && gameState.floor % 30 === 0) {
-                                applyEndlessDebuff();
-                                showLevelUpModal();
+                            else if (gameState.gameMode === 'endless') {
+                                showLevelUpModal(true); // 無限モード用のレベルアップモーダルを表示
                             } else if (gameState.gameMode === 'endgame' && gameState.floor === 1) {
                                 showModal("ゲームクリア？", "あなたはダンジョンの入り口で待ち構えていたボスを打ち破りました！…これでよかったのでしょうか？");
                                 gameState.gameOver = true;
@@ -4885,70 +4899,13 @@
                         }
                     }
 
-                    async function applyEndlessDebuff() {
-                        const debuffs = [{
-                            name: "全員の身長-30cm",
-                            func: async() => {
-                                log("天から降り注ぐ光が、全員の体を縮めていく！");
-                                for (const char of gameState.party) {
-                                    if (char.currentHp > 0) await animateStatChange(char, 'height', -30, 'decrease');
-                                }
-                            }
-                        }, {
-                            name: "全員が脱衣状態",
-                            func: () => {
-                                log("突風が吹き荒れ、パーティの装備が吹き飛ばされた！");
-                                gameState.party.forEach(char => {
-                                    if (char.currentHp > 0 && char.role !== 'ナイト' && char.role !== 'サムライ') {
-                                        char.statusEffects.stripped = {
-                                            turns: 0
-                                        };
-                                        flashCard(char, 'yellow');
-                                    }
-                                });
-                                updatePartyStatus();
-                            }
-                        }, {
-                            name: "全員の現在HPが半減",
-                            func: async() => {
-                                log("強烈なプレッシャーがパーティを襲い、体力が奪われる！");
-                                for (const char of gameState.party) {
-                                    if (char.currentHp > 0) await dealDamage(char, Math.floor(char.currentHp / 2));
-                                }
-                            }
-                        }, {
-                            name: "ランダムでひとり戦闘不能になる",
-                            func: async() => {
-                                const aliveParty = gameState.party.filter(p => p.currentHp > 0);
-                                if (aliveParty.length > 1) {
-                                    const target = aliveParty[Math.floor(Math.random() * aliveParty.length)];
-                                    log(`ボスの呪いが${target.name}を襲う！`);
-                                    await dealDamage(target, target.currentHp);
-                                } else {
-                                    log("ボスの呪いが襲いかかったが、ギリギリのところで持ちこたえた！");
-                                }
-                            }
-                        }, {
-                            name: "ランダムでひとり身長が1cmになる",
-                            func: async() => {
-                                const target = getRandomPartyMember();
-                                log(`ボスのいたずらで、${target.name}の体が極限まで縮んでしまった！`);
-                                const diff = 1 - target.height;
-                                await animateStatChange(target, 'height', diff, 'decrease');
-                            }
-                        }, ];
-
-                        const chosenDebuff = debuffs[Math.floor(Math.random() * debuffs.length)];
-                        await chosenDebuff.func();
-                    }
-
                     function showModal(title, text) {
                         modalTitle.textContent = title;
                         modalText.textContent = text;
                         modal.classList.remove('hidden');
                     }
 
-                    function showLevelUpModal() {
+                    function showLevelUpModal(isEndless = false) {
                         log('敵を倒した！');
                         enemyContainer.innerHTML = '';
                         dungeonCommands.classList.add('hidden'); // 選択中はコマンドを隠す
@@ -4956,7 +4913,11 @@
                         levelUpPartyList.innerHTML = '';
                         // パーティが1人の場合は選択肢を出さずに即時レベルアップ
                         if (gameState.party.length === 1 && gameState.party[0].currentHp > 0) {
-                            levelUpCharacter(gameState.party[0]);
+                            if (isEndless) {
+                                levelUpCharacter(gameState.party[0], true, true);
+                            } else {
+                                levelUpCharacter(gameState.party[0]);
+                            }
                             return;
                         }
 
@@ -4969,14 +4930,20 @@
                         <p class="font-bold text-lg text-${char.themeColor}-700">${char.name}</p>
                         <p class="text-sm text-gray-600">${char.role}</p>
                     `;
-                            card.onclick = () => levelUpCharacter(char);
+                            card.onclick = () => {
+                                if (isEndless) {
+                                    levelUpCharacter(char, true, true);
+                                } else {
+                                    levelUpCharacter(char);
+                                }
+                            };
                             levelUpPartyList.appendChild(card);
                         });
 
                         levelUpModal.classList.remove('hidden');
                     }
 
-                    function levelUpCharacter(character, showUI = true) {
+                    function levelUpCharacter(character, showUI = true, isEndless = false) {
                         // ステータスアップ
                         character.maxHp += 5;
                         character.maxMp += 3;
@@ -5003,9 +4970,177 @@
                         }
                         if (showUI) {
                             levelUpModal.classList.add('hidden');
-                            dungeonCommands.classList.remove('hidden');
                             updatePartyStatus();
+                            if (isEndless) {
+                                showEndlessBonusModal();
+                            } else {
+                                dungeonCommands.classList.remove('hidden');
+                            }
                         }
+                    }
+
+                    function showEndlessBonusModal() {
+                        endlessBonusButtons.innerHTML = '';
+                        const aliveParty = gameState.party.filter(p => p.currentHp > 0);
+                        if (aliveParty.length === 0) {
+                            endBattle(false); // 全滅している場合はゲームオーバー
+                            return;
+                        }
+
+                        const bonusPool = [{
+                            id: 'maxHpUp',
+                            text: (target) => `${target.name}の最大HPが永続上昇`,
+                            effect: (target) => {
+                                target.maxHp += 20;
+                                log(`${target.name}の最大HPが20上昇した！`);
+                            },
+                            weight: 10,
+                            needsTarget: true
+                        }, {
+                            id: 'maxMpUp',
+                            text: (target) => `${target.name}の最大MPが永続上昇`,
+                            effect: (target) => {
+                                target.maxMp += 10;
+                                log(`${target.name}の最大MPが10上昇した！`);
+                            },
+                            weight: 10,
+                            needsTarget: true
+                        }, {
+                            id: 'atkUp',
+                            text: (target) => `${target.name}の攻撃力が永続上昇`,
+                            effect: (target) => {
+                                target.atk += 3;
+                                log(`${target.name}の攻撃力が3上昇した！`);
+                            },
+                            weight: 10,
+                            needsTarget: true
+                        }, {
+                            id: 'defUp',
+                            text: (target) => `${target.name}の防御力が永続上昇`,
+                            effect: (target) => {
+                                target.def += 2;
+                                log(`${target.name}の防御力が2上昇した！`);
+                            },
+                            weight: 10,
+                            needsTarget: true
+                        }, {
+                            id: 'cureStrip',
+                            text: () => '全員の脱衣状態を治す',
+                            effect: () => {
+                                gameState.party.forEach(p => delete p.statusEffects.stripped);
+                                log('全員が服を着て、元の状態に戻った！');
+                            },
+                            weight: 15,
+                            condition: () => gameState.party.some(p => p.statusEffects.stripped)
+                        }, {
+                            id: 'allLevelUp',
+                            text: () => '全員がさらにレベルアップ',
+                            effect: () => {
+                                gameState.party.forEach(p => {
+                                    if (p.currentHp > 0) levelUpCharacter(p, false);
+                                });
+                                log('パーティ全員がさらにレベルアップした！');
+                            },
+                            weight: 3
+                        }, {
+                            id: 'getItems',
+                            text: () => 'アイテムを5個獲得',
+                            effect: () => {
+                                const foundItems = [];
+                                const itemIds = Object.keys(itemBlueprints).filter(id => !itemBlueprints[id].battleOnly && !itemBlueprints[id].rare);
+                                for (let i = 0; i < 5; i++) {
+                                    const foundItemId = itemIds[Math.floor(Math.random() * itemIds.length)];
+                                    addItemToInventory(foundItemId);
+                                    foundItems.push(itemBlueprints[foundItemId].name);
+                                }
+                                log(`アイテムを5個手に入れた！ (${foundItems.join('、')})`);
+                            },
+                            weight: 12
+                        }, {
+                            id: 'getRareItem',
+                            text: () => 'レアアイテムを1個獲得',
+                            effect: () => {
+                                const rareItemIds = Object.keys(itemBlueprints).filter(id => itemBlueprints[id].rare);
+                                const foundItemId = rareItemIds[Math.floor(Math.random() * rareItemIds.length)];
+                                addItemToInventory(foundItemId);
+                                log(`なんと、とても珍しい「${itemBlueprints[foundItemId].name}」を見つけた！`);
+                            },
+                            weight: 2
+                        }, {
+                            id: 'becomeCute',
+                            text: (target) => `${target.name}がかわいくなる`,
+                            effect: (target) => {
+                                const diff = 1 - target.height;
+                                animateStatChange(target, 'height', diff, 'decrease');
+                                log(`突然の光に包まれ、${target.name}の身長が1cmになってしまった！`);
+                            },
+                            weight: 1,
+                            needsTarget: true
+                        }, ];
+
+                        let selectedBonuses = [];
+                        let availableBonuses = [...bonusPool];
+
+                        while (selectedBonuses.length < 4 && availableBonuses.length > 0) {
+                            // 条件を満たすボーナスのみをフィルタリング
+                            const filteredBonuses = availableBonuses.filter(b => !b.condition || b.condition());
+                            if (filteredBonuses.length === 0) break;
+
+                            // 重み付け抽選
+                            const totalWeight = filteredBonuses.reduce((sum, b) => sum + b.weight, 0);
+                            let random = Math.random() * totalWeight;
+                            let chosenBonus = null;
+                            for (const bonus of filteredBonuses) {
+                                random -= bonus.weight;
+                                if (random <= 0) {
+                                    chosenBonus = bonus;
+                                    break;
+                                }
+                            }
+                            if (!chosenBonus) chosenBonus = filteredBonuses[filteredBonuses.length - 1];
+
+                            // ターゲットが必要な場合は抽選
+                            let target = null;
+                            if (chosenBonus.needsTarget) {
+                                target = aliveParty[Math.floor(Math.random() * aliveParty.length)];
+                            }
+
+                            selectedBonuses.push({...chosenBonus,
+                                target
+                            });
+
+                            // 同じIDのボーナスは再度選ばれないようにする
+                            availableBonuses = availableBonuses.filter(b => b.id !== chosenBonus.id);
+                        }
+
+                        // 選択肢ボタンを生成
+                        selectedBonuses.forEach(bonus => {
+                            const button = document.createElement('button');
+                            button.className = 'action-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-4 rounded-lg shadow-lg text-left';
+
+                            let buttonText = bonus.text(bonus.target);
+                            let description = '';
+                            if (bonus.id === 'becomeCute') description = '（効果は不明）';
+
+                            button.innerHTML = `
+                                ${buttonText}
+                                <span class="block text-xs text-blue-200">${description}</span>
+                            `;
+
+                            button.onclick = () => {
+                                endlessBonusModal.classList.add('hidden');
+                                bonus.effect(bonus.target);
+                                // 選択後、少し待ってからUIを更新し、次のフロアへ
+                                setTimeout(() => {
+                                    updatePartyStatus();
+                                    dungeonCommands.classList.remove('hidden');
+                                }, 1000);
+                            };
+                            endlessBonusButtons.appendChild(button);
+                        });
+
+                        dungeonCommands.classList.add('hidden');
+                        endlessBonusModal.classList.remove('hidden');
                     }
 
                     function flashCard(target, type) {
