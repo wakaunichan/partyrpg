@@ -555,6 +555,26 @@
             </div>
         </div>
 
+        <!-- 迷いの石像イベントモーダル -->
+        <div id="statue-modal" class="hidden absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-lg p-8 text-center shadow-2xl max-w-md w-full">
+                <h2 class="text-2xl font-bold mb-4">迷いの石像</h2>
+                <p class="mb-6">怪しいオーラを放つ石像がある。<br>触れると何かが起こりそうだ…。</p>
+                <div id="statue-buttons" class="flex justify-center gap-4">
+                    <button id="statue-touch-button" class="action-button bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg">触れる</button>
+                    <button id="statue-leave-button" class="action-button bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg">立ち去る</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1人選択モーダル -->
+        <div id="one-member-select-modal" class="hidden absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-lg p-8 shadow-2xl max-w-2xl w-full">
+                <h2 id="one-member-select-title" class="text-2xl font-bold mb-4 text-center">対象を1人選んでください</h2>
+                <div id="one-member-select-list" class="grid grid-cols-2 sm:grid-cols-4 gap-4"></div>
+            </div>
+        </div>
+
         <div id="menu-modal" class="hidden absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
             <div class="bg-white rounded-lg p-8 text-center shadow-2xl max-w-xs w-full">
                 <h2 class="text-2xl font-bold mb-6">メニュー</h2>
@@ -654,6 +674,13 @@
                     const twoMemberSelectModal = document.getElementById('two-member-select-modal');
                     const twoMemberSelectList = document.getElementById('two-member-select-list');
                     const twoMemberSelectConfirm = document.getElementById('two-member-select-confirm');
+
+                    // 迷いの石像イベント用
+                    const statueModal = document.getElementById('statue-modal');
+                    const statueTouchButton = document.getElementById('statue-touch-button');
+                    const statueLeaveButton = document.getElementById('statue-leave-button');
+                    const oneMemberSelectModal = document.getElementById('one-member-select-modal');
+                    const oneMemberSelectList = document.getElementById('one-member-select-list');
 
 
                     let gameState = {
@@ -3121,6 +3148,16 @@
                             func: foundSuspiciousDevice,
                             weight: gameState.party.length >= 2 ? 2 : 0 // 2人以上の場合のみ
                         };
+                        const bewilderingStatueEvent = {
+                            name: "迷いの石像",
+                            func: foundBewilderingStatue,
+                            weight: 2
+                        };
+                        const shrineOfPrayerEvent = {
+                            name: "祈りのほこら",
+                            func: foundShrineOfPrayer,
+                            weight: 3
+                        };
                         const events = [{
                                 name: "宝箱",
                                 func: foundTreasure,
@@ -3164,7 +3201,9 @@
                             },
                             equipmentEvent,
                             restoreClothesEvent,
-                            suspiciousDeviceEvent
+                            suspiciousDeviceEvent,
+                            bewilderingStatueEvent,
+                            shrineOfPrayerEvent
                         ].filter(event => event.weight > 0);
 
                         const totalWeight = events.reduce((sum, event) => sum + event.weight, 0);
@@ -3492,6 +3531,190 @@
                         };
 
                         twoMemberSelectModal.classList.remove('hidden');
+                    }
+
+                    function foundBewilderingStatue() {
+                        log("一行は、怪しいオーラを放つ石像を見つけた…");
+                        statueModal.classList.remove('hidden');
+
+                        statueTouchButton.onclick = () => {
+                            statueModal.classList.add('hidden');
+                            showOneMemberSelectionModal(char => {
+                                log(`${char.name}は、おそるおそる石像に触れた…！`);
+
+                                const effects = [{
+                                        type: 'atk_up',
+                                        weight: 30
+                                    }, {
+                                        type: 'def_up',
+                                        weight: 30
+                                    }, {
+                                        type: 'regen',
+                                        weight: 30
+                                    }, {
+                                        type: 'level_up',
+                                        weight: 5
+                                    }, // 当たり (低確率)
+                                    {
+                                        type: 'shrink_to_one',
+                                        weight: 5
+                                    } // ハズレ (低確率)
+                                ];
+
+                                const totalWeight = effects.reduce((sum, e) => sum + e.weight, 0);
+                                let random = Math.random() * totalWeight;
+                                let chosenEffect = null;
+
+                                for (const effect of effects) {
+                                    random -= effect.weight;
+                                    if (random <= 0) {
+                                        chosenEffect = effect.type;
+                                        break;
+                                    }
+                                }
+
+                                switch (chosenEffect) {
+                                    case 'atk_up':
+                                        char.buffs.atk_up = 10;
+                                        flashCard(char, 'yellow');
+                                        log(`石像が輝き、${char.name}の体に力がみなぎる！(10ターン攻撃力アップ)`);
+                                        break;
+                                    case 'def_up':
+                                        char.buffs.protect = 10;
+                                        flashCard(char, 'yellow');
+                                        log(`石像が輝き、${char.name}の体が硬質化していく！(10ターン防御力アップ)`);
+                                        break;
+                                    case 'regen':
+                                        char.statusEffects.regeneration = {
+                                            turns: 10
+                                        };
+                                        flashCard(char, 'green');
+                                        log(`石像が輝き、${char.name}の傷が癒え始めた！(10ターン自動回復)`);
+                                        break;
+                                    case 'level_up':
+                                        log(`石像から溢れ出た光が${char.name}を包み込む！ なんとレベルアップした！`);
+                                        levelUpCharacter(char, false);
+                                        break;
+                                    case 'shrink_to_one':
+                                        if (char.heightLocked) {
+                                            log(`石像は禍々しい光を放ったが、${char.name}の体は変化を拒んだ！`);
+                                        } else {
+                                            log(`石像が禍々しい光を放ち、${char.name}の体がみるみる縮んでいく！`);
+                                            animateStatChange(char, 'height', 1 - char.height, 'decrease');
+                                        }
+                                        break;
+                                }
+                            });
+                        };
+
+                        statueLeaveButton.onclick = () => {
+                            statueModal.classList.add('hidden');
+                            log("一行は不気味な石像を無視して、先へ進んだ。");
+                        };
+                    }
+
+                    function showOneMemberSelectionModal(callback) {
+                        oneMemberSelectList.innerHTML = '';
+                        const aliveParty = gameState.party.filter(p => p.currentHp > 0);
+
+                        aliveParty.forEach(char => {
+                            const card = document.createElement('div');
+                            card.className = 'p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-indigo-100 transition';
+                            card.innerHTML = `<p class="font-bold text-lg">${char.name}</p><p class="text-sm text-gray-600">${char.role}</p>`;
+
+                            card.addEventListener('click', () => {
+                                oneMemberSelectModal.classList.add('hidden');
+                                callback(char);
+                            });
+                            oneMemberSelectList.appendChild(card);
+                        });
+
+                        oneMemberSelectModal.classList.remove('hidden');
+                    }
+
+                    async function foundShrineOfPrayer() {
+                        log("一行は、静かで神聖な空気が漂う小さなほこらを見つけた。");
+                        await new Promise(resolve => setTimeout(resolve, 1500));
+
+                        const prayer = getRandomPartyMember();
+                        log(`${prayer.name}が代表して、静かに祈りを捧げた…`);
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+
+                        let message = '';
+                        switch (prayer.role) {
+                            case 'ファイター':
+                            case 'サムライ':
+                            case 'モンク':
+                                message = "戦いの神が応え、全員の体に力がみなぎる！(3ターン攻撃力アップ)";
+                                gameState.party.forEach(p => {
+                                    if (p.currentHp > 0) p.buffs.atk_up = 3;
+                                });
+                                break;
+                            case 'ナイト':
+                            case 'ガーディアン':
+                                message = "守護の神が応え、全員の体が硬質化していく！(3ターン防御力アップ)";
+                                gameState.party.forEach(p => {
+                                    if (p.currentHp > 0) p.buffs.protect = 3;
+                                });
+                                break;
+                            case 'ソーサラー':
+                            case 'アルケミスト':
+                            case 'ネクロマンサー':
+                                message = "魔力の源が共鳴し、全員のMPが回復した！";
+                                for (const p of gameState.party) {
+                                    if (p.currentHp > 0) await animateStatChange(p, 'mp', Math.floor(p.maxMp * 0.3), 'increase');
+                                }
+                                break;
+                            case 'メディック':
+                            case 'ドクター':
+                                message = "癒やしの女神が微笑み、全員の傷が少し癒えた！";
+                                for (const p of gameState.party) {
+                                    if (p.currentHp > 0) await animateStatChange(p, 'hp', Math.floor(p.maxHp * 0.3), 'increase');
+                                }
+                                break;
+                            case 'ダンサー':
+                            case 'ギャンブラー':
+                                message = "幸運の女神が微笑み、全員の足取りが軽くなった！(3ターン素早さアップ)";
+                                gameState.party.forEach(p => {
+                                    if (p.currentHp > 0) p.buffs.agi_up = 3;
+                                });
+                                break;
+                            case 'リーパー':
+                            case 'サモナー':
+                                message = "精霊たちが集まり、贈り物を置いていった！";
+                                addItemToInventory('potion', 2);
+                                addItemToInventory('mana_potion', 1);
+                                message += " (ポーションx2、マナポーションx1 を手に入れた)";
+                                break;
+                            case 'トラブルメーカー':
+                                message = "コハルの祈りが天に通じたのか、なぜかレアなアイテムが見つかった！";
+                                const rareItemIds = Object.keys(itemBlueprints).filter(id => itemBlueprints[id].rare);
+                                const foundItemId = rareItemIds[Math.floor(Math.random() * rareItemIds.length)];
+                                addItemToInventory(foundItemId);
+                                message += ` (${itemBlueprints[foundItemId].name} を手に入れた)`;
+                                break;
+                            case 'シスター':
+                                message = "慈愛の祈りが届き、全員に再生の祝福が与えられた！(3ターン自動回復)";
+                                gameState.party.forEach(p => {
+                                    if (p.currentHp > 0) p.statusEffects.regeneration = {
+                                        turns: 3
+                                    };
+                                });
+                                break;
+                            case '聖女':
+                                message = "聖なる祈りがほこらを光で満たし、全員のHPとMPが完全に回復した！";
+                                for (const p of gameState.party) {
+                                    if (p.currentHp > 0) {
+                                        await animateStatChange(p, 'hp', p.maxHp, 'increase');
+                                        await animateStatChange(p, 'mp', p.maxMp, 'increase');
+                                    }
+                                }
+                                break;
+                        }
+                        log(message);
+                        gameState.party.forEach(p => {
+                            if (p.currentHp > 0) flashCard(p, 'green');
+                        });
                     }
 
                     function nothingHappened() {
@@ -5116,6 +5339,7 @@
                             await animateStatChange(target, 'hp', -amount, 'decrease');
                         } else { // ターゲットが敵の場合
                             target.currentHp = Math.max(0, target.currentHp - amount);
+                            updateEnemyStatus(); // 敵のHPバーを更新
                         }
                         flashCard(target, 'red');
                         showDamagePopup(target, amount, false);
