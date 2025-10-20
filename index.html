@@ -1331,8 +1331,8 @@
                         },
                         'little_soup': {
                             name: 'リトルスープ',
-                            description: '味方ひとりの身長を30cm縮める。',
-                            target: 'ally',
+                            description: '味方ひとりの身長を30cm縮める。戦闘中に敵に使うと、その攻撃力と防御力をしばらく低下させる。',
+                            target: 'any',
                             effect: 'shrink',
                             power: 30,
                             battleOnly: false
@@ -2269,11 +2269,9 @@
                             character.def += 1;
                             character.agi += 1;
                             character.level += 1; // ファイター, ソーサラー
-                            if (character.role === 'ファイター' || character.role === 'ソーサラー') {
-                                character.skills.forEach(skill => {
-                                    skill.power = parseFloat((skill.power * 1.05).toFixed(2));
-                                });
-                            } // ナイト, メディック
+                            character.skills.forEach(skill => {
+                                if (skill.power) skill.power = parseFloat((skill.power * 1.05).toFixed(2));
+                            });
                             if (character.level === 2 && character.unlockableSkill) character.skills.push(character.unlockableSkill);
                             if (character.level === 4 && character.unlockableSkillLv4) character.skills.push(character.unlockableSkillLv4);
                         }
@@ -2553,6 +2551,13 @@
                             return;
                         }
 
+                        // 初期アイテムの配布
+                        if (!fromSave) {
+                            addItemToInventory('potion', gameState.party.length);
+                            addItemToInventory('milk', 1);
+                            addItemToInventory('mana_potion', 1);
+                        }
+
                         // もしもの物語モードの適用
                         if (gameState.gameMode === 'veterans') {
                             gameState.party.forEach(char => {
@@ -2790,6 +2795,9 @@
                             } else {
                                 def *= 0.7;
                             }
+                        }
+                        if (char.buffs && char.buffs.def_down) {
+                            def *= 0.7;
                         }
 
                         // 脱衣状態の場合
@@ -4151,7 +4159,7 @@
                                 // トラブルメーカー
                             case 'trouble_maker_box':
                                 // 実装は handleTroubleMakerBox に集約
-                                handleTroubleMakerBox(caster);
+                                await handleTroubleMakerBox(caster);
                                 break;
                             case 'trouble_maker_debuff':
                                 const debuffDamage = calculateDamage(caster, target, skill);
@@ -4167,7 +4175,6 @@
                                     }
                                     flashCard(target, 'yellow');
                                 }
-                                handleTroubleMakerBox(caster);
                                 break;
                             case 'self_buff_trouble':
                                 caster.buffs.trouble_check = true;
@@ -4197,6 +4204,20 @@
                         log(`${caster.name}は${itemInfo.name}を使った！`);
 
                         switch (itemInfo.effect) {
+                            case 'shrink': // リトルスープの特殊処理
+                                if (target && target.isEnemy) {
+                                    // 敵に使った場合
+                                    target.buffs = target.buffs || {};
+                                    target.buffs.atk_down = 3;
+                                    target.buffs.def_down = 3;
+                                    flashCard(target, 'yellow');
+                                    log(`${target.name}は小さくなって弱々しくなった！攻撃力と防御力が低下！`);
+                                } else {
+                                    // 味方に使った場合
+                                    await animateStatChange(target, 'height', -itemInfo.power, 'decrease');
+                                    log(`${target.name}の身長が${itemInfo.power}cm縮んだ！`);
+                                }
+                                break;
                             case 'heal_percent':
                                 if (itemInfo.target === 'party') {
                                     log(`味方全員のHPが回復した！`);
@@ -4221,11 +4242,6 @@
                                 await animateStatChange(target, 'height', resetDiff, 'increase');
                                 flashCard(target, 'yellow');
                                 log(`${target.name}の身長が元に戻った！`);
-                                break;
-                            case 'shrink':
-                                await animateStatChange(target, 'height', -itemInfo.power, 'decrease'); // Await height animation
-                                flashCard(target, 'yellow'); // Flash the card itself
-                                log(`${target.name}の身長が${itemInfo.power}cm縮んだ！`);
                                 break;
                             case 'set_height':
                                 const setDiff = itemInfo.power - target.height;
@@ -4315,24 +4331,58 @@
 
                     async function handleTroubleMakerBox(caster) {
                         log(`${caster.name}は${caster.skills[0].name}を開けた！`);
-                        const successRate = caster.buffs.trouble_check ? 0.9 : 0.6; // ばっちりチェックで成功率90%
-                        if (caster.buffs.trouble_check) delete caster.buffs.trouble_check;
+                        const isChecked = caster.buffs.trouble_check;
+                        const successRate = isChecked ? 0.9 : 0.6; // ばっちりチェックで成功率90%
+                        if (isChecked) delete caster.buffs.trouble_check;
 
                         if (Math.random() < successRate) {
                             // 成功
+
+                            // 大あたり抽選 (ばっちりチェック中のみ)
+                            if (isChecked && Math.random() < 0.1) { // 10%の確率で大あたり
+                                log("箱から眩い光が！これは…大当たりだ！");
+                                const isBossBattle = gameState.enemies.some(e => e.isBoss);
+                                if (isBossBattle) {
+                                    const boss = gameState.enemies.find(e => e.isBoss);
+                                    const damage = Math.floor(boss.maxHp * 0.5);
+                                    log(`ボスの体に亀裂が走る！`);
+                                    await dealDamage(boss, damage);
+                                } else {
+                                    log("敵が一瞬で塵と化した！");
+                                    const damagePromises = [];
+                                    for (const enemy of gameState.enemies.filter(e => e.currentHp > 0)) {
+                                        damagePromises.push(dealDamage(enemy, enemy.currentHp));
+                                    }
+                                    await Promise.all(damagePromises);
+                                }
+                                return; // 大あたりの場合はここで処理終了
+                            }
+
+                            // 通常の成功効果
                             const goodEffects = [
                                 async() => {
                                     log("箱から光が溢れ、敵全体に大ダメージ！");
-                                    for (const enemy of gameState.enemies.filter(e => e.currentHp > 0)) {
-                                        // Promise.allで並列実行
-                                        const damagePromisesBox = gameState.enemies.filter(e => e.currentHp > 0).map(enemy => dealDamage(enemy, 150 + caster.atk * 2));
-                                        await Promise.all(damagePromisesBox);
-                                    }
+                                    const damagePromisesBox = gameState.enemies.filter(e => e.currentHp > 0).map(enemy => dealDamage(enemy, 150 + caster.atk * 2));
+                                    await Promise.all(damagePromisesBox);
                                 },
                                 async() => {
                                     log("箱からお菓子が飛び出し、味方全体が回復した！"); // 回復は1人ずつアニメーション
                                     for (const p of gameState.party.filter(p => p.currentHp > 0)) {
                                         await animateStatChange(p, 'hp', Math.floor(p.maxHp * 0.5), 'increase');
+                                    }
+                                }, {
+                                    name: "あたり",
+                                    func: () => {
+                                        log("箱から虹色のオーラが！味方全体が強化され、傷が癒えていく！");
+                                        gameState.party.forEach(p => {
+                                            if (p.currentHp > 0) {
+                                                p.buffs.atk_up = 3;
+                                                p.statusEffects.regeneration = {
+                                                    turns: 3
+                                                };
+                                                flashCard(p, 'yellow');
+                                            }
+                                        });
                                     }
                                 },
                                 () => {
@@ -4342,13 +4392,44 @@
                                     });
                                 }
                             ];
-                            await goodEffectsMath.floor(Math.random() * goodEffects.length);
+                            const chosenGoodEffect = goodEffects[Math.floor(Math.random() * goodEffects.length)];
+                            await (typeof chosenGoodEffect === 'function' ? chosenGoodEffect() : chosenGoodEffect.func());
                         } else {
                             // 失敗
-                            log("箱から黒い煙が！味方全体が縮んでしまった！");
-                            for (const p of gameState.party.filter(p => p.currentHp > 0)) {
-                                await animateStatChange(p, 'height', -30, 'decrease');
-                            }
+                            const badEffects = [{
+                                name: "shrink",
+                                func: async() => {
+                                    log("箱から黒い煙が！味方全体が縮んでしまった！");
+                                    for (const p of gameState.party.filter(p => p.currentHp > 0)) {
+                                        await animateStatChange(p, 'height', -30, 'decrease');
+                                    }
+                                }
+                            }, {
+                                name: "tiny_damage",
+                                func: async() => {
+                                    const randomEnemy = gameState.enemies.filter(e => e.currentHp > 0)[Math.floor(Math.random() * gameState.enemies.filter(e => e.currentHp > 0).length)];
+                                    if (randomEnemy) {
+                                        log("箱からかわいい小動物が飛び出して、敵にかみついた！");
+                                        await dealDamage(randomEnemy, 1);
+                                    } else {
+                                        log("箱からかわいい小動物が飛び出したが、何事もなかった。");
+                                    }
+                                }
+                            }, {
+                                name: "strip_all",
+                                func: () => {
+                                    log("箱から妖しい光が！ なんと味方全員が脱衣状態になってしまった！");
+                                    gameState.party.forEach(p => {
+                                        if (p.currentHp > 0 && p.role !== 'ナイト' && p.role !== 'サムライ' && p.role !== '聖女') {
+                                            p.statusEffects.stripped = {
+                                                turns: 0
+                                            };
+                                        }
+                                    });
+                                }
+                            }, ];
+                            const chosenEffect = badEffects[Math.floor(Math.random() * badEffects.length)];
+                            await chosenEffect.func();
                         }
                     }
 
@@ -4372,6 +4453,22 @@
 
                     async function enemyTurn(enemy) {
                         log(`${enemy.name}のターン`);
+
+                        // 敵のバフ・デバフターン経過処理
+                        if (enemy.buffs) {
+                            Object.keys(enemy.buffs).forEach(key => {
+                                enemy.buffs[key]--;
+                                if (enemy.buffs[key] <= 0) {
+                                    delete enemy.buffs[key];
+                                    let buffName = '';
+                                    if (key === 'atk_down') buffName = '攻撃力低下';
+                                    else if (key === 'def_down') buffName = '防御力低下';
+                                    if (buffName) {
+                                        log(`${enemy.name}の${buffName}効果が切れた。`);
+                                    }
+                                }
+                            });
+                        }
 
                         // HPが低い場合、70%の確率で自己再生スキルを優先的に使用する
                         const regenSkill = enemy.skills.find(s => s.name === '自己再生');
@@ -4760,13 +4857,9 @@
                         character.currentHp = character.maxHp;
                         character.currentMp = character.maxMp;
 
-                        // ファイターとソーサラーはスキル威力アップ
-                        if (character.role === 'ファイター' || character.role === 'ソーサラー') {
-                            character.skills.forEach(skill => {
-                                skill.power = parseFloat((skill.power * 1.05).toFixed(2)); // 威力を5%上昇
-                            });
-                        }
-
+                        character.skills.forEach(skill => {
+                            if (skill.power) skill.power = parseFloat((skill.power * 1.05).toFixed(2)); // 威力を5%上昇
+                        });
                         // 新スキル習得
                         if (character.level === 2 && character.unlockableSkill) {
                             character.skills.push(character.unlockableSkill);
@@ -4975,11 +5068,11 @@
                                 const effect = effectMap[key];
                                 const turns = (typeof allEffects[key] === 'object' && allEffects[key].turns !== undefined) ? allEffects[key].turns : (typeof allEffects[key] === 'number' ? allEffects[key] : null);
                                 html += `<p class="${effect.color} font-semibold">${effect.name} ${turns !== null ? `(残り ${turns} ターン)` : ''}</p>`;
+                        }
                     }
-                }
 
-                if (!hasEffect) return ''; // 効果がなければ何も返さない
-                return html + '</div>';
+                    if (!hasEffect) return ''; // 効果がなければ何も返さない
+                    return html + '</div>';
             }
 
             function showScanResult(target) {
