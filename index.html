@@ -65,9 +65,10 @@
         }
         
         .character-stats {
-            background-color: rgba(255, 255, 255, 0.8);
             padding: 0.25rem;
             border-radius: 0.25rem;
+            /* 文字の視認性確保のためにテキストシャドウを追加 */
+            text-shadow: 0px 0px 4px rgba(0, 0, 0, 1), 0px 0px 4px rgba(0, 0, 0, 1);
         }
         
         .targeted {
@@ -252,6 +253,75 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+        }
+        /* キャラクター背景画像 */
+        
+        .bg-char-akari {
+            background-image: url('sgd_1.png');
+        }
+        
+        .bg-char-hikari {
+            background-image: url('images/hikari.png');
+        }
+        
+        .bg-char-shizuka {
+            background-image: url('images/shizuka.png');
+        }
+        
+        .bg-char-yui {
+            background-image: url('images/yui.png');
+        }
+        
+        .bg-char-beatrice {
+            background-image: url('images/beatrice.png');
+        }
+        
+        .bg-char-ririka {
+            background-image: url('images/ririka.png');
+        }
+        
+        .bg-char-sakuya {
+            background-image: url('images/sakuya.png');
+        }
+        
+        .bg-char-shaomei {
+            background-image: url('images/shaomei.png');
+        }
+        
+        .bg-char-eriza {
+            background-image: url('images/eriza.png');
+        }
+        
+        .bg-char-runa {
+            background-image: url('images/runa.png');
+        }
+        
+        .bg-char-chloe {
+            background-image: url('images/chloe.png');
+        }
+        
+        .bg-char-miko {
+            background-image: url('images/miko.png');
+        }
+        
+        .bg-char-renka {
+            background-image: url('images/renka.png');
+        }
+        
+        .bg-char-iori {
+            background-image: url('images/iori.png');
+        }
+        
+        .bg-char-koharu {
+            background-image: url('images/koharu.png');
+        }
+        
+        .bg-char-olivia {
+            background-image: url('images/olivia.png');
+        }
+        
+        .bg-char-celestia {
+            background-image: url('images/celestia.png');
         }
     </style>
 </head>
@@ -552,7 +622,7 @@
                                 targetType: 'random_enemies',
                                 description: '敵にランダムで4～6回の物理ダメージを与える。'
                             },
-                            image: 'https://image.pollinations.ai/prompt/anime%20girl,%20energetic,%20red%20hair,%20ponytail,%20fighter,%20holding%20a%20giant%20sword,%20smiling,%20fantasy%20armor',
+                            bgClass: 'bg-char-akari',
                             themeColor: 'red',
                         }, {
                             name: 'ヒカリ',
@@ -594,7 +664,7 @@
                                 targetType: 'enemy',
                                 description: '残りMPを全て消費し、敵一体に超特大の魔法ダメージを与える。'
                             },
-                            image: 'https://image.pollinations.ai/prompt/anime%20girl,%20cool,%20silver%20hair,%20long%20hair,%20sorcerer,%20holding%20a%20magic%20book,%20calm%20expression,%20fantasy%20robe',
+                            bgClass: 'bg-char-hikari',
                             themeColor: 'purple',
                         }, {
                             name: 'シズカ',
@@ -634,7 +704,7 @@
                                 effects: ['provoke', 'regeneration'],
                                 description: '敵の注意を引きつけつつ、3ターンの間HPが自動回復する。'
                             },
-                            image: 'https://image.pollinations.ai/prompt/anime%20girl,%20mature,%20brown%20hair,%20braid,%20knight,%20holding%20a%20large%20shield,%20confident%20smile,%20heavy%20armor',
+                            bgClass: 'bg-char-shizuka',
                             themeColor: 'amber',
                         }, {
                             name: 'ユイ',
@@ -675,7 +745,7 @@
                                 growth: 5,
                                 description: '味方全体のHPを全回復し、状態異常を治し、身長を5cm伸ばす聖域を作り出す。'
                             },
-                            image: 'https://image.pollinations.ai/prompt/anime%20girl,%20gentle,%20pink%20hair,%20short%20hair,%20medic,%20cleric,%20praying,%20kind%20smile,%20white%20robe',
+                            bgClass: 'bg-char-yui',
                             themeColor: 'green',
                         }, {
                             name: 'ベアトリス',
@@ -718,7 +788,7 @@
                                 targetType: 'enemy',
                                 description: '敵一体に錬金術の爆発で大ダメージを与える。'
                             },
-                            image: 'https://image.pollinations.ai/prompt/anime%20girl,%20intelligent,%20blonde%20hair,%20glasses,%20alchemist,%20holding%20a%20potion%20flask,%20smirk,%20lab%20coat',
+                            bgClass: 'bg-char-beatrice',
                             themeColor: 'indigo',
                         }, {
                             name: 'リリカ',
@@ -759,7 +829,7 @@
                                 targetType: 'party',
                                 description: '味方全体の攻撃力と素早さを一時的に上昇させる。'
                             },
-                            image: 'https://image.pollinations.ai/prompt/anime%20girl,%20idol,%20twin%20tails,%20sparkling%20eyes,%20dancer,%20singing%20on%20stage,%20waving,%20idol%20costume',
+                            bgClass: 'bg-char-ririka',
                             themeColor: 'pink',
                         }, {
                             name: 'サクヤ',
@@ -801,7 +871,7 @@
                                 targetType: 'enemy',
                                 description: '自身のHPを大きく消費し、敵一体に絶大な物理ダメージを与える。'
                             },
-                            image: 'https://image.pollinations.ai/prompt/anime%20girl,%20stoic,%20black%20hair,%20long%20ponytail,%20samurai,%20holding%20a%20katana,%20sharp%20eyes,%20kimono',
+                            bgClass: 'bg-char-sakuya',
                             themeColor: 'cyan',
                         }, {
                             name: 'シャオメイ',
@@ -844,7 +914,7 @@
                                 targetType: 'enemy',
                                 description: '敵の防御力を無視して物理ダメージを与える。'
                             },
-                            image: 'https://image.pollinations.ai/prompt/anime%20girl,%20cheerful,%20chinese%20dress,%20twin%20buns,%20monk,%20kung-fu%20pose,%20energetic%20smile',
+                            bgClass: 'bg-char-shaomei',
                             themeColor: 'orange',
                         }, {
                             name: 'エリザ',
@@ -887,7 +957,7 @@
                                 targetType: 'enemies',
                                 description: '敵全体に毒、麻痺、鈍化のいずれかの状態異常を引き起こすウイルスを散布する。'
                             },
-                            image: 'https://image.pollinations.ai/prompt/anime%20woman,%20sexy,%20doctor,%20white%20coat,%20long%20wavy%20hair,%20holding%20a%20syringe,%20confident%20smirk,%20large%20bust',
+                            bgClass: 'bg-char-eriza',
                             themeColor: 'teal',
                         }, {
                             name: 'ルナ',
@@ -926,7 +996,7 @@
                                 targetType: 'party',
                                 description: '奇跡を信じて全てを賭ける。低確率で味方全体が全回復＆強化されるが、ほとんどの場合は何も起こらない。'
                             },
-                            image: 'https://image.pollinations.ai/prompt/anime%20girl,%20mischievous,%20silver%20hair,%20short%20hair,%20gambler,%20shuffling%20cards,%20winking,%20casino%20outfit',
+                            bgClass: 'bg-char-runa',
                             themeColor: 'fuchsia',
                         }, {
                             name: 'クロエ',
@@ -968,7 +1038,7 @@
                                 targetType: 'enemies',
                                 description: '敵全体に冥府の鎌を振るう。自身の身長が初期値より低いほど威力が増す。'
                             },
-                            image: 'https://image.pollinations.ai/prompt/anime%20girl,%20shy,%20hooded%20robe,%20face%20in%20shadow,%20reaper,%20holding%20a%20large%20scythe,%20glowing%20eyes',
+                            bgClass: 'bg-char-chloe',
                             themeColor: 'slate',
                         }, {
                             name: 'ミコ',
@@ -1011,7 +1081,7 @@
                                 targetType: 'self',
                                 description: '自身の最大HPと同じHPを持つ、より強力なゴーレムを召喚する。'
                             },
-                            image: 'https://image.pollinations.ai/prompt/anime%20girl,%20innocent,%20brown%20hair,%20summoner,%20with%20a%20small%20fluffy%20creature%20on%20her%20shoulder,%20gentle%20smile,%20forest%20background',
+                            bgClass: 'bg-char-miko',
                             themeColor: 'lime',
                         }, {
                             name: 'セレスティア',
@@ -1046,7 +1116,7 @@
                                 targetType: 'enemies',
                                 description: '天からの光で、敵全体に聖なる魔法ダメージを与える。'
                             },
-                            image: 'https://image.pollinations.ai/prompt/beautiful%20anime%20girl,%20saint,%20long%20blonde%20hair,%20glowing%20aura,%20white%20dress,%20holy%20maiden,%20praying%20in%20a%20cathedral',
+                            bgClass: 'bg-char-celestia',
                             themeColor: 'yellow',
                         }, {
                             name: 'レンカ',
@@ -1088,7 +1158,7 @@
                                 targetType: 'ally',
                                 description: '戦闘不能の味方一人をHP100%の状態で復活させる禁断の蘇生術。'
                             },
-                            image: 'https://image.pollinations.ai/prompt/anime%20woman,%20mysterious,%20necromancer,%20long%20black%20hair,%20dark%20gothic%20dress,%20holding%20a%20skull,%20seductive%20smile',
+                            bgClass: 'bg-char-renka',
                             themeColor: 'gray',
                         }, {
                             name: 'イオリ',
@@ -1130,7 +1200,7 @@
                                 targetType: 'party',
                                 description: '味方全体に、自身の最大HPの40%の耐久値を持つ防壁を生成する。'
                             },
-                            image: 'https://image.pollinations.ai/prompt/petite%20anime%20girl,%20guardian,%20short%20white%20hair,%20determined%20expression,%20wearing%20large%20armor,%20holding%20a%20shield',
+                            bgClass: 'bg-char-iori',
                             themeColor: 'stone',
                         }, {
                             name: 'コハル',
@@ -1170,7 +1240,7 @@
                                 targetType: 'party',
                                 description: '味方全体に奇跡の贈り物を届ける。HPとMPが全回復し、3ターン攻撃力と防御力が上昇する。ごく稀に失敗する。'
                             },
-                            image: 'https://image.pollinations.ai/prompt/anime%20girl,%20clumsy,%20troublemaker,%20short%20brown%20hair,%20energetic,%20tripping%20over,%20apologetic%20smile,%20school%20uniform',
+                            bgClass: 'bg-char-koharu',
                             themeColor: 'rose',
                         }, {
                             name: 'オリビア',
@@ -1211,7 +1281,7 @@
                                 targetType: 'party',
                                 description: '味方全体に、3ターンの間HPが自動で回復する祝福を与える。'
                             },
-                            image: 'https://image.pollinations.ai/prompt/anime%20woman,%20nun,%20sister,%20gentle%20smile,%20light%20brown%20hair,%20wearing%20a%20habit,%20praying,%20caring%20eyes',
+                            bgClass: 'bg-char-olivia',
                             themeColor: 'sky',
                         },
 
@@ -2572,19 +2642,13 @@
                             }
 
                             // Update card classes
-                            card.className = `character-card w-full sm:w-1/5 p-2 rounded-lg shadow-md border-2 border-${char.themeColor}-400 ${char.currentHp <= 0 ? 'opacity-50' : ''}`;
+                            card.className = `character-card w-full sm:w-1/5 p-2 rounded-lg shadow-md border-2 border-${char.themeColor}-400 ${char.currentHp <= 0 ? 'opacity-50' : ''} ${char.bgClass || ''}`;
 
                             // Update specific elements within the card
                             // The animateStatChange function will handle the number and bar updates during animation.
                             // This updatePartyStatus call ensures consistency after animations or for non-animated changes.
 
-                            // Update name and role (stat-name is a p, not a span for number animation)
                             const nameElement = card.querySelector('.stat-name');
-
-                            // Set background image
-                            if (char.image) {
-                                card.style.backgroundImage = `url(${char.image})`;
-                            }
                             if (nameElement) {
                                 let statusHtml = '';
                                 if (char.statusEffects.poison) statusHtml += '<span class="status-icon" title="毒">🤢</span>';
