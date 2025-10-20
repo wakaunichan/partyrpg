@@ -468,6 +468,7 @@
                     <button data-mode="brawl" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-red-700">武闘の宴</strong><span class="block text-sm text-gray-600">2フロアごとに必ず戦闘が発生する。</span></button>
                     <button data-mode="monster_march" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-red-800">魔物の行軍</strong><span class="block text-sm text-gray-600">全てのフロアで戦闘が発生する。勝利する度にレベルアップし、アイテムを獲得する。50階踏破を目指せ。</span></button>
                     <button data-mode="endless" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-slate-700">無限への挑戦</strong><span class="block text-sm text-gray-600">全滅するまでダンジョンを進み続ける。30階ごとにボスが出現し、倒すと試練が訪れる。</span></button>
+                    <button data-mode="uninhibited_souls" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-orange-700">奔放な魂</strong><span class="block text-sm text-gray-600">探索中、コマンドで味方を「脱衣」させたり、身長を自由に操作したりできる。</span></button>
                     <button data-mode="endgame" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-gray-700">おわりから</strong><span class="block text-sm text-gray-600">1フロア目に最終ボスが登場する。</span></button>
                 </div>
                 <div class="text-right mt-6">
@@ -572,6 +573,17 @@
             <div class="bg-white rounded-lg p-8 shadow-2xl max-w-2xl w-full">
                 <h2 id="one-member-select-title" class="text-2xl font-bold mb-4 text-center">対象を1人選んでください</h2>
                 <div id="one-member-select-list" class="grid grid-cols-2 sm:grid-cols-4 gap-4"></div>
+            </div>
+        </div>
+
+        <!-- 数値選択モーダル -->
+        <div id="amount-choice-modal" class="hidden absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-lg p-8 text-center shadow-2xl max-w-md w-full">
+                <h2 id="amount-choice-title" class="text-2xl font-bold mb-4">量を選択</h2>
+                <p id="amount-choice-text" class="mb-6">どのくらい変化させますか？</p>
+                <div id="amount-choice-buttons" class="flex justify-center gap-4">
+                    <!-- ボタンがここに挿入される -->
+                </div>
             </div>
         </div>
 
@@ -682,6 +694,11 @@
                     const oneMemberSelectModal = document.getElementById('one-member-select-modal');
                     const oneMemberSelectList = document.getElementById('one-member-select-list');
 
+                    // 奔放な魂モード用
+                    const amountChoiceModal = document.getElementById('amount-choice-modal');
+                    const amountChoiceTitle = document.getElementById('amount-choice-title');
+                    const amountChoiceText = document.getElementById('amount-choice-text');
+                    const amountChoiceButtons = document.getElementById('amount-choice-buttons');
 
                     let gameState = {
                         floor: 0,
@@ -696,7 +713,7 @@
                         foundEquipment: [],
                         killCount: 0, // ネクロマンサー用
                         walls: [], // ガーディアン用,
-                        gameMode: 'normal', // normal, veterans, dwarves, brawl, solo, endgame, endless, indecent, enjoy, saint_march, fixed_path
+                        gameMode: 'normal', // normal, veterans, dwarves, brawl, solo, endgame, endless, indecent, enjoy, saint_march, fixed_path, uninhibited_souls
                     };
                     gameState.triggeredSpecialConvos = [];
 
@@ -2849,6 +2866,70 @@
                         };
                         if (!dungeonCommands.querySelector('#dungeon-scan-button')) {
                             dungeonCommands.insertBefore(scanButton, itemButton.nextSibling);
+                        }
+
+                        // 「奔放な魂」モード専用コマンド
+                        if (gameState.gameMode === 'uninhibited_souls') {
+                            const stripButton = document.createElement('button');
+                            stripButton.className = 'action-button bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg';
+                            stripButton.textContent = '脱ぐ';
+                            stripButton.onclick = () => {
+                                showOneMemberSelectionModal(char => {
+                                    const immuneRoles = ['ナイト', 'サムライ', '聖女'];
+                                    if (immuneRoles.includes(char.role)) {
+                                        log(`${char.name}は恥じらいを覚えず、何も起こらなかった。`);
+                                    } else {
+                                        char.statusEffects.stripped = {
+                                            turns: 0
+                                        };
+                                        log(`${char.name}は服を脱ぎ捨て、脱衣状態になった！`);
+                                        updatePartyStatus();
+                                    }
+                                });
+                            };
+                            dungeonCommands.appendChild(stripButton);
+
+                            const shrinkButton = document.createElement('button');
+                            shrinkButton.className = 'action-button bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 px-6 rounded-lg shadow-lg';
+                            shrinkButton.textContent = '縮小化薬';
+                            shrinkButton.onclick = () => {
+                                showOneMemberSelectionModal(char => {
+                                    showAmountChoiceModal('縮小化薬', `${char.name}の身長をどれだけ縮めますか？`, (amount) => {
+                                        if (char.heightLocked) {
+                                            log(`${char.name}の体は変化を拒んだ！`);
+                                            return;
+                                        }
+                                        animateStatChange(char, 'height', -amount, 'decrease');
+                                        log(`${char.name}の身長が${amount}cm縮んだ！`);
+                                    });
+                                });
+                            };
+                            dungeonCommands.appendChild(shrinkButton);
+
+                            const growButton = document.createElement('button');
+                            growButton.className = 'action-button bg-red-700 hover:bg-red-800 text-white font-bold py-3 px-6 rounded-lg shadow-lg';
+                            growButton.textContent = '巨大化薬';
+                            growButton.onclick = () => {
+                                showOneMemberSelectionModal(char => {
+                                    showAmountChoiceModal('巨大化薬', `${char.name}の身長をどれだけ伸ばしますか？`, (amount) => {
+                                        if (char.heightLocked) {
+                                            log(`${char.name}の体は変化を拒んだ！`);
+                                            return;
+                                        }
+                                        animateStatChange(char, 'height', amount, 'increase');
+                                        log(`${char.name}の身長が${amount}cm伸びた！`);
+                                    });
+                                });
+                            };
+                            dungeonCommands.appendChild(growButton);
+                        } else {
+                            // 他モードではボタンを削除
+                            ['#dungeon-strip-button', '#dungeon-shrink-button', '#dungeon-grow-button'].forEach(sel => {
+                                const element = document.querySelector(sel);
+                                if (element) {
+                                    element.remove();
+                                }
+                            });
                         }
                     }
 
@@ -6118,6 +6199,26 @@
                     return html + '</div>';
             }
 
+            function showAmountChoiceModal(title, text, callback) {
+                amountChoiceTitle.textContent = title;
+                amountChoiceText.textContent = text;
+                amountChoiceButtons.innerHTML = '';
+
+                const amounts = [30, 100, 999];
+                amounts.forEach(amount => {
+                    const button = document.createElement('button');
+                    button.className = 'action-button bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg';
+                    button.textContent = `${amount} cm`;
+                    button.onclick = () => {
+                        amountChoiceModal.classList.add('hidden');
+                        callback(amount);
+                    };
+                    amountChoiceButtons.appendChild(button);
+                });
+
+                amountChoiceModal.classList.remove('hidden');
+            }
+
             function cancelScanMode() {
                 // 探索中の「調べる」モードをキャンセルする
                 if (!gameState.inBattle) {
@@ -6372,15 +6473,11 @@
             scanModalClose.addEventListener('click', () => {
                 scanModal.classList.add('hidden');
                 // 「調べる」をキャンセルした場合、元のキャラクターのターンに戻す
-                if (gameState.inBattle) {
-                    if (!pendingAction) playerTurn(gameState.turnOrder[gameState.currentTurnIndex]);
-                } else {
-                    // 探索中の場合
-                    log('探索を続けます。');
-                    dungeonCommands.classList.remove('hidden'); // コマンドを再表示
-                    // クリックイベントを元に戻す
-                    updatePartyStatus();
+                if (gameState.inBattle && !pendingAction) {
                     playerTurn(gameState.turnOrder[gameState.currentTurnIndex]);
+                } else if (!gameState.inBattle) {
+                    // 探索中の場合は調べるモードをキャンセルするだけ
+                    cancelScanMode();
                 }
             });
 
@@ -6413,7 +6510,7 @@
                 let selectedNames = [];
                 const isSolo = mode === 'solo';
                 const isIndecent = mode === 'indecent';
-                const isTrial = mode === 'trial' || mode === 'enjoy';
+                const isTrial = mode === 'trial' || mode === 'enjoy' || mode === 'uninhibited_souls';
 
                 // モードに応じてプロンプトと選択上限を変更
                 if (isSolo) {
