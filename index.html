@@ -2986,6 +2986,7 @@
                                 <p class="text-xs stat-mp">MP: <span class="font-semibold">${char.currentMp}</span>/${char.maxMp}</p>
                                 <div class="w-full bg-gray-300 rounded-full h-2 my-1"><div class="mp-bar-inner bg-blue-500 h-2 rounded-full" style="width: ${Math.max(0, char.currentMp / char.maxMp * 100)}%"></div></div>
                                 <p class="text-xs stat-height">身長: <span class="font-semibold">${char.height}cm</span> (${char.height - char.initialHeight >= 0 ? '+' : ''}${char.height - char.initialHeight})</p>
+                                <div class="wall-status-container mt-1"></div>
                                 <div class="golem-status-container mt-1"></div>
                                 <div class="stat-statuses text-xs"></div>
                             </div>
@@ -3078,6 +3079,21 @@
                             `;
                                 } else {
                                     golemContainer.innerHTML = '';
+                                }
+                            }
+
+                            // ウォールのステータス表示
+                            const wallContainer = card.querySelector('.wall-status-container');
+                            if (wallContainer) {
+                                const wall = gameState.walls.find(w => w.targetId === index);
+                                if (wall) {
+                                    wallContainer.innerHTML = `
+                                <div class="wall-card-inner bg-stone-700/80 p-1 rounded text-white text-center border border-stone-400">
+                                    <p class="font-bold text-xs">防壁 HP: ${wall.hp}/${wall.maxHp}</p>
+                                    <div class="w-full bg-gray-500 rounded-full h-1.5"><div class="bg-stone-500 h-1.5 rounded-full" style="width: ${Math.max(0, wall.hp / wall.maxHp * 100)}%"></div></div>
+                                </div>`;
+                                } else {
+                                    wallContainer.innerHTML = '';
                                 }
                             }
                         });
@@ -5429,7 +5445,11 @@
                     async function defaultEnemyAttack(enemy, target) {
                         const damage = calculateDamage(enemy, target);
                         await dealDamage(target, damage);
-                        log(`${enemy.name}の攻撃！ ${target.name}に${damage}のダメージ！`);
+                        if (target.isWall) {
+                            log(`${enemy.name}の攻撃！ 防壁に${damage}のダメージ！`);
+                        } else {
+                            log(`${enemy.name}の攻撃！ ${target.name}に${damage}のダメージ！`);
+                        }
                     }
 
                     function findTarget(enemy) {
@@ -5500,7 +5520,10 @@
                         let effectiveDefense = 0;
 
                         // 防御側の防御力を決定
-                        if (defender === gameState.golem) {
+                        if (defender.isWall) {
+                            // ウォールの場合、防御力は0とする
+                            effectiveDefense = 0;
+                        } else if (defender === gameState.golem) {
                             // ゴーレムの場合、防御力は0とする
                             effectiveDefense = 0;
                         } else if (defender.isEnemy) {
@@ -5551,6 +5574,7 @@
                             wall.hp = Math.max(0, wall.hp - amount);
                             log(`防壁が攻撃を受け止めた！ (防壁の残り耐久値: ${wall.hp})`);
                             if (wall.hp <= 0) {
+                                flashCard(gameState.party[wall.targetId], 'red');
                                 log("防壁は砕け散った！");
                                 gameState.walls.splice(target.wallIndex, 1);
                             }
