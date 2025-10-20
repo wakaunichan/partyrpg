@@ -463,6 +463,7 @@
                     <button data-mode="saint_march" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-yellow-500">聖女の行進</strong><span class="block text-sm text-gray-600">特別なジョブ「聖女」ひとりで30階の踏破を目指す。彼女はターン開始時にHPとMPが回復し、脱衣を無効化する。</span></button>
                     <button data-mode="monster_march" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-red-800">魔物の行軍</strong><span class="block text-sm text-gray-600">全てのフロアで戦闘が発生する。勝利する度にレベルアップし、アイテムを獲得する。50階踏破を目指せ。</span></button>
                     <button data-mode="endgame" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-gray-700">おわりから</strong><span class="block text-sm text-gray-600">1フロア目に最終ボスが登場する。</span></button>
+                    <button data-mode="unstable_bodies" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-cyan-700">流転の体躯</strong><span class="block text-sm text-gray-600">戦闘に勝利するたび、生存者全員の身長が-50cm～+50cmの範囲でランダムに変動する。</span></button>
                 </div>
                 <div class="text-right mt-6">
                     <button id="what-if-modal-close" class="action-button bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded-lg shadow-lg">戻る</button></div>
@@ -2725,6 +2726,24 @@
 
                             // Update card classes
                             card.className = `character-card w-full sm:w-1/5 p-2 rounded-lg shadow-md border-2 border-${char.themeColor}-400 ${char.currentHp <= 0 ? 'opacity-50' : ''} ${char.bgClass || ''}`;
+
+                            // 身長に応じて背景の立ち絵を調整
+                            const heightRatio = char.height / char.initialHeight;
+                            let bgSize = 'auto 100%'; // デフォルトサイズ（coverに近い挙動）
+                            let bgPosition = 'center bottom'; // デフォルト位置（下揃え）
+
+                            if (heightRatio < 1.0) {
+                                // 身長が初期値より低い場合、立ち絵を縮小して下揃え
+                                const sizePercentage = Math.max(40, 100 * heightRatio); // 最低でも40%のサイズ
+                                bgSize = `auto ${sizePercentage}%`;
+                            } else if (heightRatio > 1.0) {
+                                // 身長が初期値より高い場合、少しだけ大きく見せる
+                                const sizePercentage = Math.min(130, 100 * heightRatio); // 最大130%
+                                bgSize = `auto ${sizePercentage}%`;
+                            }
+
+                            card.style.setProperty('--char-bg-size', bgSize);
+                            card.style.setProperty('--char-bg-position', bgPosition);
 
                             // Update specific elements within the card
                             // The animateStatChange function will handle the number and bar updates during animation.
