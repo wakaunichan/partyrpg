@@ -458,7 +458,7 @@
                 <div id="what-if-list" class="space-y-3 max-h-60 overflow-y-auto pr-2">
                     <button data-mode="enjoy" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-sky-700">エンジョイ</strong><span class="block text-sm text-gray-600">味方が戦闘不能になっても、即座にHPが全回復する。ゲームオーバーにならずに最後まで遊べる。</span></button>
                     <button data-mode="trial" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-blue-700">腕試し</strong><span class="block text-sm text-gray-600">通常ルールで冒険を開始する。</span></button>
-                    <button data-mode="indecent" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-pink-700">痴態騒ぎ</strong><span class="block text-sm text-gray-600">全員が脱衣状態で開始。服は手に入らず、恥ずかしさに慣れることもない。タンクとサムライは参加不可。</span></button>
+                    <button data-mode="indecent" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-pink-700">痴態騒ぎ</strong><span class="block text-sm text-gray-600">全員が脱衣状態で開始。服は手に入らず、恥ずかしさに慣れることもない。ナイトとサムライは参加不可。</span></button>
                     <button data-mode="dwarves" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-green-700">小人族の戦い</strong><span class="block text-sm text-gray-600">全員の身長が10cmの状態で冒険を開始する。</span></button>
                     <button data-mode="unstable_bodies" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-cyan-700">流転の体躯</strong><span class="block text-sm text-gray-600">戦闘に勝利するたび、生存者全員の身長が-50cm～+50cmの範囲でランダムに変動する。</span></button>
                     <button data-mode="fixed_path" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-indigo-700">決まった道程</strong><span class="block text-sm text-gray-600">5の倍数階以外の探索時、2つのイベントから好きな方を選んで進める。</span></button>
@@ -2835,6 +2835,18 @@
                         if (!dungeonCommands.querySelector('#dungeon-item-button')) {
                             dungeonCommands.insertBefore(itemButton, talkButton.nextSibling);
                         }
+
+                        // 調べるボタンのセットアップ
+                        const scanButton = document.getElementById('dungeon-scan-button') || document.createElement('button');
+                        scanButton.id = 'dungeon-scan-button';
+                        scanButton.className = 'action-button bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg';
+                        scanButton.textContent = '調べる';
+                        scanButton.onclick = () => {
+                            showScanTargetSelection();
+                        };
+                        if (!dungeonCommands.querySelector('#dungeon-scan-button')) {
+                            dungeonCommands.insertBefore(scanButton, itemButton.nextSibling);
+                        }
                     }
 
                     function updateFloorDisplay() {
@@ -3803,6 +3815,12 @@
 
                     function createEnemy(isBoss, isEnhanced = false) {
                         const floor = gameState.floor;
+
+                        // パーティ人数による敵ステータスの補正計算 (1人減るごとに10%低下)
+                        const partySize = gameState.party.length;
+                        const reductionFactor = Math.max(0, (4 - partySize) * 0.1);
+                        const statMultiplier = 1 - reductionFactor;
+
                         if (isBoss) {
                             if (isEnhanced) {
                                 return {
@@ -3876,13 +3894,21 @@
                                 }, ]
                             }];
                             const blueprint = bossBlueprints[Math.floor(Math.random() * bossBlueprints.length)];
+
+                            // ステータスに補正を適用
+                            const finalMaxHp = Math.ceil((blueprint.maxHp + floor * 15) * statMultiplier);
+                            const finalAtk = Math.ceil((blueprint.atk + Math.floor(floor * 1.2)) * statMultiplier);
+                            const finalPDef = Math.ceil((blueprint.pDef + Math.floor(floor * 0.8)) * statMultiplier);
+                            const finalMDef = Math.ceil((blueprint.mDef + Math.floor(floor * 0.8)) * statMultiplier);
+
                             return {
                                 ...blueprint,
-                                maxHp: blueprint.maxHp + floor * 15, // 最大HPを計算
-                                currentHp: blueprint.maxHp + floor * 15, // 現在HPを最大HPと一致させる
-                                atk: blueprint.atk + Math.floor(floor * 1.2),
-                                pDef: blueprint.pDef + Math.floor(floor * 0.8),
-                                mDef: blueprint.mDef + Math.floor(floor * 0.8),
+                                maxHp: finalMaxHp,
+                                currentHp: finalMaxHp,
+                                atk: finalAtk,
+                                pDef: finalPDef,
+                                mDef: finalMDef,
+                                // agiは補正対象外
                                 isEnemy: true,
                                 statusEffects: {},
                                 regenUses: 0, // 自己再生の使用回数カウンター
@@ -3926,13 +3952,20 @@
                         ];
                         const blueprint = enemyBlueprints[Math.floor(Math.random() * enemyBlueprints.length)];
                         const baseDef = 5 + floor * 0.8;
+
+                        // ステータスに補正を適用
+                        const finalMaxHp = Math.ceil((45 + floor * 8) * statMultiplier);
+                        const finalAtk = Math.ceil((10 + Math.floor(floor * 1.2)) * statMultiplier);
+                        const finalPDef = Math.ceil(Math.max(1, Math.floor(baseDef * blueprint.pDefRatio)) * statMultiplier);
+                        const finalMDef = Math.ceil(Math.max(1, Math.floor(baseDef * blueprint.mDefRatio)) * statMultiplier);
+
                         return {
                             name: blueprint.name,
-                            maxHp: 45 + floor * 8,
-                            currentHp: 45 + floor * 8,
-                            atk: 10 + Math.floor(floor * 1.2),
-                            pDef: Math.max(1, Math.floor(baseDef * blueprint.pDefRatio)),
-                            mDef: Math.max(1, Math.floor(baseDef * blueprint.mDefRatio)),
+                            maxHp: finalMaxHp,
+                            currentHp: finalMaxHp,
+                            atk: finalAtk,
+                            pDef: finalPDef,
+                            mDef: finalMDef,
                             agi: 7 + floor,
                             isEnemy: true,
                             skills: (blueprint.name === 'ウィスプ') ? [{
@@ -3965,6 +3998,38 @@
                     }
 
                     async function sweepAttack(enemy) {
+                        // --- 行動変化ロジック ---
+                        // 挑発、ゴーレム、ウォールのいずれかが存在するかチェック
+                        const provokingChar = gameState.party.find(p => p.currentHp > 0 && (p.buffs.provoke || p.buffs.cover));
+                        const golemActive = gameState.golem && gameState.golem.hp > 0;
+                        const wallActive = gameState.walls.length > 0;
+
+                        if (provokingChar || golemActive || wallActive) {
+                            let target;
+                            // ターゲットの優先順位: 挑発/かばう > ゴーレム > ウォール
+                            if (provokingChar) {
+                                target = provokingChar;
+                            } else if (golemActive) {
+                                target = gameState.golem;
+                            } else {
+                                // ウォールを持つキャラクターをターゲットにする
+                                const wall = gameState.walls[0]; // 最初のウォールを対象とする
+                                target = gameState.party[wall.targetId];
+                            }
+
+                            log(`${enemy.name}は防御を固める${target.name}に狙いを定めた！`);
+                            await new Promise(resolve => setTimeout(resolve, 1000));
+                            log(`${enemy.name}の強打！`);
+                            // 強打は高火力の単体攻撃 (威力2.5倍)
+                            const damage = calculateDamage(enemy, target, {
+                                type: 'physical',
+                                power: 2.5
+                            });
+                            await dealDamage(target, damage);
+                            return; // 強打を実行したので、なぎ払いは行わない
+                        }
+
+                        // --- 通常のなぎ払いロジック ---
                         log(`${enemy.name}のなぎ払い！`);
                         const aliveParty = gameState.party.filter(p => p.currentHp > 0);
                         for (const target of aliveParty) {
@@ -4173,6 +4238,16 @@
                     function playerTurn(character) {
                         commandMessage.textContent = `${character.name}のターン`;
                         actionButtons.innerHTML = '';
+                        // コマンドコンテナのレイアウトを縦並びに変更
+                        actionButtons.className = 'flex flex-col gap-2';
+
+                        // 上段の基本コマンド用コンテナ
+                        const topRow = document.createElement('div');
+                        topRow.className = 'grid grid-cols-2 sm:grid-cols-4 gap-2';
+
+                        // 下段のスキル用コンテナ
+                        const skillRow = document.createElement('div');
+                        skillRow.className = 'grid grid-cols-2 sm:grid-cols-4 gap-2';
 
                         const attackBtn = document.createElement('button');
                         attackBtn.textContent = 'たたかう';
@@ -4180,7 +4255,30 @@
                         attackBtn.onclick = () => playerAction(character, {
                             type: 'attack'
                         });
-                        actionButtons.appendChild(attackBtn);
+                        topRow.appendChild(attackBtn);
+
+                        const defendBtn = document.createElement('button');
+                        defendBtn.textContent = 'ぼうぎょ';
+                        defendBtn.className = 'action-button bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded';
+                        defendBtn.onclick = () => playerAction(character, {
+                            type: 'defend'
+                        });
+                        topRow.appendChild(defendBtn);
+
+                        const itemBtn = document.createElement('button');
+                        itemBtn.textContent = 'アイテム';
+                        itemBtn.className = `action-button bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded ${gameState.inventory.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`;
+                        itemBtn.disabled = gameState.inventory.length === 0;
+                        itemBtn.onclick = () => showItemModal(character);
+                        topRow.appendChild(itemBtn);
+
+                        const scanBtn = document.createElement('button');
+                        scanBtn.textContent = '調べる';
+                        scanBtn.className = 'action-button bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded';
+                        scanBtn.onclick = () => playerAction(character, {
+                            type: 'scan'
+                        });
+                        topRow.appendChild(scanBtn);
 
                         character.skills.forEach(skill => {
                             const isSlowed = character.statusEffects && character.statusEffects.slow;
@@ -4203,33 +4301,13 @@
                                 type: 'skill',
                                 skill: skill
                             });
-                            actionButtons.appendChild(skillBtn);
+                            skillRow.appendChild(skillBtn);
                         });
 
-                        const defendBtn = document.createElement('button');
-                        defendBtn.textContent = 'ぼうぎょ';
-                        defendBtn.className = 'action-button bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded';
-                        defendBtn.onclick = () => playerAction(character, {
-                            type: 'defend'
-                        });
-
-                        const scanBtn = document.createElement('button');
-                        scanBtn.textContent = '調べる';
-                        scanBtn.className = 'action-button bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded';
-                        scanBtn.onclick = () => playerAction(character, {
-                            type: 'scan'
-                        });
-                        actionButtons.appendChild(scanBtn);
-
-                        actionButtons.appendChild(defendBtn);
-
-                        const itemBtn = document.createElement('button');
-                        itemBtn.textContent = 'アイテム';
-                        itemBtn.className = `action-button bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded ${gameState.inventory.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`;
-                        itemBtn.disabled = gameState.inventory.length === 0;
-                        itemBtn.onclick = () => showItemModal(character);
-                        actionButtons.appendChild(itemBtn);
-
+                        actionButtons.appendChild(topRow);
+                        if (skillRow.hasChildNodes()) {
+                            actionButtons.appendChild(skillRow);
+                        }
                     }
 
                     let pendingAction = null;
@@ -6037,6 +6115,21 @@
                     return html + '</div>';
             }
 
+            function showScanTargetSelection() {
+                log('誰を調べますか？');
+                dungeonCommands.classList.add('hidden'); // コマンドを隠す
+                gameState.party.forEach((char, index) => {
+                    const card = document.getElementById(`party-card-${index}`);
+                    if (card) {
+                        card.classList.add('targeted');
+                        // 探索中のクリックイベントを一時的に上書き
+                        card.onclick = () => {
+                            showScanResult(char);
+                        };
+                    }
+                });
+            }
+
             function showScanResult(target) {
                 const scanModalTitle = document.getElementById('scan-modal-title');
                 const scanModalContent = document.getElementById('scan-modal-content');
@@ -6264,7 +6357,14 @@
             scanModalClose.addEventListener('click', () => {
                 scanModal.classList.add('hidden');
                 // 「調べる」をキャンセルした場合、元のキャラクターのターンに戻す
-                if (gameState.inBattle && !pendingAction) {
+                if (gameState.inBattle) {
+                    if (!pendingAction) playerTurn(gameState.turnOrder[gameState.currentTurnIndex]);
+                } else {
+                    // 探索中の場合
+                    log('探索を続けます。');
+                    dungeonCommands.classList.remove('hidden'); // コマンドを再表示
+                    // クリックイベントを元に戻す
+                    updatePartyStatus();
                     playerTurn(gameState.turnOrder[gameState.currentTurnIndex]);
                 }
             });
