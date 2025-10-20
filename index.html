@@ -4806,7 +4806,7 @@
                         setTimeout(() => popup.remove(), 1500);
                     }
 
-                    function endBattle(isVictory) {
+                    async function endBattle(isVictory) {
                         gameState.inBattle = false;
 
                         // ゴーレムが残っている場合の処理
@@ -4837,6 +4837,20 @@
 
                         if (isVictory) {
                             gameState.killCount += gameState.enemies.length; // 倒した敵の数を加算
+
+                            // 新モード「流転の体躯」の処理
+                            if (gameState.gameMode === 'unstable_bodies') {
+                                log("勝利の余韻に浸る間もなく、パーティの体が不安定に変化する…！");
+                                await new Promise(resolve => setTimeout(resolve, 1500)); // メッセージ表示のための待機
+                                const aliveParty = gameState.party.filter(p => p.currentHp > 0);
+                                for (const char of aliveParty) {
+                                    const change = Math.floor(Math.random() * 101) - 50; // -50 から +50
+                                    const type = change >= 0 ? 'increase' : 'decrease';
+                                    await animateStatChange(char, 'height', change, type);
+                                    log(`${char.name}の身長が${change > 0 ? '+' : ''}${change}cm変化した！`);
+                                    await new Promise(resolve => setTimeout(resolve, 500)); // 各キャラのログ表示のための短い待機
+                                }
+                            }
 
                             if (gameState.gameMode === 'monster_march') {
                                 if (gameState.floor === 50) {
@@ -4909,6 +4923,9 @@
                                     case 'enjoy':
                                         title = "楽しい冒険の終わり";
                                         text = "どんな困難も笑顔で乗り越え、パーティはついにダンジョンを制覇しました！最高の冒険でしたね！";
+                                        break;
+                                    case 'unstable_bodies':
+                                        text = "絶え間なく変化する肉体を乗りこなし、あなたは見事ボスを打ち破りました！その精神力は、もはや何物にも揺るがないでしょう。";
                                         break;
                                 }
                                 showModal(title, text);
