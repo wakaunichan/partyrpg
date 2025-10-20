@@ -2831,7 +2831,10 @@
                         itemButton.id = 'dungeon-item-button';
                         itemButton.className = 'action-button bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg';
                         itemButton.textContent = 'アイテム';
-                        itemButton.onclick = () => showItemModal();
+                        itemButton.onclick = () => {
+                            cancelScanMode(); // アイテムモーダルを開く前に調べるモードを終了
+                            showItemModal();
+                        };
                         if (!dungeonCommands.querySelector('#dungeon-item-button')) {
                             dungeonCommands.insertBefore(itemButton, talkButton.nextSibling);
                         }
@@ -2874,7 +2877,7 @@
                                 // Initial render of the inner structure
                                 card.innerHTML = `
                             <div class="character-stats w-full">
-                                <div class="stat-name">
+                                <div class="stat-name" data-char-name="${char.name}">
                                     <p class="font-bold text-sm truncate text-${char.themeColor}-700">${char.name}</p>
                                     <p class="text-xs text-gray-600">Lv.${char.level} ${char.role}</p>
                                 </div>
@@ -2888,7 +2891,7 @@
                             </div>
                         `;
                             }
-
+                            card.onclick = () => playerSelectAlly(index); // onclickを常に再設定
                             // Update card classes
                             card.className = `character-card w-full sm:w-1/5 p-2 rounded-lg shadow-md border-2 border-${char.themeColor}-400 ${char.currentHp <= 0 ? 'opacity-50' : ''} ${char.bgClass || ''}`;
 
@@ -2925,8 +2928,8 @@
                                 if (char.statusEffects.regeneration) statusHtml += '<span class="status-icon" title="自然治癒">✨</span>';
 
                                 // nameElement is now a div, so we set its children
-                                const nameP = nameElement.querySelector('p:first-child');
-                                const roleP = nameElement.querySelector('p:last-child');
+                                const nameP = nameElement.querySelector('p:first-child'); // The <p> with the name
+                                const roleP = nameElement.querySelector('p:last-child'); // The <p> with the role
                                 if (nameP) nameP.innerHTML = `${char.name} ${statusHtml}`;
                                 if (roleP) roleP.textContent = `Lv.${char.level} ${char.role}`;
                             }
@@ -6115,6 +6118,15 @@
                     return html + '</div>';
             }
 
+            function cancelScanMode() {
+                // 探索中の「調べる」モードをキャンセルする
+                if (!gameState.inBattle) {
+                    log('探索を続けます。');
+                    dungeonCommands.classList.remove('hidden');
+                    updatePartyStatus(); // クリックイベントとカードのスタイルを元に戻す
+                }
+            }
+
             function showScanTargetSelection() {
                 log('誰を調べますか？');
                 dungeonCommands.classList.add('hidden'); // コマンドを隠す
@@ -6306,7 +6318,10 @@
             nextFloorButton.addEventListener('click', () => {
                 if (!gameState.inBattle && !gameState.gameOver) advanceFloor();
             });
-            talkButton.addEventListener('click', generateConversation);
+            talkButton.addEventListener('click', () => {
+                cancelScanMode(); // 会話する前に調べるモードを終了
+                generateConversation();
+            });
             modalButton.addEventListener('click', () => {
                 returnToTitle();
             });
