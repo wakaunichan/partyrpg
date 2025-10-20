@@ -4620,6 +4620,22 @@
                     function calculateDamage(attacker, defender, skill = null) {
                         const attackerStats = getEffectiveStats(attacker);
                         let skillPowerMultiplier = 1.0;
+                        let baseAtk;
+
+                        // 魔法攻撃の場合、身長補正を無視し、バフのみを適用した攻撃力を計算
+                        if (skill && (skill.type === 'magic' || skill.type.includes('magic'))) {
+                            baseAtk = attacker.atk; // 素の攻撃力
+                            if (attacker.buffs && attacker.buffs.atk_up) {
+                                baseAtk *= 1.5; // 攻撃力アップバフは適用
+                            }
+                            // リーパーの脱衣デバフも適用
+                            if (attacker.statusEffects && attacker.statusEffects.stripped && attacker.role === 'リーパー') {
+                                baseAtk *= 0.5;
+                            }
+                        } else {
+                            // 物理攻撃や通常攻撃の場合は、身長補正を含む攻撃力を使用
+                            baseAtk = attackerStats.atk;
+                        }
 
                         // 渾身斬りのクリティカル判定
                         if (skill && skill.name === '渾身斬り' && Math.random() < 0.3) {
@@ -4627,7 +4643,7 @@
                             skillPowerMultiplier = 3; // ダメージ計算用の倍率を変更
                         }
 
-                        let baseDamage = skill ? attackerStats.atk * skill.power * skillPowerMultiplier : attackerStats.atk;
+                        let baseDamage = skill ? baseAtk * skill.power * skillPowerMultiplier : baseAtk;
                         let effectiveDefense = 0;
 
                         // 防御側の防御力を決定
@@ -5307,7 +5323,7 @@
                         },
                         target: null // ターゲットは後で選択
                     };
-                    if (itemInfo.target === 'ally') {
+                    if (itemInfo.target === 'ally' || itemInfo.target === 'any') {
                         log('誰に使いますか？');
                         // 復活アイテムの場合、戦闘不能の味方をターゲット可能にする
                         if (itemInfo.effect === 'revive') {
@@ -5322,6 +5338,9 @@
                         gameState.party.forEach((char, index) => {
                             if (char.currentHp > 0) document.getElementById(`party-card-${index}`).classList.add('targeted');
                         });
+                    } else if (itemInfo.target === 'party') {
+                        // 全体対象や対象不要のアイテム
+                        handleItem(pendingAction.character, gameState.party, pendingAction.action.item);
                     } else {
                         // 全体対象や対象不要のアイテム
                         executePlayerAction();
