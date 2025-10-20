@@ -2738,7 +2738,7 @@
 
                             if (heightRatio < 1.0) {
                                 // 身長が初期値より低い場合、立ち絵を縮小して下揃え
-                                const sizePercentage = Math.max(40, 100 * heightRatio); // 最低でも40%のサイズ
+                                const sizePercentage = Math.max(20, 100 * heightRatio); // 最低でも20%のサイズ
                                 bgSize = `auto ${sizePercentage}%`;
                             } else if (heightRatio > 1.0) {
                                 // 身長が初期値より高い場合、少しだけ大きく見せる
@@ -5529,9 +5529,6 @@
             }
 
             function startGame(mode = 'normal', selectedMembers = null, fromSave = false) {
-                // パーティ表示をクリア
-                partyContainer.innerHTML = '';
-
                 gameState.gameMode = mode;
 
                 // メンバー選択が必要なモードで、まだメンバーが選ばれていない場合 (聖女の行進は除く)
@@ -5540,6 +5537,9 @@
                     showSelectTeamModal(mode); // モードを引き継いで選択画面へ
                     return;
                 }
+
+                // パーティ表示をクリア
+                partyContainer.innerHTML = '';
 
                 titleScreen.classList.add('hidden');
                 whatIfModal.classList.add('hidden');
