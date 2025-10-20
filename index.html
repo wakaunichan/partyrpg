@@ -2926,10 +2926,14 @@
                             startBattle(isBossFloor);
                         } else if (gameState.gameMode === 'endgame' && gameState.floor === 1) {
                             startBattle(true); // 1階でボス戦
+                        } else if (gameState.gameMode === 'endless') {
+                            if (gameState.floor > 0 && gameState.floor % 30 === 0) {
+                                startBattle(true); // 無限モードのボス戦
+                            } else {
+                                triggerRandomEvent(); // ボス階以外はランダムイベント
+                            }
                         } else if (gameState.gameMode === 'brawl' && gameState.floor % 2 === 0) {
                             startBattle(); // 2フロアごとに戦闘
-                        } else if (gameState.gameMode === 'endless' && gameState.floor > 0 && gameState.floor % 30 === 0) {
-                            startBattle(true); // 無限モードのボス戦 (強化はなし)
                         } else if (gameState.floor === 30 && gameState.gameMode !== 'endless' && gameState.gameMode !== 'monster_march') startBattle(true);
                         else if (gameState.floor % 5 === 0 && gameState.gameMode !== 'brawl' && gameState.gameMode !== 'endless') {
                             startBattle();
