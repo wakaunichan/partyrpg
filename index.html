@@ -461,6 +461,7 @@
                     <button data-mode="fixed_path" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-indigo-700">決まった道程</strong><span class="block text-sm text-gray-600">5の倍数階以外の探索時、2つのイベントから好きな方を選んで進める。</span></button>
                     <button data-mode="enjoy" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-sky-700">エンジョイ</strong><span class="block text-sm text-gray-600">味方が戦闘不能になっても、即座にHPが全回復する。ゲームオーバーにならずに最後まで遊べる。</span></button>
                     <button data-mode="saint_march" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-yellow-500">聖女の行進</strong><span class="block text-sm text-gray-600">特別なジョブ「聖女」ひとりで30階の踏破を目指す。彼女はターン開始時にHPとMPが回復し、脱衣を無効化する。</span></button>
+                    <button data-mode="monster_march" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-red-800">魔物の行軍</strong><span class="block text-sm text-gray-600">全てのフロアで戦闘が発生する。勝利する度にレベルアップし、アイテムを獲得する。50階踏破を目指せ。</span></button>
                     <button data-mode="endgame" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-gray-700">おわりから</strong><span class="block text-sm text-gray-600">1フロア目に最終ボスが登場する。</span></button>
                 </div>
                 <div class="text-right mt-6">
@@ -495,6 +496,17 @@
                 </div>
                 <div class="text-right mt-4">
                     <button id="scan-modal-close" class="action-button bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded-lg shadow-lg">閉じる</button></div>
+            </div>
+        </div>
+
+        <!-- 聖女イベントモーダル -->
+        <div id="celestia-event-modal" class="hidden absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-lg p-8 text-center shadow-2xl max-w-md w-full">
+                <h2 id="celestia-event-title" class="text-2xl font-bold mb-4"></h2>
+                <p id="celestia-event-text" class="mb-6 whitespace-pre-wrap"></p>
+                <div id="celestia-event-buttons" class="flex justify-center gap-4">
+                    <!-- ボタンがここに挿入される -->
+                </div>
             </div>
         </div>
 
@@ -581,6 +593,11 @@
                     const eventChoiceModal = document.getElementById('event-choice-modal');
                     const eventChoiceButtons = document.getElementById('event-choice-buttons');
 
+                    const celestiaEventModal = document.getElementById('celestia-event-modal');
+                    const celestiaEventTitle = document.getElementById('celestia-event-title');
+                    const celestiaEventText = document.getElementById('celestia-event-text');
+                    const celestiaEventButtons = document.getElementById('celestia-event-buttons');
+
                     let gameState = {
                         floor: 0,
                         party: [],
@@ -593,7 +610,7 @@
                         golem: null,
                         foundEquipment: [],
                         killCount: 0, // ネクロマンサー用
-                        walls: [], // ガーディアン用
+                        walls: [], // ガーディアン用,
                         gameMode: 'normal', // normal, veterans, dwarves, brawl, solo, endgame, endless, indecent, enjoy, saint_march, fixed_path
                     };
                     gameState.triggeredSpecialConvos = [];
@@ -1583,6 +1600,7 @@
                             pair_コハル: ["コハルちゃん、見てて飽きないなー！次はなにが起こるか楽しみ！", "失敗しても私がフォローするから、思いっきりやっていいよ！"],
                             pair_オリビア: ["オリビアさん、いつもありがとう！その祈り、すっごく温かいです！", "私も、オリビアさんみたいに誰かを癒せるようになりたいな！"],
                             pair_レンカ: ["レンカさん、なんだかミステリアスだね！でも、悪い人じゃないってわかるよ！", "その魔法、どうなってるの？すごいね！"],
+                            pair_セレスティア: ["セレスティアちゃん、すごい力だね！私も負けてられないな！", "なんだか、見てるだけで心が洗われるみたい…不思議な感じ！"],
                             pair_イオリ: ["イオリ先輩！小さくてもすっごく頼りになります！", "私が先輩を守りますからね！任せてください！"],
                             pair_コハル: ["コハルちゃん、見てて飽きないなー！次はなにが起こるか楽しみ！", "失敗しても私がフォローするから、思いっきりやっていいよ！"],
                             pair_オリビア: ["オリビアさん、いつもありがとう！その祈り、すっごく温かいです！", "私も、オリビアさんみたいに誰かを癒せるようになりたいな！"],
@@ -1630,6 +1648,7 @@
                             pair_コハル: ["…コハル、予測不能。それが一番厄介。", "…次は何が起こるか、見ておく。"],
                             pair_オリビア: ["…オリビア、その祈り、純粋な魔力。…聖属性か。", "…回復魔法、専門外だが、参考になる。"],
                             pair_レンカ: ["…レンカ、死霊術か。…禁忌の領域。だが、力は本物。", "…その魂、どこから呼んでいる？"],
+                            pair_セレスティア: ["…その力、聖なるものか。魔力とは異なる、純粋なエネルギー。", "…あなたの存在そのものが、この地の穢れを払っている。"],
                             pair_イオリ: ["…イオリ、先輩か。その守り、確か。", "…小さくても、その存在感は大きい。"],
                             pair_コハル: ["…コハル、予測不能。それが一番厄介。", "…次は何が起こるか、見ておく。"],
                             pair_オリビア: ["…オリビア、その祈り、純粋な魔力。…聖属性か。", "…回復魔法、専門外だが、参考になる。"],
@@ -1675,6 +1694,7 @@
                             pair_コハル: ["コハル、あんたは見ててハラハラするねぇ。でも、面白いからいいか。", "何かあったらあたしがなんとかしてやるから、好きにやりな。"],
                             pair_オリビア: ["オリビア、あんたの祈りは心に染みるね。ありがとうよ。", "無理するんじゃないよ。あんたも大事な仲間だからね。"],
                             pair_レンカ: ["レンカ、あんたの魔法は気味が悪いねぇ。でも、頼りにしてるよ。", "死人相手とは、感心しないね。"],
+                            pair_セレスティア: ["セレスティア、あんたは一人で背負いすぎだよ。あたしたちもいるんだからさ。", "その小さな体で、よく頑張るねぇ。感心だよ。"],
                             pair_イオリ: ["イオリ、あんたが先輩だったのかい。頼りにしてるよ、先輩。", "その小さな体で、よく頑張るねぇ。感心だよ。"],
                             pair_コハル: ["コハル、あんたは見ててハラハラするねぇ。でも、面白いからいいか。", "何かあったらあたしがなんとかしてやるから、好きにやりな。"],
                             pair_オリビア: ["オリビア、あんたの祈りは心に染みるね。ありがとうよ。", "無理するんじゃないよ。あんたも大事な仲間だからね。"],
@@ -1722,6 +1742,7 @@
                             pair_コハル: ["コハルちゃん、大丈夫ですか！？転んだりしてませんか？", "見ててハラハラしますけど…なんだか楽しいです！"],
                             pair_オリビア: ["オリビアさん、その祈り、とっても温かいです。私もそんな風になりたいです。", "疲れたら、いつでも言ってくださいね。私がヒールしますから！"],
                             pair_レンカ: ["レンカさん、その魔法、ちょっと怖いですけど…味方だと頼もしいです！", "何かあったら、私がヒールしますからね！"],
+                            pair_セレスティア: ["セレスティアさん、なんだかとても温かい光を感じます…。", "疲れたらいつでも言ってくださいね。私、ヒールしますから！"],
                             pair_イオリ: ["イオリ先輩、小さくてもとっても頼りになります！尊敬します！", "先輩のこと、私がしっかりお守りしますね！"],
                             pair_コハル: ["コハルちゃん、大丈夫ですか！？転んだりしてませんか？", "見ててハラハラしますけど…なんだか楽しいです！"],
                             pair_オリビア: ["オリビアさん、その祈り、とっても温かいです。私もそんな風になりたいです。", "疲れたら、いつでも言ってくださいね。私がヒールしますから！"],
@@ -1765,6 +1786,7 @@
                             pair_コハル: ["コハルさん、あなたの行動は、因果律を無視しているようですわね。観測対象として最適ですわ。", "次は何が起こるのか…楽しみですわ。"],
                             pair_オリビア: ["オリビアさん、その祈り、高エネルギー反応を観測しましたわ。素晴らしい。", "聖なる力…科学で解明できるかしら。"],
                             pair_レンカ: ["レンカさん、死霊術…生命の理を冒涜する行為。ですが、その力、認めざるを得ませんわ。", "その魂、どこからエネルギーを得ているのですの？"],
+                            pair_セレスティア: ["聖女…その聖なる力の源、非常に興味深いですわ。少し調査させていただけませんこと？", "あなたのその力、科学では説明できない現象ですわね。素晴らしい研究対象ですわ。"],
                             pair_イオリ: ["イオリさん、先輩でしたのね。その守り、錬金術の防壁とは違う原理のようですわ。", "その病、研究すれば治療法が見つかるかもしれませんわ。"],
                             pair_コハル: ["コハルさん、あなたの行動は、因果律を無視しているようですわね。観測対象として最適ですわ。", "次は何が起こるのか…楽しみですわ。"],
                             pair_オリビア: ["オリビアさん、その祈り、高エネルギー反応を観測しましたわ。素晴らしい。", "聖なる力…科学で解明できるかしら。"],
@@ -1808,6 +1830,7 @@
                             pair_コハル: ["コハルちゃん、見ててハラハラするけど、そこがまた可愛い！", "失敗しても、リリカがアンコールで盛り上げるから大丈夫だよ！"],
                             pair_オリビア: ["オリビアちゃん、その清楚な感じ、王道アイドルって感じだね！", "その祈りのポーズ、リリカも今度取り入れてみようかな！"],
                             pair_レンカ: ["レンカさん、大人っぽくてセクシーだね！リリカも見習わなきゃ！", "その魔法、ステージ演出に使えそう！"],
+                            pair_セレスティア: ["セレスティアちゃん、ミステリアスで素敵！新しいアイドルのコンセプトになりそう！", "リリカの歌で、セレスティアちゃんを応援しちゃうからね！"],
                             pair_イオリ: ["イオリ先輩！小さくても頼りになるなんて、ギャップが素敵です！", "先輩のことも、リリカが応援しちゃいます！"],
                             pair_コハル: ["コハルちゃん、見ててハラハラするけど、そこがまた可愛い！", "失敗しても、リリカがアンコールで盛り上げるから大丈夫だよ！"],
                             pair_オリビア: ["オリビアちゃん、その清楚な感じ、王道アイドルって感じだね！", "その祈りのポーズ、リリカも今度取り入れてみようかな！"],
@@ -1848,6 +1871,7 @@
                             pair_コハル: ["コハル、お主の周りは、常に騒がしいな。", "…予測できぬ動き。…厄介だ。"],
                             pair_オリビア: ["オリビア、その祈り、邪念がない。…故に、強い。", "…感謝する。"],
                             pair_レンカ: ["レンカ、死者を操るか。…外道の術。だが、力は認めよう。", "…その魂、成仏させてやるのが武士の情けか。"],
+                            pair_セレスティア: ["…その身に宿す光、迷いがない。見事なものだ。", "…その使命、拙者の剣で助太刀いたす。"],
                             pair_イオリ: ["イオリ、先輩か。その守り、見事。", "…その体で、よくぞ。感服する。"],
                             pair_コハル: ["コハル、お主の周りは、常に騒がしいな。", "…予測できぬ動き。…厄介だ。"],
                             pair_オリビア: ["オリビア、その祈り、邪念がない。…故に、強い。", "…感謝する。"],
@@ -1881,6 +1905,7 @@
                             pair_イオリ: ["イオリの姉ちゃん、ちっちぇーのにスゲーな！オラも負けてらんねえ！", "オラが守ってやっからな！"],
                             pair_コハル: ["コハル！お前、見てて飽きねえな！次はなにするんだ？", "失敗したって気にすんな！腹が減るだけだ！"],
                             pair_オリビア: ["オリビア！お前の祈り、なんだか腹の底からあったかくなるな！", "腹減ったらオラに言えよ！"],
+                            pair_セレスティア: ["おー！なんかキラキラしてて強そうだな！オラと勝負だ！", "腹減らねえのか？不思議なヤツだな！"],
                         },
                         // エリザ (ドクター): 自信家、研究熱心、尊大。
                         'エリザ': {
@@ -1921,6 +1946,7 @@
                             pair_コハル: ["コハルさん、あなたの引き起こす現象、確率論を無視していますわ。最高の研究対象ですわ！", "さあ、もっと面白いことを起こしてごらんなさい！"],
                             pair_オリビア: ["オリビアさん、その祈り、プラシーボ効果以上のものを感じますわ。", "その聖なる力とやら、科学で再現してみせますわ。"],
                             pair_レンカ: ["レンカさん、死体蘇生…生命倫理に反しますわ。ですが、その技術、喉から手が出るほど欲しいですわね。", "その魂、捕獲して研究してみたいですわ。"],
+                            pair_セレスティア: ["聖女…ふふ、神の代行者ですって？実に非科学的ですわ。ですが、その力、解析する価値はありますわね。", "あなたのその体、私の研究対象として完璧ですわ。隅々まで調べさせてくださいな。"],
                             pair_イオリ: ["イオリさん、その縮小病、私の研究対象として完璧ですわ。", "安心なさい。私が必ず、あなたの病を解明して差し上げますわ。"],
                             pair_コハル: ["コハルさん、あなたの引き起こす現象、確率論を無視していますわ。最高の研究対象ですわ！", "さあ、もっと面白いことを起こしてごらんなさい！"],
                             pair_オリビア: ["オリビアさん、その祈り、プラシーボ効果以上のものを感じますわ。", "その聖なる力とやら、科学で再現してみせますわ。"],
@@ -1964,6 +1990,7 @@
                             pair_コハル: ["コハル、あなたこそ最高のギャンブルね！次に何が起こるか、全く読めないわ！", "あなたに全部賭けてみるのも、面白そうね！"],
                             pair_オリビア: ["オリビア、祈りだけで勝てるなんて思ってないでしょうね？", "神様と私、どっちがツイてるか勝負しましょうか。"],
                             pair_レンカ: ["レンカ、死者を操るなんて、ハイリスク・ハイリターンね。嫌いじゃないわ。", "その魔法、失敗したらどうなるの？面白そうじゃない。"],
+                            pair_セレスティア: ["聖女様、ね。あなたに賭けても、スリルはなさそうね。だって、絶対に勝つんでしょう？", "あなたのその力、イカサマじゃないんでしょうね？"],
                             pair_イオリ: ["イオリ先輩、ね。その守り、いつまで続くかしら？", "小さくても、賭けの対象としては面白いわ。"],
                             pair_コハル: ["コハル、あなたこそ最高のギャンブルね！次に何が起こるか、全く読めないわ！", "あなたに全部賭けてみるのも、面白そうね！"],
                             pair_オリビア: ["オリビア、祈りだけで勝てるなんて思ってないでしょうね？", "神様と私、どっちがツイてるか勝負しましょうか。"],
@@ -2007,6 +2034,7 @@
                             pair_コハル: ["コハル…あなたの周り、魂が騒がしい。", "…何が起こるか、わからない。…面白い。"],
                             pair_オリビア: ["オリビア…あなたの魂、光ってる。…綺麗。", "…その祈り、死者の魂も、癒されるかも。"],
                             pair_レンカ: ["レンカ…死者の魂を弄ぶのは、よくない。", "…でも、あなたの魂は、寂しそう。"],
+                            pair_セレスティア: ["…あなたの魂、光そのもの。…眩しい。", "…たくさんの魂が、あなたに救いを求めてる。…聞こえる。"],
                             pair_イオリ: ["イオリ…先輩。…その魂、古い。…でも、強い。", "…守る、ね。…わかる。"],
                             pair_コハル: ["コハル…あなたの周り、魂が騒がしい。", "…何が起こるか、わからない。…面白い。"],
                             pair_オリビア: ["オリビア…あなたの魂、光ってる。…綺麗。", "…その祈り、死者の魂も、癒されるかも。"],
@@ -2038,6 +2066,7 @@
                             pair_レンカ: ["レンカさん、死んじゃったモンスターともお話しできるの？すごい！", "モコがね、レンカさんのこと、ちょっと怖いけど気になるって！"],
                             pair_イオリ: ["イオリ先輩、ちっちゃくてもかっこいいね！ゴーレムくんもそう言ってる！", "先輩！ミコとモコが守るからね！"],
                             pair_コハル: ["コハルちゃん、次はなにするの？モコがわくわくしてるよ！", "失敗しても、モコがなぐさめてくれるから大丈夫だよ！"],
+                            pair_セレスティア: ["わー！セレスティアさん、キラキラしてる！モコがね、すりすりしたいって！", "セレスティアさん、モンスターとお話しできる？"],
                             pair_オリビア: ["オリビアさん、優しい匂いがするね！モコがすりすりしたがってる！", "その祈り、モンスターにも効くのかな？"],
                         },
                         // レンカ (ネクロマンサー): ミステリアス、お姉さん、死者と対話。
@@ -2075,6 +2104,7 @@
                             pair_ルナ: ["ルナさん、運命も死も、抗えないものよ。", "あなたのギャンブル、魂を賭けてみるのも面白そうね。"],
                             pair_クロエ: ["クロエちゃん、あなたも『あちら側』が見えるのね。…話が合いそうだわ。", "その鎌、私のコレクションにしたいくらい素敵よ。"],
                             pair_ミコ: ["ミコちゃん、その子たち、純粋な魂を持っているのね。可愛いわ。", "死んだモンスターの魂も、召喚できるかしら？"],
+                            pair_セレスティア: ["聖女様…あなたの光は、死者にとっては少し眩しすぎるかしら。", "ふふ、あなたがいれば、私の仕事がなくなってしまいそうね。"],
                         },
                         // イオリ (ガーディアン): 先輩、小柄、守護者。
                         'イオリ': {
@@ -2111,6 +2141,7 @@
                             pair_ルナ: ["ルナ、ギャンブルはほどほどにな。見ててハラハラする。", "君の運も、ボクが守って見せるさ。"],
                             pair_クロエ: ["クロエ、大丈夫か？暗い顔するなよ。ボクがそばにいる。", "その鎌、危ないから気をつけて使えよ。"],
                             pair_ミコ: ["ミコ、その召喚獣たち、可愛いな。ボクが守ってやる。", "モコってやつ、ふわふわだな。"],
+                            pair_セレスティア: ["セレスティアさん、あなたも一人で戦ってきたんだね。…ボクが守るから、もう一人じゃない。", "その力、すごいな。でも、無理はしないでくれよ。"],
                         },
                         // コハル (トラブルメーカー): 元気、おっちょこちょい、予測不能。
                         'コハル': {
@@ -2147,6 +2178,7 @@
                             pair_ルナ: ["ルナさん、ギャンブルってなんですか？楽しいことですか？", "コハルに賭けてみてください！きっと面白いことが起こりますよ！"],
                             pair_クロエ: ["クロエちゃん、静かですね。お化けとか、見えたりしますか？", "その鎌、草刈りとかできそうですね！"],
                             pair_ミコ: ["ミコちゃん、モコちゃん、ふわふわで可愛いです！触ってもいいですか？", "コハルもモンスターとお友達になりたいです！"],
+                            pair_セレスティア: ["わー！セレスティアさん、キラキラしてて綺麗です！お友達になってください！", "その服、どうなってるんですか？すごい！"],
                         },
                         // オリビア (シスター): 慈愛、信仰、癒し。
                         'オリビア': {
@@ -2183,7 +2215,21 @@
                             pair_ルナ: ["ルナさん、運命は神がお与えになるもの。賭け事はいけませんよ。", "ですが、あなたのその強い心、きっと正しい道へと導かれるはずです。"],
                             pair_クロエ: ["クロエさん…あなたの瞳には、何か特別なものが見えているのですね。", "あなたの魂に、安らぎが訪れますように。"],
                             pair_ミコ: ["ミコさん、言葉の通じぬ者と心を通わせる…素晴らしい力ですね。", "神は、全ての生き物を愛しておられますから。"],
-                        }
+                            pair_セレスティア: ["セレスティア様…あなたこそ、まさに神の御使いなのですね。", "私も、あなたのように、多くの人を救えるようになりたいです。"],
+                        },
+                        // セレスティア (聖女): 無口、聖なる力、使命感。
+                        'セレスティア': {
+                            default: ["（静かに前を見つめている）", "（ダンジョンの穢れた空気に、少しだけ眉をひそめた）", "（仲間たちのほうを見て、こくりと頷いた）"],
+                            lowHp: ["（…少し、光が揺らいだ）", "（胸に手を当て、静かに呼吸を整えている）", "（大丈夫、というように仲間へ微笑んだ）"],
+                            allyLowHp: ["（傷ついた{name}を、心配そうに見つめている）", "（{name}の前に立ち、守るように両手を広げた）"],
+                            shrunk: ["（小さくなった自分の手を見つめている）", "（特に気にした様子もなく、前を向いた）"],
+                            grown: ["（大きくなった体に、少し戸惑っているようだ）", "（天井を見上げ、少し首をかしげた）"],
+                            pair_アカリ: ["（アカリを見て、こくりと頷いた）", "（アカリの言葉に、ふわりと微笑んだ）"],
+                            pair_ヒカリ: ["（ヒカリの言葉に、静かに頷いた）", "（ヒカリの魔導書に、興味深そうな視線を向けた）"],
+                            pair_シズカ: ["（シズカの言葉に、少しだけ安堵したような表情を見せた）", "（シズカの盾を、尊敬の眼差しで見つめている）"],
+                            pair_ユイ: ["（ユイの優しさに、慈愛に満ちた微笑みで応えた）", "（ユイの頭を、優しく撫でた）"],
+                            // 他のキャラクターへの応答も同様に追加可能
+                        },
                     };
 
                     const specialConversations = {
@@ -2834,14 +2880,42 @@
                         gameState.floor++;
                         updateFloorDisplay();
 
+                        const hasCelestia = gameState.party.some(p => p.role === '聖女');
+                        const isPartyOfTwoOrMore = gameState.party.length >= 2;
+
+                        // 29階の聖女特別イベント
+                        if (gameState.floor === 29 && hasCelestia && isPartyOfTwoOrMore) {
+                            celestiaEventTitle.textContent = "最後の問い";
+                            celestiaEventText.textContent = "セレスティアが、静かにあなたを見つめている。\nその瞳は、これから待ち受ける運命について、覚悟を問うているようだ。\n\n「…この先に待つ元凶は、計り知れないほどの穢れを溜め込んでいます。仲間と共に挑めば、その穢れはさらに増し、想像を絶する脅威となるでしょう。それでも、あなたはこの道を進みますか？」";
+                            celestiaEventButtons.innerHTML = `
+                                <button id="celestia-accept" class="action-button bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg">覚悟を決める</button>
+                                <button id="celestia-decline" class="action-button bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg">今はまだ…</button>
+                            `;
+                            celestiaEventModal.classList.remove('hidden');
+
+                            document.getElementById('celestia-accept').onclick = () => {
+                                celestiaEventModal.classList.add('hidden');
+                                startBattle(true, true); // 強化ボス戦
+                            };
+                            document.getElementById('celestia-decline').onclick = () => {
+                                celestiaEventModal.classList.add('hidden');
+                                startBattle(true, false); // 通常ボス戦
+                            };
+                            return; // モーダル表示のため、ここで処理を中断
+                        }
+
+
                         // ゲームモードによる分岐
-                        if (gameState.gameMode === 'endgame' && gameState.floor === 1) {
+                        if (gameState.gameMode === 'monster_march') {
+                            const isBossFloor = gameState.floor === 30 || gameState.floor === 50;
+                            startBattle(isBossFloor);
+                        } else if (gameState.gameMode === 'endgame' && gameState.floor === 1) {
                             startBattle(true); // 1階でボス戦
                         } else if (gameState.gameMode === 'brawl' && gameState.floor % 2 === 0) {
                             startBattle(); // 2フロアごとに戦闘
                         } else if (gameState.gameMode === 'endless' && gameState.floor > 0 && gameState.floor % 30 === 0) {
-                            startBattle(true); // 無限モードのボス戦
-                        } else if (gameState.floor === 30 && gameState.gameMode !== 'endless') startBattle(true);
+                            startBattle(true); // 無限モードのボス戦 (強化はなし)
+                        } else if (gameState.floor === 30 && gameState.gameMode !== 'endless' && gameState.gameMode !== 'monster_march') startBattle(true);
                         else if (gameState.floor % 5 === 0 && gameState.gameMode !== 'brawl' && gameState.gameMode !== 'endless') {
                             startBattle();
                         } else if (gameState.gameMode === 'fixed_path') {
@@ -2939,63 +3013,6 @@
                     }
 
                     function triggerRandomEvent() {
-                        // イベントの発生率を重みで管理
-                        const isAnyoneStripped = gameState.party.some(p => p.statusEffects.stripped);
-
-                        const restoreClothesEvent = {
-                            name: "服を発見",
-                            func: foundClothes,
-                            weight: isAnyoneStripped && gameState.gameMode !== 'indecent' ? 5 : 0 // 脱衣状態のキャラがいて、痴態騒ぎモードでない場合のみ発生
-                        };
-
-
-                        const remainingEquipment = getRemainingEquipment();
-                        const equipmentEvent = {
-                            name: "装備発見",
-                            func: foundEquipment,
-                            weight: remainingEquipment.length > 0 ? 3 : 0 // 未取得の装備がある場合のみ発生
-                        };
-
-                        const events = [{
-                                name: "宝箱",
-                                func: foundTreasure,
-                                weight: 4
-                            }, {
-                                name: "泉",
-                                func: foundFountain,
-                                weight: 2
-                            }, // 発生率を下げた
-                            {
-                                name: "身長が縮む罠",
-                                func: triggerShrinkTrap,
-                                weight: 2
-                            }, // 発生率を下げた
-                            {
-                                name: "身長が伸びる罠",
-                                func: triggerGrowTrap,
-                                weight: 1
-                            }, {
-                                name: "ダメージの罠",
-                                func: triggerDamageTrap,
-                                weight: 3
-                            }, // 新規追加
-                            {
-                                name: "怪しげな祭壇",
-                                func: foundAltar,
-                                weight: 2
-                            }, {
-                                name: "吟遊詩人",
-                                func: foundBard,
-                                weight: 1
-                            }, {
-                                name: "なにもない",
-                                func: nothingHappened,
-                                weight: 5
-                            },
-                            equipmentEvent, // 装備イベントを追加
-                            restoreClothesEvent // 服発見イベントを追加
-                        ].filter(event => event.weight > 0); // 発生率が0のイベントは除外
-
                         const chosenEvent = getRandomEvent();
                         chosenEvent.func();
                         updatePartyStatus();
@@ -3167,7 +3184,7 @@
                         return available[Math.floor(Math.random() * available.length)];
                     }
 
-                    function startBattle(isBoss = false) {
+                    function startBattle(isBoss = false, isEnhancedBoss = false) {
                         log(isBoss ? 'ボスの気配がする…！' : '敵が現れた！');
                         gameState.inBattle = true;
                         dungeonCommands.classList.add('hidden');
@@ -3177,7 +3194,7 @@
 
                         const enemyCount = isBoss ? 1 : Math.floor(Math.random() * 2) + 1 + Math.floor(gameState.floor / 10);
                         gameState.enemies = [];
-                        for (let i = 0; i < enemyCount; i++) gameState.enemies.push(createEnemy(isBoss));
+                        for (let i = 0; i < enemyCount; i++) gameState.enemies.push(createEnemy(isBoss, isEnhancedBoss));
                         updateEnemyStatus();
 
                         const combatants = [...gameState.party.filter(p => p.currentHp > 0), ...gameState.enemies];
@@ -3187,9 +3204,31 @@
                         nextTurn();
                     }
 
-                    function createEnemy(isBoss) {
+                    function createEnemy(isBoss, isEnhanced = false) {
                         const floor = gameState.floor;
                         if (isBoss) {
+                            if (isEnhanced) {
+                                return {
+                                    name: '【覚醒】ダンジョンマスター',
+                                    maxHp: 1200 + floor * 20,
+                                    currentHp: 1200 + floor * 20,
+                                    atk: 40 + Math.floor(floor * 1.5),
+                                    pDef: 30 + Math.floor(floor * 1.0),
+                                    mDef: 20 + Math.floor(floor * 1.0),
+                                    agi: 20,
+                                    isEnemy: true,
+                                    statusEffects: {},
+                                    skills: [{
+                                        name: 'カタストロフィ',
+                                        func: sweepAttack,
+                                        type: 'physical'
+                                    }, {
+                                        name: '縮小ビーム',
+                                        func: shrinkBeam,
+                                        type: 'utility'
+                                    }, ]
+                                };
+                            }
                             const bossBlueprints = [{
                                 name: 'ダンジョンマスター',
                                 maxHp: 750,
@@ -3278,6 +3317,11 @@
                                 mDefRatio: 1.5
                             }, // 状態異常を使う
                             {
+                                name: 'リトルメイジ',
+                                pDefRatio: 0.8,
+                                mDefRatio: 1.2
+                            }, // 状態異常を使う
+                            {
                                 name: 'インプ',
                                 pDefRatio: 0.9,
                                 mDefRatio: 1.1
@@ -3297,6 +3341,10 @@
                             skills: (blueprint.name === 'ウィスプ') ? [{
                                     name: '状態異常攻撃',
                                     func: inflictStatusEffect
+                                }] :
+                                (blueprint.name === 'リトルメイジ') ? [{
+                                    name: '縮小ビーム',
+                                    func: shrinkBeam
                                 }] :
                                 (blueprint.name === 'インプ') ? [{
                                     name: 'いたずら',
@@ -4730,15 +4778,82 @@
 
                         if (isVictory) {
                             gameState.killCount += gameState.enemies.length; // 倒した敵の数を加算
+
+                            if (gameState.gameMode === 'monster_march') {
+                                if (gameState.floor === 50) {
+                                    showModal("完全踏破", "絶え間ない戦いの果てに、あなたはついにダンジョンの最奥に到達し、元凶を打ち破りました。その行軍は、伝説として語り継がれるでしょう。");
+                                    gameState.gameOver = true;
+                                    return;
+                                }
+
+                                log('敵を倒した！パーティ全員がレベルアップ！');
+                                gameState.party.forEach(char => {
+                                    if (char.currentHp > 0) levelUpCharacter(char, false); // UIは表示しない
+                                });
+
+                                const foundItems = [];
+                                const itemIds = Object.keys(itemBlueprints).filter(id => !itemBlueprints[id].battleOnly && !itemBlueprints[id].rare);
+                                for (let i = 0; i < 3; i++) {
+                                    const foundItemId = itemIds[Math.floor(Math.random() * itemIds.length)];
+                                    addItemToInventory(foundItemId);
+                                    foundItems.push(itemBlueprints[foundItemId].name);
+                                }
+                                log(`さらに、 ${foundItems.join('、')} を手に入れた！`);
+                            }
                             // 無限モードのボス撃破後
-                            if (gameState.gameMode === 'endless' && gameState.floor > 0 && gameState.floor % 30 === 0) {
+                            else if (gameState.gameMode === 'endless' && gameState.floor > 0 && gameState.floor % 30 === 0) {
                                 applyEndlessDebuff();
                                 showLevelUpModal();
-                            } else if (gameState.floor === 30 && gameState.gameMode === 'saint_march') {
-                                showModal("聖女の使命", "セレスティアはダンジョンの最深部に巣食う元凶を浄化しました。しかし、世界のどこかで穢れが生まれる限り、彼女の行進は終わりません。");
+                            } else if (gameState.gameMode === 'endgame' && gameState.floor === 1) {
+                                showModal("ゲームクリア？", "あなたはダンジョンの入り口で待ち構えていたボスを打ち破りました！…これでよかったのでしょうか？");
                                 gameState.gameOver = true;
                             } else if (gameState.floor === 30 && gameState.gameMode !== 'endless') {
-                                showModal("ゲームクリア！", "おめでとう！あなたはダンジョンの最深部に到達し、ボスを打ち破りました！");
+                                let title = "ゲームクリア！";
+                                let text = "おめでとう！あなたはダンジョンの最深部に到達し、ボスを打ち破りました！";
+
+                                switch (gameState.gameMode) {
+                                    case 'normal':
+                                    case 'trial':
+                                        text += "\nもしもの物語では、異なる結末があなたを待っているかもしれません。";
+                                        break;
+                                    case 'veterans':
+                                        title = "歴戦の証";
+                                        text = "歴戦の勇者たちは、その実力を見せつけ、ダンジョンを容易く踏破しました。しかし、彼女たちの本当の戦いは、まだ始まったばかりなのかもしれません。";
+                                        break;
+                                    case 'dwarves':
+                                        title = "小さな英雄譚";
+                                        text = "小さな体で、大きな困難を乗り越えた一行。彼女たちの勇気は、どんな巨人よりも雄大でした。";
+                                        break;
+                                    case 'brawl':
+                                        title = "武闘の果てに";
+                                        text = "戦い、戦い、そしてまた戦い…。武闘の宴の果てに、彼女たちは最強の称号を手にしました。その拳に宿るは、数多の強敵との記憶。";
+                                        break;
+                                    case 'solo':
+                                        title = "孤独な覇者";
+                                        text = `たった一人で、${gameState.party[0].name}はダンジョンを制覇しました。その強さは伝説となり、後世まで語り継がれるでしょう。`;
+                                        break;
+                                    case 'saint_march':
+                                        title = "聖女の使命";
+                                        text = "セレスティアはダンジョンの最深部に巣食う元凶を浄化しました。しかし、世界のどこかで穢れが生まれる限り、彼女の行進は終わりません。";
+                                        // 聖女クリアフラグを保存
+                                        const clearFlags = JSON.parse(localStorage.getItem('sizeDungeonClearFlags') || '{}');
+                                        clearFlags.saintMarchCleared = true;
+                                        localStorage.setItem('sizeDungeonClearFlags', JSON.stringify(clearFlags));
+                                        break;
+                                    case 'indecent':
+                                        title = "恥辱の先の勝利";
+                                        text = "数々の羞恥を乗り越え、彼女たちはついにボスを打ち破りました。この冒険のことは、きっと誰にも話せないでしょう…。";
+                                        break;
+                                    case 'fixed_path':
+                                        title = "運命の踏破";
+                                        text = "定められた道を乗り越え、一行はついに最深部に到達しました。これは運命だったのか、それとも自ら選び取った未来だったのか…。";
+                                        break;
+                                    case 'enjoy':
+                                        title = "楽しい冒険の終わり";
+                                        text = "どんな困難も笑顔で乗り越え、パーティはついにダンジョンを制覇しました！最高の冒険でしたね！";
+                                        break;
+                                }
+                                showModal(title, text);
                                 gameState.gameOver = true;
                             } else {
                                 showLevelUpModal();
@@ -4845,7 +4960,7 @@
                         levelUpModal.classList.remove('hidden');
                     }
 
-                    function levelUpCharacter(character) {
+                    function levelUpCharacter(character, showUI = true) {
                         // ステータスアップ
                         character.maxHp += 5;
                         character.maxMp += 3;
@@ -4870,9 +4985,11 @@
                         } else {
                             log(`${character.name}は強くなった！`);
                         }
-                        levelUpModal.classList.add('hidden');
-                        dungeonCommands.classList.remove('hidden');
-                        updatePartyStatus();
+                        if (showUI) {
+                            levelUpModal.classList.add('hidden');
+                            dungeonCommands.classList.remove('hidden');
+                            updatePartyStatus();
+                        }
                     }
 
                     function flashCard(target, type) {
@@ -5346,16 +5463,23 @@
                     selectionPrompt.textContent = '共に冒険する仲間を2～4人選んでください。';
                 }
 
-                allCharacterBlueprints.forEach(char => {
-                    if (isIndecent && (char.role === 'ナイト' || char.role === 'サムライ')) {
-                        return; // 痴態騒ぎモードではナイトとサムライをスキップ
+                // 表示するキャラクターリストを準備
+                let availableBlueprints = allCharacterBlueprints.filter(char => char.role !== '聖女');
+                const clearFlags = JSON.parse(localStorage.getItem('sizeDungeonClearFlags') || '{}');
+                if (clearFlags.saintMarchCleared) {
+                    const saint = allCharacterBlueprints.find(char => char.role === '聖女');
+                    if (saint) {
+                        availableBlueprints.push(saint);
                     }
-                    if (char.role === '聖女') {
-                        return; // 聖女は選抜チームから除外
+                }
+
+                availableBlueprints.forEach(char => {
+                    if (isIndecent && (char.role === 'ナイト' || char.role === 'サムライ' || char.role === '聖女')) {
+                        return; // 痴態騒ぎモードではナイト、サムライ、聖女をスキップ
                     }
 
                     const card = document.createElement('div');
-                    card.className = 'p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 transition';
+                    card.className = `p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 transition ${char.role === '聖女' ? 'border-yellow-300 bg-yellow-50' : ''}`;
                     card.dataset.name = char.name;
                     card.innerHTML = `
                         <p class="font-bold text-lg text-${char.themeColor}-700">${char.name}</p>
