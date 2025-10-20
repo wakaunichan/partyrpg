@@ -366,6 +366,7 @@
         <div id="dungeon-view" class="hidden flex-grow bg-cover bg-center relative flex flex-col justify-between p-4" style="background-image: url('https://image.pollinations.ai/prompt/fantasy%20rpg%20dungeon,%20dark,%20mysterious,%20glowing%20runes,%20stone%20columns,%20roots,%20moss,%20pathway,%20digital%20painting');">
             <p id="floor-display" class="hidden absolute top-4 left-4 text-white font-bold text-lg" style="text-shadow: 1px 1px 3px #000;"></p>
             <button id="menu-button" class="absolute top-4 right-4 action-button bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-lg shadow-lg z-30">メニュー</button>
+            <button id="emergency-button" class="hidden absolute top-4 right-28 action-button bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg shadow-lg z-30" title="戦闘が止まった時に押してください">緊急</button>
             <div id="log-container" class="w-full max-w-2xl mx-auto rounded-lg p-2 text-center log-gradient shadow-md">
                 <p id="log-message" class="text-gray-800 font-bold text-sm md:text-base"></p>
             </div>
@@ -663,6 +664,7 @@
                     const menuReturnTitleButton = document.getElementById('menu-return-title-button');
                     const menuModalClose = document.getElementById('menu-modal-close');
 
+                    const emergencyButton = document.getElementById('emergency-button');
                     const challengeModal = document.getElementById('challenge-modal');
                     const challengeAcceptButton = document.getElementById('challenge-accept-button');
                     const challengeDeclineButton = document.getElementById('challenge-decline-button');
@@ -3881,6 +3883,7 @@
                         log(isBoss ? 'ボスの気配がする…！' : '敵が現れた！');
                         gameState.inBattle = true;
                         dungeonCommands.classList.add('hidden');
+                        emergencyButton.classList.remove('hidden'); // 緊急ボタンを表示
                         floorDisplay.classList.add('hidden');
                         gameState.golem = null; // 戦闘開始時にゴーレムをリセット
                         battleCommands.classList.remove('hidden');
@@ -5599,6 +5602,7 @@
 
                     async function endBattle(isVictory) {
                         gameState.inBattle = false;
+                        emergencyButton.classList.add('hidden'); // 緊急ボタンを非表示
 
                         // ゴーレムが残っている場合の処理
                         if (gameState.golem && gameState.golem.hp > 0) {
@@ -6503,6 +6507,24 @@
             menuReturnTitleButton.addEventListener('click', () => {
                 menuModal.classList.add('hidden');
                 returnToTitle();
+            });
+
+            emergencyButton.addEventListener('click', () => {
+                if (!gameState.inBattle) return; // 戦闘中のみ有効
+
+                log("【緊急処理】現在のターンを強制的にスキップします。");
+
+                // 保留中のアクションをクリア
+                pendingAction = null;
+                document.querySelectorAll('.enemy-card, .character-card').forEach(c => c.classList.remove('targeted'));
+
+                // コマンドUIをリセット
+                actionButtons.innerHTML = '';
+                commandMessage.textContent = '';
+
+                // ターンを進める
+                gameState.currentTurnIndex = (gameState.currentTurnIndex + 1) % gameState.turnOrder.length;
+                nextTurn();
             });
 
             function showSelectTeamModal(mode) {
