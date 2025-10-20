@@ -4164,9 +4164,10 @@
 
                     function inflictStatusEffect(enemy) {
                         const target = findTarget(enemy);
-                        // ターゲットがゴーレムの場合、状態異常は効かないので通常攻撃に切り替える
-                        if (target === gameState.golem) {
-                            log(`${enemy.name}はゴーレムに状態異常を仕掛けようとしたが、効果がなかった！`);
+                        // ターゲットがゴーレムまたはウォールの場合、状態異常は効かないので通常攻撃に切り替える
+                        if (target === gameState.golem || target.isWall) {
+                            const targetName = target.isWall ? '防壁' : 'ゴーレム';
+                            log(`${enemy.name}は${targetName}に状態異常を仕掛けようとしたが、効果がなかった！`);
                             defaultEnemyAttack(enemy, target);
                             return;
                         }
