@@ -61,11 +61,15 @@
             right: 0;
             bottom: 0;
             background-image: var(--char-bg-image);
-            background-size: cover;
-            background-position: center;
+            /* 画像URL */
+            background-size: var(--char-bg-size, cover);
+            /* サイズ (JSで変更) */
+            background-position: var(--char-bg-position, center bottom);
+            /* 位置 (JSで変更) */
             opacity: 0.3;
             /* 背景画像の透明度を調整 */
             z-index: 0;
+            transition: background-size 0.5s ease-in-out, background-position 0.5s ease-in-out;
         }
         
         .character-card.targeted {
