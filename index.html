@@ -2977,14 +2977,40 @@
                             shrinkButton.className = 'action-button bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 px-6 rounded-lg shadow-lg';
                             shrinkButton.textContent = '縮小化薬';
                             shrinkButton.onclick = () => {
-                                showOneMemberSelectionModal(char => {
-                                    showAmountChoiceModal('縮小化薬', `${char.name}の身長をどれだけ縮めますか？`, (amount) => {
+                                showOneMemberSelectionModal(char => { // 対象を選択
+                                    const choices = [{
+                                            text: '30 cm',
+                                            value: 30
+                                        }, {
+                                            text: '100 cm',
+                                            value: 100
+                                        }, {
+                                            text: '999 cm',
+                                            value: 999
+                                        }, {
+                                            text: '1cmに固定',
+                                            value: 'lock_one'
+                                        } // 新しい選択肢
+                                    ];
+                                    showAmountChoiceModal('縮小化薬', `${char.name}をどうしますか？`, choices, (value) => {
+                                        if (value === 'lock_one') {
+                                            // 1cmに固定する処理
+                                            if (char.heightLocked) {
+                                                log(`${char.name}の体はすでに固定されているため、何も起こらなかった。`);
+                                                return;
+                                            }
+                                            animateStatChange(char, 'height', 1 - char.height, 'decrease');
+                                            char.heightLocked = true;
+                                            log(`${char.name}の体が妖精のように小さくなり、その姿で固定された！`);
+                                            return;
+                                        }
+                                        // 通常の縮小処理
                                         if (char.heightLocked) {
                                             log(`${char.name}の体は変化を拒んだ！`);
                                             return;
                                         }
-                                        animateStatChange(char, 'height', -amount, 'decrease');
-                                        log(`${char.name}の身長が${amount}cm縮んだ！`);
+                                        animateStatChange(char, 'height', -value, 'decrease');
+                                        log(`${char.name}の身長が${value}cm縮んだ！`);
                                     });
                                 });
                             };
@@ -2994,8 +3020,22 @@
                             growButton.className = 'action-button bg-red-700 hover:bg-red-800 text-white font-bold py-3 px-6 rounded-lg shadow-lg';
                             growButton.textContent = '巨大化薬';
                             growButton.onclick = () => {
-                                showOneMemberSelectionModal(char => {
-                                    showAmountChoiceModal('巨大化薬', `${char.name}の身長をどれだけ伸ばしますか？`, (amount) => {
+                                showOneMemberSelectionModal(char => { // 対象を選択
+                                    const choices = [{
+                                            text: '30 cm',
+                                            value: 30
+                                        }, {
+                                            text: '100 cm',
+                                            value: 100
+                                        }, {
+                                            text: '999 cm',
+                                            value: 999
+                                        }, {
+                                            text: '2000 cm',
+                                            value: 2000
+                                        } // 新しい選択肢
+                                    ];
+                                    showAmountChoiceModal('巨大化薬', `${char.name}の身長をどれだけ伸ばしますか？`, choices, (amount) => {
                                         if (char.heightLocked) {
                                             log(`${char.name}の体は変化を拒んだ！`);
                                             return;
@@ -6745,19 +6785,18 @@
                     return html + '</div>';
             }
 
-            function showAmountChoiceModal(title, text, callback) {
+            function showAmountChoiceModal(title, text, choices, callback) {
                 amountChoiceTitle.textContent = title;
                 amountChoiceText.textContent = text;
                 amountChoiceButtons.innerHTML = '';
 
-                const amounts = [30, 100, 999];
-                amounts.forEach(amount => {
+                choices.forEach(choice => {
                     const button = document.createElement('button');
                     button.className = 'action-button bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg';
-                    button.textContent = `${amount} cm`;
+                    button.textContent = choice.text;
                     button.onclick = () => {
                         amountChoiceModal.classList.add('hidden');
-                        callback(amount);
+                        callback(choice.value);
                     };
                     amountChoiceButtons.appendChild(button);
                 });
