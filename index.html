@@ -5123,7 +5123,8 @@
                                     await dealDamage(target, damage); // Await the damage animation
                                     log(logMessageText); // Log after animation
                                 } // ファイター, ソーサラー, ナイト, メディック
-                            case 'skill':
+                                break;
+                            case 'skill': // ファイター, ソーサラー, ナイト, メディック
                                 if (action.skill.type && action.skill.type.includes('hp_cost')) { // HPコスト
                                     await animateStatChange(character, 'hp', -action.skill.cost, 'decrease'); // HP消費
                                 } else if (action.skill.cost > 0 && action.skill.type !== 'mp_burst_magic') { // MPコスト
