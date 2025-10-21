@@ -483,11 +483,13 @@
                 <div id="what-if-list" class="space-y-3 max-h-60 overflow-y-auto pr-2">
                     <button data-mode="enjoy" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-sky-700">エンジョイ</strong><span class="block text-sm text-gray-600">味方が戦闘不能になっても、即座にHPが全回復する。ゲームオーバーにならずに最後まで遊べる。</span></button>
                     <button data-mode="trial" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-blue-700">腕試し</strong><span class="block text-sm text-gray-600">通常ルールで冒険を開始する。</span></button>
+                    <button data-mode="random_party" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-teal-700">運命の出会い</strong><span class="block text-sm text-gray-600">共に冒険する仲間がランダムに4人選ばれる。誰と出会うかは運命次第。</span></button>
                     <button data-mode="indecent" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-pink-700">痴態騒ぎ</strong><span class="block text-sm text-gray-600">全員が脱衣状態で開始。服は手に入らず、恥ずかしさに慣れることもない。ナイトとサムライは参加不可。</span></button>
                     <button data-mode="dwarves" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-green-700">小人族の戦い</strong><span class="block text-sm text-gray-600">全員の身長が10cmの状態で冒険を開始する。</span></button>
                     <button data-mode="unstable_bodies" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-cyan-700">流転の体躯</strong><span class="block text-sm text-gray-600">戦闘に勝利するたび、生存者全員の身長が-50cm～+50cmの範囲でランダムに変動する。</span></button>
                     <button data-mode="fixed_path" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-indigo-700">決まった道程</strong><span class="block text-sm text-gray-600">5の倍数階以外の探索時、2つのイベントから好きな方を選んで進める。</span></button>
                     <button data-mode="veterans" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-purple-700">歴戦の勇者たち</strong><span class="block text-sm text-gray-600">全員レベル4の状態で冒険を開始する。</span></button>
+                    <button data-mode="divine_trial" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-amber-600">神々の試練</strong><span class="block text-sm text-gray-600">戦闘に勝利するたびに、レベルアップの代わりにランダムな3つの祝福から1つを選んで仲間を強化する。全スキルを習得した状態で開始。</span></button>
                     <button data-mode="saint_march" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-yellow-500">聖女の行進</strong><span class="block text-sm text-gray-600">特別なジョブ「聖女」ひとりで30階の踏破を目指す。彼女はターン開始時にHPとMPが回復し、脱衣を無効化する。</span></button>
                     <button data-mode="solo" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-yellow-700">孤独な闘い</strong><span class="block text-sm text-gray-600">好きな仲間を一人選び、強化された状態で冒険に出る。</span></button>
                     <button data-mode="brawl" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-red-700">武闘の宴</strong><span class="block text-sm text-gray-600">2フロアごとに必ず戦闘が発生する。</span></button>
@@ -495,7 +497,6 @@
                     <button data-mode="endless" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-slate-700">無限への挑戦</strong><span class="block text-sm text-gray-600">全滅するまでダンジョンを進み続ける。30階ごとにボスが出現し、倒すと試練が訪れる。</span></button>
                     <button data-mode="uninhibited_souls" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-orange-700">奔放な魂</strong><span class="block text-sm text-gray-600">探索中、コマンドで味方を「脱衣」させたり、身長を自由に操作したりできる。</span></button>
                     <button data-mode="endgame" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-gray-700">おわりから</strong><span class="block text-sm text-gray-600">1フロア目に最終ボスが登場する。</span></button>
-                    <button data-mode="random_party" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-teal-700">運命の出会い</strong><span class="block text-sm text-gray-600">共に冒険する仲間がランダムに4人選ばれる。誰と出会うかは運命次第。</span></button>
                 </div>
                 <div class="text-right mt-6">
                     <button id="what-if-modal-close" class="action-button bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded-lg shadow-lg">戻る</button></div>
@@ -1798,6 +1799,8 @@
                             shrunk_pair: ["{name}も小さくなっちゃったんだね！なんだかお揃いで楽しいね！", "二人いれば怖くない！ちびっこ探検隊、出発だ！", "こうなったら、どっちがもっと小さくなれるか競争しちゃう？なんちゃって！", "二人で敵の足元を狙えば、最強コンビかも！", "見失わないように、手、繋いでいこうか！"],
                             pair_ベアトリス: ["ベアトリス、その薬、飲むとどうなるの？ちょっと興味ある！", "なんか難しいこと考えてるの？私が代わりに敵、殴ってこようか？"],
                             pair_リリカ: ["リリカちゃんのダンス、見てると元気出る！私も踊っちゃおうかな！", "リリカちゃん、今度一緒に歌おうよ！"],
+                            high_mouse_hole_giant: ["うおおお！ボクの肩に乗って、お宝ゲットだー！", "よーっし、この高さなら任せて！しっかり掴まってな！"],
+                            high_mouse_hole_tiny: ["任せて！一番乗りでお宝見つけてくるから！", "わーい、高い高い！行ってきまーす！"],
                             pair_サクヤ: ["サクヤちゃん、その刀すごいね！私のも負けてないよ！", "たまには笑ってよー！ね？"],
                             pair_シャオメイ: ["シャオメイちゃん、勝負だ！どっちが多く倒せるか競争しよう！", "お腹すいたねー！終わったら肉まん食べに行こう！"],
                             pair_エリザ: ["エリザさん、その注射、痛くない…？", "大きくなる薬、もっとちょうだい！"],
@@ -1848,6 +1851,8 @@
                             shrunk_pair: ["…{name}もか。互いに、見失わないようにしよう。", "…二人分の気配が消えた。奇襲には最適。", "…この状況、笑えてきた。", "…{name}、段差だ。手を貸す。", "…二人でいれば、ただの小さい存在ではない。"],
                             pair_アカリ: ["…アカリ、また突っ走って。少しは落ち着け。", "…アカリ、背中は任せた。"],
                             pair_シズカ: ["…シズカ、頼りにしてる。援護は任せて。", "…その盾、私の魔法でも壊せないかも。"],
+                            high_mouse_hole_giant: ["…肩を貸す。落ちるなよ。", "…この高さなら届く。中を頼む。"],
+                            high_mouse_hole_tiny: ["…了解。内部の構造を調査する。", "…行ってくる。すぐに戻る。"],
                             pair_ユイ: ["…ユイ、MPは大丈夫？無理はするな。", "…いつもありがとう。助かる。"],
                             pair_ベアトリス: ["…ベアトリス、その探究心、嫌いじゃない。", "…錬金術と魔術、根源は同じかもしれない。"],
                             pair_リリカ: ["…リリカ、騒がしい。だが、士気が上がるのは確か。", "…その歌、魔力に影響を与える。面白い。"],
@@ -1894,6 +1899,8 @@
                             allyStripped: ["おやおや、{name}。大胆な格好じゃないか。風邪ひくんじゃないよ。", "敵の奴、くだらない真似をしやがる。さっさと叩き潰してやるからな！", "アカリ、{name}から目を離しな。"],
                             allyShrunk_70: ["{name}、そのサイズじゃ一歩が大きいだろう。無理するなよ。", "可愛いねぇ。頭を撫でてやりたいよ。"],
                             allyShrunk_50: ["{name}、あたしの足元にいれば安全だよ。踏んじまわないようにしないとね。", "半分か…。ちゃんと守ってやらないとね。"],
+                            high_mouse_hole_giant: ["よし、あたしの肩に乗りな。しっかり支えててやるからさ。", "はは、こうでもしないと届かないかね。さあ、行きな！"],
+                            high_mouse_hole_tiny: ["はは、こりゃいい眺めだね。じゃ、ちょっと見てくるよ。", "了解。中の様子を探ってくる。任せときな。"],
                             allyShrunk_30: ["{name}、どこだい？ああ、そこにいたのか。", "ユイ、あんたの鞄に入れてやったらどうだい？"],
                             shrunk_pair: ["おや、{name}もかい。こりゃ、ちびっこコンビで敵を油断させるかね。", "二人してこの様かい。笑っちまうね。", "こうなったら、どっちがうまく隠れられるか勝負といくかい？", "あんたが囮で、あたしが仕留める。どうだい、この作戦？", "よし、手でも繋いでおくかね。はぐれないようにさ。"],
                             pair_アカリ: ["アカリ、あんまり前に出過ぎるんじゃないよ。あたしが壁になってやるからさ。", "よしよし、いい子だ。"],
@@ -1951,6 +1958,8 @@
                             shrunk_pair: ["{name}さんもですか！？ふぇぇ…二人で一緒に頑張りましょうね…！", "二人とも小さくなっちゃって…どうしましょう…。", "でも、なんだか秘密基地みたいで、ちょっとだけ楽しいです…！", "手、繋いでいきましょう！はぐれたら大変ですから！", "{name}さん、怖くないですか？私がそばにいますからね！"],
                             pair_アカリ: ["アカリさん、あんまり無茶しないでくださいね！ケガしたら私が治しますから！", "元気で、見てて楽しいです！"],
                             pair_ヒカリ: ["ヒカリさん、大丈夫ですか？疲れたらいつでも言ってくださいね。", "その本、面白そうですね！"],
+                            high_mouse_hole_giant: ["わわっ、私で大丈夫でしょうか…？えいっ！しっかり掴まってくださいね！", "こ、こんな高いところ…！私がしっかり支えますから！"],
+                            high_mouse_hole_tiny: ["は、はいっ！行ってきます！皆さんのために、頑張らないと…！", "わ、高いです…！でも、お宝のためなら！"],
                             pair_シズカ: ["シズカさん、いつも守ってくれてありがとうございます！私も頑張ります！", "シズカさんがいると、とっても安心です！"],
                             pair_ベアトリス: ["ベアトリスさん、そのお薬、なんですか？回復薬ですか？", "研究、頑張ってください！"],
                             pair_リリカ: ["リリカさんのステージ、いつも見てます！とってもキラキラしてます！", "わわ、リリカさん！私、ファンなんです！サインください！", "リリカさんのダンス、どうしてあんなに綺麗なんですか？"],
@@ -1996,6 +2005,8 @@
                             allyStripped_shrunk: ["あらあら、{name}さん。それは大変なことになりましたわね。", "私が何か羽織るものを作って差し上げますわ。少しお待ちになって。"],
                             stripped_pair: ["{name}さんもですの？…これは、非常に気まずい状況ですわね。", "お互い、見なかったことにしましょう。ええ、それが合理的ですわ。"],
                             allyStripped: ["{name}さん、大丈夫ですの？私のコートをお使いになりますか？", "…敵の悪趣味には、付き合いきれませんわね。"],
+                            high_mouse_hole_giant: ["ふふ、私の肩をお貸ししますわ。さあ、どうぞ。", "この高さですと、肩車が最も合理的な手段ですわね。"],
+                            high_mouse_hole_tiny: ["これは興味深い構造ですわね。内部を調査してまいります。", "失礼しますわ。何か面白いサンプルが見つかると良いのですが。"],
                             shame_pillory: ["あらあら…これは、非科学的な拘束ですわね。", "…この粘液、サンプルとして採取しておきたいくらいですわ。", "（冷静に状況を分析しようとしているが、顔が少し赤い）"],
                             shrunk_pair: ["ふふ、{name}さんも小さいですのね。なんだか、小動物のようで可愛らしいですわ。", "二人でいれば、敵の死角を突くのも容易いですわね。"],
                             pair_アカリ: ["アカリさん、その剣、錬金術で強化できそうですわね。", "あなたのそのエネルギー、どこから湧いてくるのですか？興味深いですわ。", "あまり無鉄砲な行動は感心しませんわよ。もう少し、合理的に。"],
@@ -2045,6 +2056,8 @@
                             allyStripped_shrunk: ["{name}ちゃん、大丈夫！？リリカのステージ衣装、貸してあげる！ちょっと小さいかもだけど！", "なんてことするの！{name}ちゃんに！絶対許さないんだから！"],
                             stripped_pair: ["え、{name}ちゃんも！？こ、これは…禁断のデュエットって感じ！？", "二人でこうしてたら、逆に芸術っぽく見えないかな？…見えないかぁ。"],
                             allyStripped: ["{name}ちゃん、大変！リリカのタオル、使って！", "もう！敵のセンス、サイテー！リリカがステージから退場させてあげる！"],
+                            high_mouse_hole_giant: ["はーい、リリカのスペシャルリフトだよー！最高の景色、楽しんでってね！", "リリカがおっきくしてあげる！しっかり掴まっててね、未来のスター！"],
+                            high_mouse_hole_tiny: ["きゃー、高い！まるでステージのセットみたい！お宝、見つけてくるから応援しててね！", "任せて！リリカがキラキラのお宝、ゲットしてきちゃうから！"],
                             shame_pillory: ["きゃー！何これ！こんなの、ステージの演出にないよぉ！", "だ、だめ！こんな姿、ファンのみんなには見せられない…！", "（ぷるぷる…）でも、これも新しいコンセプトってことにすれば…アリかも…？"],
                             shrunk_pair: ["{name}ちゃんも小さいんだね！二人で『ちびっこアイドルユニット』結成しちゃう？", "二人でいれば怖くないね！手、繋いでいこ！"],
                             pair_アカリ: ["アカリちゃん、元気いっぱいだね！リリカも負けてられないな！", "その剣、ステージの小道具にどうかな？キラキラしてて映えそう！"],
@@ -2091,6 +2104,8 @@
                             allyStripped: ["…{name}、破廉恥な。…これを。拙者の羽織でよければ。", "…敵の所業、武士の風上にも置けぬ。斬る。"],
                             dollhouse_explore: ["…小さな家。…だが、造りはしっかりしている。侮れぬ。", "…失礼する。中に、何者かの気配は…ないか。", "…静寂。茶でも一服点てたいものだ。"],
                             cracked_rock_break: ["…ふんっ！岩斬るも、人斬るも、同じこと。", "…道を開く。ただ、それだけのこと。", "…無心の境地にて、一閃。"],
+                            high_mouse_hole_giant: ["…肩を貸す。行け。", "…拙者が足場となろう。務め、果たしてまいれ。"],
+                            high_mouse_hole_tiny: ["…承知。中の様子、探ってくる。", "…任されよ。必ずや、何かを見つけてくる。"],
                             fairy_shrunk: ["…我が身、刃と一体となれり。この小ささ、むしろ好都合。", "…敵の足元、がら空き。好機。", "…心の大きさは、体の大きさにはよらぬ。"],
                             shrunk_pair: ["…{name}もか。二人して、豆粒のようだな。", "…この状況、むしろ好機。二人で奇襲をかけるぞ。"],
                             pair_アカリ: ["アカリ、その勢い、悪くない。だが、隙だらけだ。", "…少しは落ち着け。"],
@@ -2139,7 +2154,8 @@
                             fairy_shrunk: ["うおー！ちっちぇー！でも、拳の重さは変わんねえぞ！", "このサイズ、速すぎて敵には見えねえんじゃねえか！？", "腹は減るな！"],
                             allyStripped_shrunk: ["{name}！ちっちぇー上にその格好はヤベえだろ！オラの服、貸してやるよ！", "てめえ！{name}に何しやがった！ぶっ飛ばす！"],
                             stripped_pair: ["お、{name}もか！二人して身軽になったな！動きやすくていいじゃねえか！", "はっはっは！こうなったら、どっちが先に敵を倒すか勝負だ！"],
-
+                            high_mouse_hole_giant: ["うおー！オラの肩は頑丈だぞ！しっかり掴まってろ！", "よっしゃ、任せとけ！このまま天井まで届かせてやろうか！"],
+                            high_mouse_hole_tiny: ["おう！行ってくるぜ！中に美味いもんでもあるといいな！", "ははっ、高いな！宝探しは得意なんだ、任せとけ！"],
                             allyStripped: ["{name}、大胆だな！風邪ひくなよ！", "敵のヤツ、くだらねえことしやがる！オラが拳で分からせてやる！"],
                             shrunk_pair: ["{name}もか！二人して豆粒だな！だが、二人いればなんとかなるだろ！", "よし、連携技だ！オラが下から、お前が上からだ！"],
                             pair_シズカ: ["シズカの姉御がいると安心するな！背中は任せたぜ！", "姉御！腹減った！肉まん食いてえ！", "その盾、やっぱカッチカチだな！オラの拳とどっちが硬いか勝負だ！"],
@@ -2175,6 +2191,8 @@
                             allyStripped_shrunk: ["あらあら、{name}さん。それは惨めな姿ですわね。私がすぐに服薬…いえ、服を作って差し上げますわ。", "敵の悪趣味な攻撃…サンプルとして解析する価値もありませんわね。"],
                             stripped_pair: ["{name}さんもですの？…ふふ、二人でいれば羞恥も和らぐ、というデータが取れそうですわね。", "こうなったら、どちらが堂々としていられるか、勝負ですわよ。"],
                             allyStripped: ["{name}さん、風邪をひきますわよ。私の白衣をお使いなさい。", "敵の非科学的な攻撃…私が根絶して差し上げますわ。"],
+                            high_mouse_hole_giant: ["ふふ、私の肩は安定していますわよ。さあ、どうぞ。", "これが最も効率的な手段ですわね。中の調査、お願いしますわ。"],
+                            high_mouse_hole_tiny: ["あら、面白い構造ですわね。調査の価値がありそうですわ。", "行ってまいりますわ。貴重なサンプルが見つかるかもしれませんし。"],
                             shame_pillory: ["なんですの、この粘着質なものは！私の体に！", "離しなさい！この無礼者！私の完璧なボディを汚すなんて…！", "（屈辱に顔を歪ませているが、どこか興奮しているようにも見える）"],
                             shrunk_pair: ["あら、{name}さんも小さいですのね。ふふ、二人でいれば敵も油断するでしょう。好都合ですわ。", "ミニミニ探検隊、ですわね。私の指揮に従いなさい。"],
                             pair_アカリ: ["アカリさん、その有り余る元気、どこから来るのか解析してみたいですわね。", "あなたの単純な思考回路、羨ましいですわ。"],
@@ -2224,6 +2242,8 @@
                             allyStripped_shrunk: ["あらあら、{name}。それは無様ね。でも、そこからの大逆転劇、期待してるわよ。", "敵の趣味、最悪ね。美しくないわ。"],
                             stripped_pair: ["{name}も？ふふ、面白いじゃない。二人で『ノーペア』ってとこかしら。", "こうなったら、どっちが先に服を手に入れるか、勝負しましょうか。"],
                             allyStripped: ["{name}、大胆ね。でも、風邪ひいたら元も子もないわよ。私のストール、貸してあげる。", "敵のやり方、スマートじゃないわね。私がきっちりお灸を据えてあげる。"],
+                            high_mouse_hole_giant: ["さあ、私の肩に乗りなさい。最高の特等席よ。", "ふふ、私を踏み台にするなんて、いい度胸じゃない。"],
+                            high_mouse_hole_tiny: ["ふふ、面白そうじゃない。お宝に賭けてみるのも悪くないわね。", "行ってくるわ。大当たりを引いてきてあげる。"],
                             shame_pillory: ["…ふふ、面白いじゃない。こんなの、初めての経験だわ。", "もっと、強く…！なんてね。早く離してくれないかしら。", "（恍惚とした表情で、ガラスに映る自分の姿を見ている）"],
                             shrunk_pair: ["あら、{name}も小さいのね。二人でなら、どんなイカサマも見破られないかも。", "ミニミニギャンブラーズの結成ね。私の指示に従いなさい。"],
                             pair_アカリ: ["アカリ、その勢い、嫌いじゃないわ。賭けてみる価値、あるかもね。", "単純でわかりやすいわね。"],
@@ -2273,6 +2293,8 @@
                             allyStripped_shrunk: ["…{name}、かわいそう。…私のローブ、貸してあげる。", "…ひどいこと、するね。…あの敵の魂、私がもらう。"],
                             stripped_pair: ["…{name}も。…二人とも、魂が丸見え。", "…こうしてると、少しだけ、温かいかも。"],
                             allyStripped: ["…{name}、風邪ひくよ。…これ、使って。", "…許さない。"],
+                            high_mouse_hole_giant: ["…私の肩、使って。…静かにね。", "…この高さなら、届く。…お願い。"],
+                            high_mouse_hole_tiny: ["…行ってくる。…中に、何かいるかも。", "…静かに。…中の魂の声を、聞いてくる。"],
                             shame_pillory: ["…これは、罰…？", "…魂が、見られてる。…寒い。", "（ただ静かに、目を閉じている）"],
                             shrunk_pair: ["…{name}も、小さいね。…二人で、影になろう。", "…二人なら、見つからない。"],
                             pair_アカリ: ["アカリ…その光、眩しい。…魂が、燃えてるみたい。", "…元気、だね。"],
@@ -2322,6 +2344,8 @@
                             allyStripped_shrunk: ["{name}ちゃん、大丈夫！？モコが温めてあげるって！", "ひどいことする敵さんだね！ゴーレ-ムくん、やっつけて！"],
                             stripped_pair: ["{name}ちゃんもなの！？二人でいれば、恥ずかしくない…かな？ううん、恥ずかしい！", "モコ、どっちも見ちゃだめだよ！"],
                             allyStripped: ["{name}ちゃん、風邪ひいちゃう！ミコのマント、使って！", "敵さん、意地悪だね！サラマンダーくん、お仕置きして！"],
+                            high_mouse_hole_giant: ["うん！ミコがおっきくしてあげる！モコも応援してるよ！", "ゴーレムくんみたいに、どっしり構えてるから大丈夫だよ！"],
+                            high_mouse_hole_tiny: ["わーい、高いね！モコ、行ってくるね！", "中にモンスターさん、いるかな？お友達になれるといいな！"],
                             shame_pillory: ["いやー！なにこれ、ネバネバするよぉ！モコ、助けてー！", "だ、だめ！こんな格好、ゴーレムくんに見られちゃう！", "（うるうるした目で助けを求めている）"],
                             shrunk_pair: ["{name}ちゃんも小さいんだね！二人でモコに乗って探検しようよ！", "ちびっこ探検隊だね！"],
                             pair_ユイ: ["ユイちゃん、いつもありがとう！モコもね、ユイちゃんのこと大好きなんだって！", "ユイちゃんのお菓子、美味しいね！モコにも少しちょうだい！"],
@@ -2357,6 +2381,8 @@
                             allyStripped_shrunk: ["あらあら、{name}。なんて無防備な姿。私が守ってあげないと。", "敵の趣味、感心しないわね。後で魂を問い詰めておきましょう。"],
                             stripped_pair: ["{name}も？ふふ、奇遇ね。二人でいれば、羞恥心も薄れるかしら。", "こうなったら、どちらがより妖艶でいられるか、勝負しましょうか。"],
                             allyStripped: ["{name}、風邪をひくわよ。私のローブ、使いなさい。", "下等な真似をする敵ね。魂ごと消してあげる。"],
+                            high_mouse_hole_giant: ["ふふ、私の肩を使いなさい。死者のように軽やかに登れるでしょう？", "さあ、行きなさい。中の魂が、あなたを呼んでいるわ。"],
+                            high_mouse_hole_tiny: ["あら、面白そうね。何か曰く付きの品でも眠っているかしら。", "行ってくるわ。死者の囁きが聞こえるかもしれないもの。"],
                             shame_pillory: ["あら…ふふ、面白い趣向ね。嫌いじゃないわ。", "もっと強く、私の魂を縛り付けてごらんなさい。", "（ガラスに映る自分の姿を見て、妖艶に微笑んでいる）"],
                             shrunk_pair: ["あら、{name}も小さいのね。二人でいれば、まるで妖精のようね。…死を運ぶ妖精かしら。", "手、繋いでおきましょうか。迷子になったら大変だもの。"],
                             pair_アカリ: ["アカリちゃん、その元気な魂、素敵よ。でも、燃え尽きないようにね。", "あなたの光、少し眩しすぎるわ。"],
@@ -2416,6 +2442,8 @@
                             pair_セレスティア: ["セレスティアさん、あなたも一人で戦ってきたんだね。…ボクが守るから、もう一人じゃない。", "その力、すごいな。でも、無理はしないでくれよ。"],
                             giant_among_tinies: ["みんな、ボクの後ろに隠れてて！絶対に守るから！", "ボクがこんなに大きいんだから…みんなは安心していいんだぞ！先輩に任せなさい！"],
                         },
+                        high_mouse_hole_giant: ["よし、ボクが肩車してやる！しっかり掴まっててくれよ、後輩！", "この高さなら任せろ！先輩の肩は頑丈なんだ！"],
+                        high_mouse_hole_tiny: ["はい、先輩！行ってきます！", "わ、高い…！でも、ボクがしっかり偵察してきます！"],
                         // コハル (トラブルメーカー): 元気、おっちょこちょい、予測不能。
                         'コハル': {
                             default: ["えーっと、次はどっちに行こうかな？こっちからいい匂いがする！", "わわっ！ごめんなさい、今のはわざとじゃ…！", "なんだか、面白いことになりそうな予感がする！", "皆さん、準備はいいですかー？コハル、行っきまーす！", "アカリさん、元気ですね！コハルも負けませんよ！", "ヒカリさん、大丈夫ですか？疲れてませんか？", "シズカさん、かっこいいです！コハルも守ってください！", "ユイさん、いつもすみません！すぐケガしちゃって…。", "イオリ先輩！コハル、ちゃんとついて行きますからね！"],
@@ -2445,6 +2473,8 @@
                             shame_pillory: ["ひゃっ！？な、なんですかこれー！？くすぐったいです！", "わわわ、ガラスに顔が！面白い顔になっちゃってます！", "（状況をあまり理解しておらず、少し楽しんでいるようにも見える）"],
                             shrunk_pair: ["{name}さんも小さいんですね！ちびっこ探検隊、結成です！", "二人でいれば、どんなハプニングも乗り越えられますよ！"],
                             pair_アカリ: ["アカリさん、元気ですね！コハルも負けませんよ！", "その剣、かっこいいです！コハルも持ってみたい！"],
+                            high_mouse_hole_giant: ["わーい！肩車ですか！コハル、高いところ得意です！", "任せてください！きっと面白いものが見つかりますよ！"],
+                            high_mouse_hole_tiny: ["行ってきまーす！何か面白いもの、あるかなー？わくわく！", "わわっ、狭いですけど…探検、探検！えいっ！"],
                             pair_ヒカリ: ["ヒカリさん、なんだか静かですね。コハルがお話し相手になりますよ！", "その本、面白そうですね！今度見せてください！"],
                             pair_シズカ: ["シズカさん、かっこいいです！コハルも守ってください！", "シズカさんがいると、なんだか安心します！"],
                             pair_ユイ: ["ユイさん、いつもすみません！すぐケガしちゃって…。", "ユイさんのお菓子、大好きです！"],
@@ -2487,6 +2517,8 @@
                             shame_pillory: ["主よ…！なぜ私にこのような試練を…！", "こ、このような姿…信徒の方々には見せられません…！", "（目を固く閉じ、必死に祈りを捧げて羞恥に耐えている）"],
                             shrunk_pair: ["あら、{name}さんも小さいのですね。二人でいれば、まるで天使のよう…かもしれませんね。", "手を取り合って進みましょう。そうすれば、怖くありませんから。"],
                             pair_アカリ: ["アカリさん、その元気な姿、見ているこちらも力が湧いてきます。", "あまり無茶はなさらないでくださいね。お怪我が心配です。"],
+                            high_mouse_hole_giant: ["主よ、感謝します。この体で、仲間たちの助けとなれることを。", "さあ、私の肩に。神のご加護があらんことを。"],
+                            high_mouse_hole_tiny: ["はい、お任せください！神のご加護がありますように…！", "行ってまいります。きっと、主の導きがあるはずです。"],
                             pair_ヒカリ: ["ヒカリさん、静かな方ですね。祈りに集中できて、私は好きですよ。", "その魔術、人々のために使えば、きっと神もお喜びになるでしょう。"],
                             pair_シズカ: ["シズカさん、いつも皆様を守ってくださり、ありがとうございます。", "あなたの盾は、信仰そのもののように見えます。"],
                             pair_ユイ: ["ユイさん、あなたの献身的な姿、本当に素晴らしいです。", "あなたと一緒なら、どんな方の心も癒せそうですね。"],
@@ -2506,6 +2538,8 @@
                             lowHp: ["（…少し、光が揺らいだ）", "（胸に手を当て、静かに呼吸を整えている）", "（大丈夫、というように仲間へ微笑んだ）"],
                             allyLowHp: ["（傷ついた{name}を、心配そうに見つめている）", "（{name}の前に立ち、守るように両手を広げた）"],
                             shrunk: ["（小さくなった自分の手を見つめている）", "（特に気にした様子もなく、前を向いた）"],
+                            high_mouse_hole_giant: ["（静かに頷き、肩を貸した）", "（…行きますか）"],
+                            high_mouse_hole_tiny: ["（こくりと頷き、穴の中へと入っていく）", "（…見てきます）"],
                             grown: ["（大きくなった体に、少し戸惑っているようだ）", "（天井を見上げ、少し首をかしげた）"],
                             grown_max: ["（静かに天を仰ぎ、自分の体に満ちる光を感じている）", "（これ以上の成長は、世界の理を歪める、とでも言うように静かに首を振った）"],
                             pair_アカリ: ["（アカリを見て、こくりと頷いた）", "（アカリの言葉に、ふわりと微笑んだ）"],
@@ -3675,6 +3709,11 @@
                             // 無限モードで両方の結晶を持っている場合にのみ候補になる
                             weight: (gameState.gameMode === 'endless' && hasHolyCrystal && hasEvilCrystal) ? 5 : 0
                         };
+                        const highMouseHoleEvent = {
+                            name: "高所のネズミ穴",
+                            func: foundHighMouseHole,
+                            weight: gameState.party.some(p => p.height >= 200) && gameState.party.some(p => p.height <= 10) ? 2 : 0 // 大きいキャラと小さいキャラがいる場合のみ
+                        };
                         const events = [{
                                 name: "宝箱",
                                 func: foundTreasure,
@@ -3731,6 +3770,7 @@
                             shrineOfPrayerEvent, // ファイター, ソーサラー, ナイト, メディック
                             shamePilloryEvent,
                             liberationEvent,
+                            highMouseHoleEvent,
                         ].filter(event => event.weight > 0);
 
                         const totalWeight = events.reduce((sum, event) => sum + event.weight, 0);
@@ -3945,7 +3985,7 @@
                         await new Promise(resolve => setTimeout(resolve, 2000));
 
                         const foundItems = [];
-                        const allItemIds = Object.keys(itemBlueprints);
+                        const allItemIds = Object.keys(itemBlueprints).filter(id => !itemBlueprints[id].special); // 特殊アイテムを除外
                         for (let i = 0; i < 2; i++) {
                             const foundItemId = allItemIds[Math.floor(Math.random() * allItemIds.length)];
                             addItemToInventory(foundItemId);
@@ -3990,6 +4030,50 @@
                             log(`足元で禍々しく光る魔力の結晶を見つけた！「邪結晶」を手に入れた！`);
                         }
                         flashCard(getRandomPartyMember(), 'yellow');
+                    }
+
+                    async function foundHighMouseHole() {
+                        const giantMembers = gameState.party.filter(p => p.currentHp > 0 && p.height >= 200);
+                        const tinyMembers = gameState.party.filter(p => p.currentHp > 0 && p.height <= 10);
+
+                        if (giantMembers.length === 0 || tinyMembers.length === 0) {
+                            nothingHappened();
+                            return;
+                        }
+
+                        const giant = giantMembers[Math.floor(Math.random() * giantMembers.length)];
+                        const tiny = tinyMembers[Math.floor(Math.random() * tinyMembers.length)];
+
+                        log(`壁の高い位置に、小さなネズミ穴を見つけた！`);
+                        await new Promise(resolve => setTimeout(resolve, 1500));
+                        log(`これは一人では届かないし、小さすぎて入れない…。`);
+                        await new Promise(resolve => setTimeout(resolve, 1500));
+                        log(`${giant.name}と${tiny.name}が協力して調べるようだ。`);
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+
+                        const getLineForHole = (char, situation, partner) => {
+                            const charConvos = conversations[char.name];
+                            if (charConvos && charConvos[situation] && charConvos[situation].length > 0) {
+                                const lines = charConvos[situation];
+                                return lines[Math.floor(Math.random() * lines.length)].replace(/{name}/g, partner.name);
+                            }
+                            return situation === 'high_mouse_hole_giant' ? "よし、肩に乗れ！" : "行ってきます！";
+                        };
+
+                        const giantLine = getLineForHole(giant, 'high_mouse_hole_giant', tiny);
+                        const tinyLine = getLineForHole(tiny, 'high_mouse_hole_tiny', giant);
+
+                        log(`${giant.name}「${giantLine}」`);
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        log(`${tiny.name}「${tinyLine}」`);
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+
+                        const rareItemIds = Object.keys(itemBlueprints).filter(id => itemBlueprints[id].rare);
+                        const foundItemId = rareItemIds[Math.floor(Math.random() * rareItemIds.length)];
+                        addItemToInventory(foundItemId);
+                        log(`${tiny.name}は穴の中から、とても珍しい「${itemBlueprints[foundItemId].name}」を見つけてきた！`);
+                        flashCard(giant, 'yellow');
+                        flashCard(tiny, 'yellow');
                     }
 
                     function foundProtectiveWall() {
@@ -5039,15 +5123,6 @@
                                     await dealDamage(target, damage); // Await the damage animation
                                     log(logMessageText); // Log after animation
                                 } // ファイター, ソーサラー, ナイト, メディック
-                                break;
-                                if (character.blessings && character.blessings.double_attack) {
-                                    log(`${character.name}は双撃の祝福で追撃！`);
-                                    await new Promise(resolve => setTimeout(resolve, 500));
-                                    const secondDamage = calculateDamage(character, target, {
-                                        power: 0.6
-                                    }); // 2撃目は威力0.6倍
-                                    await dealDamage(target, secondDamage);
-                                }
                             case 'skill':
                                 if (action.skill.type && action.skill.type.includes('hp_cost')) { // HPコスト
                                     await animateStatChange(character, 'hp', -action.skill.cost, 'decrease'); // HP消費
@@ -6289,65 +6364,57 @@
                             if (defender.isDefending) {
                                 effectiveDefense *= 2;
                             }
-                            // ダンサーの回避判定
-                            if (defender.buffs && defender.buffs.evade_up && Math.random() < 0.7) { // 70%で回避
-                                log(`${defender.name}は華麗に攻撃をかわした！`);
-                                return 0;
-                            }
                         }
 
                         // 祝福: 物理/魔法シールド
-                        if (defender.blessings) {
-                            const isPhysical = !skill || skill.type === 'physical' || skill.type.includes('physical');
-                            const isMagic = skill && (skill.type === 'magic' || skill.type.includes('magic'));
-                            if (defender.blessings.physical_shield && isPhysical) {
-                                baseDamage *= 0.7;
-                            } else if (defender.blessings.magic_shield && isMagic) {
-                                baseDamage *= 0.7;
-                            }
-
-                            // モンクの破砕拳は防御無視
-                            if (skill && skill.type === 'def_ignore_physical') {
-                                effectiveDefense = 0;
-                            }
-
-                            // 溜め攻撃の処理 (物理攻撃のみ)
-                            if (attacker.isCharging && (!skill || skill.type === 'physical')) {
-                                baseDamage *= 2.5;
-                                attacker.isCharging = false;
-                            }
-
-                            // ダメージから防御力を減算
-                            baseDamage -= effectiveDefense;
-
-                            // ダンサーの回避判定 (スポットライト効果中)
-                            if (defender.buffs && defender.buffs.evade_up) {
-                                let evadeRate = 0.7; // 基本回避率70%
-                                const heightDiff = defender.initialHeight - defender.height;
-
-                                // 身長が初期値より低い場合、回避率にボーナス
-                                if (heightDiff > 0) { // ファイター, ソーサラー, ナイト, メディック
-                                    // 1cm低くなるごとに0.15%回避率が上昇
-                                    const bonusEvadeRate = heightDiff * 0.0015;
-                                    evadeRate += bonusEvadeRate;
-                                }
-                                // 祝福: 小人の俊敏
-                                if (defender.blessings && defender.blessings.low_height_evade) {
-                                    const heightDiffBonus = Math.max(0, defender.initialHeight - defender.height);
-                                    evadeRate += (heightDiffBonus * 0.002); // 1cmあたり0.2%回避率上昇
-                                }
-
-                                // 回避率の上限を95%に設定
-                                const finalEvadeRate = Math.min(0.95, evadeRate);
-
-                                if (Math.random() < finalEvadeRate) {
-                                    log(`${defender.name}は華麗に攻撃をかわした！`);
-                                    return 'evaded'; // 回避したことを示す特別な値を返す
-                                }
-                            }
-
-                            return Math.max(1, Math.ceil(baseDamage * (Math.random() * 0.2 + 0.9))); // ダメージは最低1
+                        if (defender.blessings && defender.blessings.physical_shield && (!skill || skill.type === 'physical' || skill.type.includes('physical'))) {
+                            baseDamage *= 0.7;
                         }
+                        if (defender.blessings && defender.blessings.magic_shield && skill && (skill.type === 'magic' || skill.type.includes('magic'))) {
+                            baseDamage *= 0.7;
+                        }
+
+                        // モンクの破砕拳は防御無視
+                        if (skill && skill.type === 'def_ignore_physical') {
+                            effectiveDefense = 0;
+                        }
+
+                        // 溜め攻撃の処理 (物理攻撃のみ)
+                        if (attacker.isCharging && (!skill || skill.type === 'physical')) {
+                            baseDamage *= 2.5;
+                            attacker.isCharging = false;
+                        }
+
+                        // ダメージから防御力を減算
+                        baseDamage -= effectiveDefense;
+
+                        // ダンサーの回避判定 (スポットライト効果中)
+                        if (defender.buffs && defender.buffs.evade_up) {
+                            let evadeRate = 0.7; // 基本回避率70%
+                            const heightDiff = defender.initialHeight - defender.height;
+
+                            // 身長が初期値より低い場合、回避率にボーナス
+                            if (heightDiff > 0) { // ファイター, ソーサラー, ナイト, メディック
+                                // 1cm低くなるごとに0.15%回避率が上昇
+                                const bonusEvadeRate = heightDiff * 0.0015;
+                                evadeRate += bonusEvadeRate;
+                            }
+                            // 祝福: 小人の俊敏
+                            if (defender.blessings && defender.blessings.low_height_evade) {
+                                const heightDiffBonus = Math.max(0, defender.initialHeight - defender.height);
+                                evadeRate += (heightDiffBonus * 0.002); // 1cmあたり0.2%回避率上昇
+                            }
+
+                            // 回避率の上限を95%に設定
+                            const finalEvadeRate = Math.min(0.95, evadeRate);
+
+                            if (Math.random() < finalEvadeRate) {
+                                log(`${defender.name}は華麗に攻撃をかわした！`);
+                                return 'evaded'; // 回避したことを示す特別な値を返す
+                            }
+                        }
+
+                        return Math.max(1, Math.ceil(baseDamage * (Math.random() * 0.2 + 0.9))); // ダメージは最低1
                     }
 
                     async function dealDamage(target, amount, isHeal = false) {
