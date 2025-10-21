@@ -546,6 +546,28 @@
             </div>
         </div>
 
+        <!-- 無限モード呪い選択モーダル -->
+        <div id="endless-curse-modal" class="hidden absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-lg p-8 text-center shadow-2xl max-w-2xl w-full">
+                <h2 class="text-2xl font-bold mb-2 text-red-700">試練の刻</h2>
+                <p class="mb-6">ボスを打ち破った代償として、避けられぬ呪いを一つ選ばなければならない。</p>
+                <div id="endless-curse-buttons" class="grid grid-cols-2 gap-4">
+                    <!-- 呪いボタンがここに挿入される -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 解放イベントモーダル -->
+        <div id="liberation-modal" class="hidden absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-lg p-8 text-center shadow-2xl max-w-md w-full">
+                <h2 class="text-3xl font-bold mb-4">解放の刻</h2>
+                <p class="mb-6">聖結晶と邪結晶が共鳴し、強大な魔力の気配が空間を歪ませている。<br>結晶を捧げ、古の英雄の幻影に挑戦しますか？</p>
+                <button id="liberation-accept-button" class="action-button bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg mr-4">挑戦する</button>
+                <button id="liberation-decline-button" class="action-button bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg">立ち去る</button>
+            </div>
+        </div>
+
+
         <!-- 怪しい装置イベントモーダル -->
         <div id="device-modal" class="hidden absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
             <div class="bg-white rounded-lg p-8 text-center shadow-2xl max-w-md w-full">
@@ -696,6 +718,14 @@
 
                     const endlessBonusModal = document.getElementById('endless-bonus-modal');
                     const endlessBonusButtons = document.getElementById('endless-bonus-buttons');
+
+                    const endlessCurseModal = document.getElementById('endless-curse-modal');
+                    const endlessCurseButtons = document.getElementById('endless-curse-buttons');
+
+                    // 解放イベント用
+                    const liberationModal = document.getElementById('liberation-modal');
+                    const liberationAcceptButton = document.getElementById('liberation-accept-button');
+                    const liberationDeclineButton = document.getElementById('liberation-decline-button');
 
                     // 怪しい装置イベント用
                     const deviceModal = document.getElementById('device-modal');
@@ -1556,6 +1586,24 @@
                             effect: 'lock_height_to_one',
                             battleOnly: false,
                             rare: true
+                        },
+                        'holy_crystal': {
+                            name: '聖結晶',
+                            description: '味方全員のHPを全回復する。',
+                            target: 'party',
+                            effect: 'heal_percent',
+                            power: 1.0,
+                            battleOnly: false,
+                            special: true // 通常のイベントでは入手不可
+                        },
+                        'evil_crystal': {
+                            name: '邪結晶',
+                            description: '敵全員に250の固定ダメージを与える。',
+                            target: 'enemies',
+                            effect: 'damage',
+                            power: 250,
+                            battleOnly: true,
+                            special: true // 通常のイベントでは入手不可
                         },
                     };
 
@@ -3351,6 +3399,10 @@
                                 name: "なにもない",
                                 func: nothingHappened,
                                 weight: 5
+                            }, {
+                                name: "守護の壁",
+                                func: foundProtectiveWall,
+                                weight: 2
                             },
                             equipmentEvent,
                             restoreClothesEvent,
@@ -3370,10 +3422,21 @@
                     }
 
                     function triggerRandomEvent() {
+                        // 「解放」イベントの発生条件チェック
+                        const hasHolyCrystal = gameState.inventory.some(item => item.id === 'holy_crystal' && item.quantity > 0);
+                        const hasEvilCrystal = gameState.inventory.some(item => item.id === 'evil_crystal' && item.quantity > 0);
+
+                        if (gameState.gameMode === 'endless' && hasHolyCrystal && hasEvilCrystal) {
+                            triggerLiberationEvent();
+                            return;
+                        }
+
                         const chosenEvent = getRandomEvent();
                         chosenEvent.func();
                         updatePartyStatus();
                     }
+
+
 
                     function foundTreasure() {
                         // 5%の確率でレアアイテムが出現
@@ -3387,7 +3450,7 @@
                             // 通常のアイテム
                             const itemCount = Math.floor(Math.random() * 3) + 1; // 1〜3個のアイテム
                             const foundItems = [];
-                            // レアアイテムを除外
+                            // レア・特殊アイテムを除外
                             const itemIds = Object.keys(itemBlueprints).filter(id => !itemBlueprints[id].battleOnly && !itemBlueprints[id].rare);
 
                             for (let i = 0; i < itemCount; i++) {
@@ -3514,6 +3577,34 @@
                             return;
                         }
 
+                        function foundProtectiveWall() {
+                            const aliveParty = gameState.party.filter(p => p.currentHp > 0);
+                            if (aliveParty.length === 0) {
+                                nothingHappened();
+                                return;
+                            }
+                            const target = aliveParty[Math.floor(Math.random() * aliveParty.length)];
+                            const targetId = gameState.party.indexOf(target);
+
+                            // 既にウォールがある場合は何もしない
+                            if (gameState.walls.some(w => w.targetId === targetId)) {
+                                log(`${target.name}の前には既に防壁があったため、何も起こらなかった。`);
+                                return;
+                            }
+
+                            log("どこからか岩が集まり、防壁を形成した！");
+
+                            // 耐久値は対象の最大HPの50%とする
+                            const wallHp = Math.ceil(target.maxHp * 0.5);
+                            gameState.walls.push({
+                                targetId: targetId,
+                                hp: wallHp,
+                                maxHp: wallHp
+                            });
+                            log(`${target.name}の前に、耐久値${wallHp}の防壁が現れた！`);
+                            flashCard(target, 'yellow');
+                        }
+
                         // 装備を見つけられる可能性のあるロールからランダムに一つ選ぶ
                         const targetRole = partyRolesWithRemainingEquipment[Math.floor(Math.random() * partyRolesWithRemainingEquipment.length)];
                         const availableEquipmentForRole = getRemainingEquipment().filter(id => equipmentBlueprints[id].targetRole === targetRole);
@@ -3599,6 +3690,21 @@
                         await new Promise(resolve => setTimeout(resolve, 2000));
                         log(`ゴゴゴ…！ ${breaker.name}は巨岩を粉々に打ち砕いた！`);
                         levelUpCharacter(breaker, false); // UIは表示せずにレベルアップ
+                    }
+
+                    function foundMagicCrystal() {
+                        if (Math.random() < 0.5) {
+                            addItemToInventory('holy_crystal');
+                            log(`足元で輝く魔力の結晶を見つけた！「聖結晶」を手に入れた！`);
+                        } else {
+                            addItemToInventory('evil_crystal');
+                            log(`足元で禍々しく光る魔力の結晶を見つけた！「邪結晶」を手に入れた！`);
+                        }
+                        flashCard(getRandomPartyMember(), 'yellow');
+                    }
+
+                    function nothingHappened() {
+                        log('なにも見つからなかった。');
                     }
 
                     function foundSuspiciousDevice() {
@@ -3903,10 +4009,6 @@
                         });
                     }
 
-                    function nothingHappened() {
-                        log('なにも見つからなかった。');
-                    }
-
                     function getRandomPartyMember(aliveOnly = true) {
                         const available = aliveOnly ? gameState.party.filter(p => p.currentHp > 0) : gameState.party;
                         return available[Math.floor(Math.random() * available.length)];
@@ -3914,7 +4016,7 @@
 
                     function startBattle(isBoss = false, isEnhancedBoss = false) {
                         log(isBoss ? 'ボスの気配がする…！' : '敵が現れた！');
-                        gameState.inBattle = true;
+                        gameState.inBattle = true; // ファイター, ソーサラー, ナイト, メディック
                         dungeonCommands.classList.add('hidden');
                         emergencyButton.classList.add('battle-active'); // 緊急ボタンを有効化
                         floorDisplay.classList.add('hidden');
@@ -3923,7 +4025,11 @@
 
                         const enemyCount = isBoss ? 1 : Math.floor(Math.random() * 2) + 1 + Math.floor(gameState.floor / 10);
                         gameState.enemies = [];
-                        for (let i = 0; i < enemyCount; i++) gameState.enemies.push(createEnemy(isBoss, isEnhancedBoss));
+                        if (isBoss && isEnhancedBoss === 'phantom_hero') {
+                            gameState.enemies.push(createEnemy(true, 'phantom_hero'));
+                        } else {
+                            for (let i = 0; i < enemyCount; i++) gameState.enemies.push(createEnemy(isBoss, isEnhancedBoss));
+                        }
                         updateEnemyStatus();
 
                         const combatants = [...gameState.party.filter(p => p.currentHp > 0), ...gameState.enemies];
@@ -3941,7 +4047,32 @@
                         const reductionFactor = Math.max(0, (4 - partySize) * 0.1);
                         const statMultiplier = 1 - reductionFactor;
 
-                        if (isBoss) {
+                        if (isBoss && isEnhanced === 'phantom_hero') {
+                            return {
+                                name: '英雄の幻影',
+                                maxHp: 2000 + floor * 30,
+                                currentHp: 2000 + floor * 30,
+                                atk: 50 + Math.floor(floor * 1.8),
+                                pDef: 25 + floor,
+                                mDef: 25 + floor,
+                                agi: 25 + Math.floor(floor / 2),
+                                isEnemy: true,
+                                isBoss: true,
+                                statusEffects: {},
+                                skills: [{
+                                    name: 'フォーカス',
+                                    func: focusSkill
+                                }, {
+                                    name: 'チェインロック',
+                                    func: chainLockSkill
+                                }, {
+                                    name: 'ヒロイックエンド',
+                                    func: heroicEndSkill
+                                }, ],
+                                specialAIType: 'phantom_hero'
+                            };
+                        }
+                        if (isBoss) { // ファイター, ソーサラー, ナイト, メディック
                             if (isEnhanced) {
                                 return {
                                     name: '【覚醒】ダンジョンマスター',
@@ -4115,6 +4246,25 @@
                         flashCard(target, 'yellow');
                         log(`${enemy.name}は${target.name}に縮小ビームを放った！身長が${shrinkAmount}cm縮んだ！`);
                         updatePartyStatus();
+                    }
+
+                    function focusSkill(enemy) {
+                        enemy.buffs = enemy.buffs || {};
+                        enemy.buffs.atk_up = 3;
+                        flashCard(enemy, 'yellow');
+                        log(`${enemy.name}は${enemy.skills[0].name}で精神を集中！攻撃力が大幅に上昇！`);
+                    }
+
+                    async function chainLockSkill(enemy) {
+                        log(`${enemy.name}は${enemy.skills[1].name}を放った！`);
+                        for (const target of gameState.party.filter(p => p.currentHp > 0)) {
+                            if (Math.random() < 0.5) { // 50%の確率で鈍化
+                                target.statusEffects.slow = {
+                                    turns: 3
+                                };
+                                log(`${target.name}は鎖に捕らえられ、動きが鈍くなった！`);
+                            }
+                        }
                     }
 
                     async function sweepAttack(enemy) {
@@ -4592,7 +4742,11 @@
                                 }
                                 // ターン終了時の自然治癒
                                 if (character.statusEffects && character.statusEffects.regeneration) {
-                                    const healAmount = Math.max(1, Math.ceil(character.maxHp * 0.08));
+                                    let healAmount = Math.max(1, Math.ceil(character.maxHp * 0.08));
+                                    // 聖女の行進モードでは回復量が2倍
+                                    if (gameState.gameMode === 'saint_march') {
+                                        healAmount *= 2;
+                                    }
                                     log(`${character.name}は傷が自然に回復していく！`);
                                     animateStatChange(character, 'hp', healAmount, 'increase');
                                     updatePartyStatus();
@@ -4626,11 +4780,11 @@
                                 }
                                 break;
                             case 'heal':
-                                const healAmount = skill.power + Math.ceil(getEffectiveStats(caster).atk * 0.5); // Calculate amount first
-                                await animateStatChange(target, 'hp', healAmount, 'increase'); // Await HP animation
+                                const skillHealAmount = skill.power + Math.ceil(getEffectiveStats(caster).atk * 0.5); // Calculate amount first
+                                await animateStatChange(target, 'hp', skillHealAmount, 'increase'); // Await HP animation
                                 flashCard(target, 'green'); // Flash the card itself
-                                showDamagePopup(target, healAmount, true);
-                                log(`${caster.name}は${target.name}に${skill.name}を唱えた！ HPが${healAmount}回復した。`);
+                                showDamagePopup(target, skillHealAmount, true);
+                                log(`${caster.name}は${target.name}に${skill.name}を唱えた！ HPが${skillHealAmount}回復した。`);
                                 break;
                             case 'buff':
                                 if (skill.effect === 'atk_up') {
@@ -4687,9 +4841,7 @@
                                     quantity: 1
                                 }, true); // キュアミストの効果を流用
                                 break;
-                        }
-                        // 新しいLv4スキル
-                        switch (skill.type) {
+                                // 新しいLv4スキル
                             case 'multi_hit_physical': // 乱舞
                                 const hitCount = Math.floor(Math.random() * 3) + 4; // 4〜6回
                                 log(`${caster.name}の${skill.name}！`);
@@ -4941,11 +5093,11 @@
                                 break;
                             case 'reaper_soul_exchange': // 魂の交換
                                 const hpCost = Math.ceil(caster.currentHp / 2);
-                                await dealDamage(caster, hpCost);
-                                const healAmount = Math.ceil(hpCost * 1.5); // 削ったHPの1.5倍回復
+                                await dealDamage(caster, hpCost, false, true); // isHeal=false, isSelfDamage=true
+                                const soulHealAmount = Math.ceil(hpCost * 1.5); // 削ったHPの1.5倍回復
                                 const mpAmount = Math.ceil(hpCost * 1.0); // 削ったHPと同じだけMP回復
                                 log(`${caster.name}は${skill.name}で自らの魂を分け与えた！`);
-                                await animateStatChange(target, 'hp', healAmount, 'increase');
+                                await animateStatChange(target, 'hp', soulHealAmount, 'increase');
                                 await animateStatChange(target, 'mp', mpAmount, 'increase');
                                 log(`${target.name}のHPとMPが回復した！`);
                                 break;
@@ -5109,18 +5261,18 @@
                                     log(`味方全員のHPが回復した！`);
                                     for (const p of gameState.party) {
                                         if (p.currentHp > 0) {
-                                            const healAmount = Math.ceil(p.maxHp * itemInfo.power);
-                                            await animateStatChange(p, 'hp', healAmount, 'increase');
+                                            const partyHealAmount = Math.ceil(p.maxHp * itemInfo.power);
+                                            await animateStatChange(p, 'hp', partyHealAmount, 'increase');
                                             flashCard(p, 'green');
-                                            showDamagePopup(p, healAmount, true);
+                                            showDamagePopup(p, partyHealAmount, true);
                                         }
                                     }
                                 } else {
-                                    const healAmount = Math.ceil(target.maxHp * itemInfo.power);
-                                    await animateStatChange(target, 'hp', healAmount, 'increase');
+                                    const itemHealAmount = Math.ceil(target.maxHp * itemInfo.power);
+                                    await animateStatChange(target, 'hp', itemHealAmount, 'increase');
                                     flashCard(target, 'green');
-                                    showDamagePopup(target, healAmount, true);
-                                    log(`${target.name}のHPが${healAmount}回復した！`);
+                                    showDamagePopup(target, itemHealAmount, true);
+                                    log(`${target.name}のHPが${itemHealAmount}回復した！`);
                                 }
                                 break;
                             case 'reset_height':
@@ -5389,7 +5541,7 @@
                         }
 
                         // HPが低い場合、70%の確率で自己再生スキルを優先的に使用する
-                        const regenSkill = enemy.skills.find(s => s.name === '自己再生');
+                        let regenSkill = enemy.skills.find(s => s.name === '自己再生');
                         const canUseRegen = regenSkill && enemy.regenUses < 3; // 使用回数が3回未満かチェック
 
                         if (canUseRegen && enemy.currentHp / enemy.maxHp < 0.5 && Math.random() < 0.7) {
@@ -5399,12 +5551,13 @@
                             // スキル使用判定 (自己再生以外のスキル)
                             const skill = enemy.skills[Math.floor(Math.random() * enemy.skills.length)];
                             // 自己再生スキルが選ばれた場合でも、HPが50%以上なら通常通り使用する
-                            if (skill.name === '自己再生' && enemy.currentHp / enemy.maxHp >= 0.5 && enemy.regenUses < 3) {
+                            if (skill.name === '自己再生' && canUseRegen) {
                                 enemy.regenUses++; // 使用回数をインクリメント
                                 await skill.func(enemy);
                             } else if (skill.name === '自己再生') {
                                 // 自己再生を使おうとしたが条件を満たさなかった場合 -> 通常攻撃
-                                await defaultEnemyAttack(enemy, findTarget(enemy));
+                                const target = findTarget(enemy);
+                                await defaultEnemyAttack(enemy, target);
                             } else if (skill.name !== '自己再生') { // 自己再生以外のスキルは通常通り使用
                                 await skill.func(enemy);
                             } else {
@@ -5431,9 +5584,9 @@
 
                         // ターン終了時の自然治癒
                         if (enemy.statusEffects && enemy.statusEffects.regeneration) {
-                            const healAmount = Math.max(1, Math.ceil(enemy.maxHp * 0.08));
+                            let healAmount = Math.max(1, Math.ceil(enemy.maxHp * 0.08));
                             log(`${enemy.name}の傷が再生していく！`); // 敵の回復ログ
-                            await dealDamage(enemy, -healAmount, true); // dealDamageを回復に利用
+                            await dealDamage(enemy, -healAmount, true);
                             updateEnemyStatus();
                         }
 
@@ -5453,6 +5606,20 @@
                         }
                     }
 
+                    async function heroicEndSkill(enemy) {
+                        const target = findTarget(enemy);
+                        log(`${enemy.name}は${enemy.skills[2].name}を放つ！`);
+                        const damage = calculateDamage(enemy, target, {
+                            power: 2.8
+                        }); // 高威力
+                        await dealDamage(target, damage);
+                        if (target.currentHp > 0 && Math.random() < 0.7) { // 70%で麻痺
+                            target.statusEffects.paralysis = true;
+                            log(`${target.name}は強烈な一撃を受け、体が痺れてしまった！`);
+                        }
+                    }
+
+
                     function findTarget(enemy) {
                         const aliveParty = gameState.party.filter(p => p.currentHp > 0);
 
@@ -5469,6 +5636,26 @@
                             };
                         }
 
+                        // 「英雄の幻影」の特殊AI
+                        if (enemy.specialAIType === 'phantom_hero') {
+                            const provokingChar = aliveParty.find(p => p.buffs && (p.buffs.provoke || p.buffs.cover));
+                            const golemActive = gameState.golem && gameState.golem.hp > 0;
+                            const wallActive = gameState.walls.length > 0;
+
+                            if (provokingChar) {
+                                return provokingChar;
+                            }
+                            if (golemActive) {
+                                return gameState.golem;
+                            }
+                            if (wallActive) {
+                                const randomWall = gameState.walls[Math.floor(Math.random() * gameState.walls.length)];
+                                return {...randomWall,
+                                    isWall: true,
+                                    wallIndex: gameState.walls.indexOf(randomWall)
+                                };
+                            }
+                        }
 
                         // ゴーレムが召喚されていれば最優先でターゲットにする
                         if (gameState.golem && gameState.golem.hp > 0) {
@@ -5570,11 +5757,11 @@
 
                     async function dealDamage(target, amount, isHeal = false) {
                         // ターゲットがウォールの場合
-                        if (target.isWall) {
+                        if (target && target.isWall) {
                             const wall = gameState.walls[target.wallIndex];
                             wall.hp = Math.max(0, wall.hp - amount);
                             log(`防壁が攻撃を受け止めた！ (防壁の残り耐久値: ${wall.hp})`);
-                            if (wall.hp <= 0) {
+                            if (wall && wall.hp <= 0) {
                                 flashCard(gameState.party[wall.targetId], 'red');
                                 log("防壁は砕け散った！");
                                 gameState.walls.splice(target.wallIndex, 1);
@@ -5584,10 +5771,10 @@
                         if (amount === 0) return; // 回避などでダメージ0の場合は何もしない
                         if (isHeal) {
                             // 回復の場合
-                            if (!target.isEnemy) await animateStatChange(target, 'hp', -amount, 'increase');
-                            else target.currentHp = Math.min(target.maxHp, target.currentHp - amount);
+                            if (target && !target.isEnemy) await animateStatChange(target, 'hp', -amount, 'increase');
+                            else if (target) target.currentHp = Math.min(target.maxHp, target.currentHp - amount);
                             flashCard(target, 'green');
-                            showDamagePopup(target, -amount, true);
+                            if (target) showDamagePopup(target, -amount, true);
                             return;
                         }
                         // ターゲットがゴーレムの場合
@@ -5597,14 +5784,14 @@
                             flashCard(target, 'red');
                             updatePartyStatus();
                             if (gameState.golem.hp <= 0) log('ゴーレムは砕け散った！');
-                        } else if (!target.isEnemy) { // ターゲットが味方の場合 (敵からの攻撃、自傷など)
+                        } else if (target && !target.isEnemy) { // ターゲットが味方の場合 (敵からの攻撃、自傷など)
                             await animateStatChange(target, 'hp', -amount, 'decrease');
-                        } else { // ターゲットが敵の場合
+                        } else if (target) { // ターゲットが敵の場合
                             target.currentHp = Math.max(0, target.currentHp - amount);
                             updateEnemyStatus(); // 敵のHPバーを更新
                         }
                         flashCard(target, 'red');
-                        showDamagePopup(target, amount, false);
+                        if (target) showDamagePopup(target, amount, false);
                         if (target.currentHp <= 0 && target !== gameState.golem) {
                             if (!target.isEnemy && gameState.gameMode === 'enjoy') {
                                 log(`${target.name}は倒れた...しかし、不思議な力ですぐに立ち上がった！`);
@@ -5623,6 +5810,22 @@
                                 }
                             }
                         }
+                    }
+
+                    function triggerLiberationEvent() {
+                        liberationModal.classList.remove('hidden');
+                        liberationAcceptButton.onclick = () => {
+                            liberationModal.classList.add('hidden');
+                            log("結晶が砕け散り、空間が歪む…！");
+                            // アイテムを1つずつ消費
+                            gameState.inventory.find(item => item.id === 'holy_crystal').quantity--;
+                            gameState.inventory.find(item => item.id === 'evil_crystal').quantity--;
+                            startBattle(true, 'phantom_hero');
+                        };
+                        liberationDeclineButton.onclick = () => {
+                            liberationModal.classList.add('hidden');
+                            log("一行は危険を察知し、その場を後にした。");
+                        };
                     }
 
                     function showDamagePopup(target, amount, isHeal = false) {
@@ -5673,6 +5876,21 @@
                         });
 
                         if (isVictory) {
+                            // 「英雄の幻影」撃破ボーナス
+                            if (gameState.enemies.some(e => e.name === '英雄の幻影')) {
+                                log("英雄の幻影を打ち破った！パーティ全員の魂が共鳴し、限界を超えて成長する！");
+                                gameState.party.forEach(p => {
+                                    if (p.currentHp > 0) {
+                                        p.maxHp += 5;
+                                        p.maxMp += 5;
+                                        p.atk += 1;
+                                        p.def += 1;
+                                        flashCard(p, 'green');
+                                    }
+                                });
+                                updatePartyStatus();
+                            }
+
                             gameState.killCount += gameState.enemies.length; // 倒した敵の数を加算
 
                             // 新モード「流転の体躯」の処理
@@ -5716,7 +5934,12 @@
                             }
                             // 無限モードのボス撃破後
                             else if (gameState.gameMode === 'endless') {
-                                showLevelUpModal(true); // 無限モード用のレベルアップモーダルを表示
+                                const isBossFloor = gameState.floor > 0 && gameState.floor % 30 === 0;
+                                if (isBossFloor) {
+                                    showEndlessCurseModal(); // 呪い選択モーダルを表示
+                                } else {
+                                    showLevelUpModal(true); // 通常のボーナス選択モーダルを表示
+                                }
                             } else if (gameState.gameMode === 'endgame' && gameState.floor === 1) {
                                 showModal("ゲームクリア？", "あなたはダンジョンの入り口で待ち構えていたボスを打ち破りました！…これでよかったのでしょうか？");
                                 gameState.gameOver = true;
@@ -5931,7 +6154,7 @@
                         }, {
                             id: 'getItems',
                             text: () => 'アイテムを5個獲得',
-                            effect: () => {
+                            effect: () => { // ファイター, ソーサラー, ナイト, メディック
                                 const foundItems = [];
                                 const itemIds = Object.keys(itemBlueprints).filter(id => !itemBlueprints[id].battleOnly && !itemBlueprints[id].rare);
                                 for (let i = 0; i < 5; i++) {
@@ -6031,6 +6254,127 @@
 
                         dungeonCommands.classList.add('hidden');
                         endlessBonusModal.classList.remove('hidden');
+                    }
+
+                    function showEndlessCurseModal() {
+                        endlessCurseButtons.innerHTML = '';
+                        const aliveParty = gameState.party.filter(p => p.currentHp > 0);
+                        if (aliveParty.length === 0) {
+                            endBattle(false); // 全滅している場合はゲームオーバー
+                            return;
+                        }
+
+                        // 呪いの選択肢プール
+                        const cursePool = [{
+                            id: 'hp_half',
+                            text: '血の代償',
+                            description: '生存者全員の現在HPが半減する。',
+                            effect: () => {
+                                log("呪いが発動し、全員の生命力が吸い取られた！");
+                                gameState.party.forEach(p => {
+                                    if (p.currentHp > 0) {
+                                        const damage = Math.ceil(p.currentHp / 2);
+                                        animateStatChange(p, 'hp', -damage, 'decrease');
+                                    }
+                                });
+                            },
+                            weight: 10
+                        }, {
+                            id: 'lose_items',
+                            text: '忘却の呪い',
+                            description: '所持アイテムをランダムに3つ失う。',
+                            effect: () => {
+                                const lostItems = [];
+                                for (let i = 0; i < 3; i++) {
+                                    const availableItems = gameState.inventory.filter(item => item.quantity > 0);
+                                    if (availableItems.length > 0) {
+                                        const itemToLose = availableItems[Math.floor(Math.random() * availableItems.length)];
+                                        itemToLose.quantity--;
+                                        lostItems.push(itemBlueprints[itemToLose.id].name);
+                                    }
+                                }
+                                if (lostItems.length > 0) {
+                                    log(`呪いによって ${lostItems.join('、')} を失ってしまった！`);
+                                } else {
+                                    log("呪いが発動したが、失うアイテムがなかった。");
+                                }
+                            },
+                            weight: 10,
+                            condition: () => gameState.inventory.some(item => item.quantity > 0)
+                        }, {
+                            id: 'random_height',
+                            text: '不安定な肉体',
+                            description: '生存者全員の身長が-100cm～+100cmの範囲でランダムに変動する。',
+                            effect: async() => {
+                                log("呪いがパーティの肉体を蝕む！");
+                                for (const p of aliveParty) {
+                                    if (p.heightLocked) {
+                                        log(`${p.name}は体の変化を拒んだ！`);
+                                        continue;
+                                    }
+                                    const change = Math.floor(Math.random() * 201) - 100;
+                                    await animateStatChange(p, 'height', change, change >= 0 ? 'increase' : 'decrease');
+                                    log(`${p.name}の身長が${change > 0 ? '+' : ''}${change}cm変化した！`);
+                                }
+                            },
+                            weight: 8
+                        }, {
+                            id: 'stat_down_or_lock',
+                            text: '個人の犠牲',
+                            description: 'ランダムな仲間一人に過酷な運命が降りかかる。',
+                            effect: (target) => {
+                                if (Math.random() < 0.5) {
+                                    target.atk -= 1;
+                                    log(`呪いによって${target.name}の魂が少し削られ、攻撃力が永続的に1減少した…。`);
+                                } else {
+                                    if (target.heightLocked) {
+                                        log(`呪いは${target.name}の体を固定しようとしたが、既に固定されていたため何も起こらなかった。`);
+                                    } else {
+                                        animateStatChange(target, 'height', 1 - target.height, 'decrease');
+                                        target.heightLocked = true;
+                                        log(`呪いによって${target.name}の体が1cmに固定されてしまった！`);
+                                    }
+                                }
+                            },
+                            weight: 7,
+                            needsTarget: true
+                        }, ];
+
+                        // 4つの異なる呪いを選択
+                        let selectedCurses = [];
+                        let availableCurses = [...cursePool];
+                        while (selectedCurses.length < 4 && availableCurses.length > 0) {
+                            const filtered = availableCurses.filter(c => !c.condition || c.condition());
+                            if (filtered.length === 0) break;
+                            const index = Math.floor(Math.random() * filtered.length);
+                            const curse = filtered[index];
+                            if (curse.needsTarget) curse.target = aliveParty[Math.floor(Math.random() * aliveParty.length)];
+                            selectedCurses.push(curse);
+                            availableCurses.splice(availableCurses.findIndex(c => c.id === curse.id), 1);
+                        }
+
+                        // 選択肢ボタンを生成
+                        selectedCurses.forEach(curse => {
+                            const button = document.createElement('button');
+                            button.className = 'action-button bg-purple-700 hover:bg-purple-800 text-white font-bold py-4 px-4 rounded-lg shadow-lg text-left';
+                            const targetName = curse.target ? ` (${curse.target.name})` : '';
+                            button.innerHTML = `
+                                <strong class="text-lg">${curse.text}${targetName}</strong>
+                                <span class="block text-sm text-purple-200 mt-1">${curse.description}</span>
+                            `;
+                            button.onclick = async() => {
+                                endlessCurseModal.classList.add('hidden');
+                                await curse.effect(curse.target);
+                                setTimeout(() => {
+                                    updatePartyStatus();
+                                    dungeonCommands.classList.remove('hidden');
+                                }, 1000);
+                            };
+                            endlessCurseButtons.appendChild(button);
+                        });
+
+                        dungeonCommands.classList.add('hidden');
+                        endlessCurseModal.classList.remove('hidden');
                     }
 
                     function flashCard(target, type) {
