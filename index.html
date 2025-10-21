@@ -1132,7 +1132,7 @@
                                 type: 'status_ailment_multi',
                                 effects: ['poison', 'slow'],
                                 targetType: 'enemy',
-                                description: '敵一体に毒か鈍化の状態異常を引き起こすガスを浴びせる。'
+                                description: '敵一体に毒か鈍化の状態異常を与え、さらに攻撃力か防御力を低下させる。'
                             }],
                             unlockableSkill: {
                                 name: '縮小薬',
@@ -1316,7 +1316,7 @@
                             role: 'ネクロマンサー',
                             hp: 90,
                             mp: 70,
-                            atk: 15,
+                            atk: 18,
                             def: 8,
                             agi: 15,
                             height: 157,
@@ -1330,7 +1330,7 @@
                                 description: '敵一体に魂を吸収する魔法ダメージを与える。倒したモンスター数で威力が上がる。'
                             }, {
                                 name: 'ドレインソウル',
-                                cost: 5,
+                                cost: 3,
                                 power: 1.5,
                                 type: 'mp_drain',
                                 targetType: 'enemy',
@@ -3541,6 +3541,10 @@
                                 name: "守護の壁",
                                 func: foundProtectiveWall,
                                 weight: 2
+                            }, {
+                                name: "魔力の結晶",
+                                func: foundMagicCrystal,
+                                weight: gameState.gameMode === 'endless' ? 1 : 0 // 無限モードでのみ出現
                             },
                             equipmentEvent,
                             restoreClothesEvent,
@@ -3622,7 +3626,7 @@
                             const itemCount = Math.floor(Math.random() * 3) + 1; // 1〜3個のアイテム
                             const foundItems = [];
                             // レア・特殊アイテムを除外
-                            const itemIds = Object.keys(itemBlueprints).filter(id => !itemBlueprints[id].battleOnly && !itemBlueprints[id].rare);
+                            const itemIds = Object.keys(itemBlueprints).filter(id => !itemBlueprints[id].battleOnly && !itemBlueprints[id].rare && !itemBlueprints[id].special);
 
                             for (let i = 0; i < itemCount; i++) {
                                 const foundItemId = itemIds[Math.floor(Math.random() * itemIds.length)];
@@ -4448,8 +4452,12 @@
                                 targetName = 'ゴーレム';
                             } else {
                                 // ウォールを持つキャラクターをターゲットにする
-                                const wall = gameState.walls[0]; // 最初のウォールを対象とする
-                                target = gameState.party[wall.targetId];
+                                const wallData = gameState.walls[0]; // 最初のウォールを対象とする
+                                target = {...wallData,
+                                    isWall: true,
+                                    wallIndex: 0
+                                }; // 攻撃対象として壁オブジェクトを作成
+                                const protectedChar = gameState.party[wallData.targetId];
                                 targetName = `${target.name}の防壁`;
                             }
 
@@ -4871,7 +4879,7 @@
                                     let damage = calculateDamage(character, target);
                                     let logMessageText = `${character.name}の攻撃！ ${target.name}に${damage}のダメージ！`;
 
-                                    const mpRecoveryRoles = ['ソーサラー', 'メディック', 'モンク', 'ギャンブラー', 'サモナー', 'アルケミスト', 'ダンサー', 'ドクター', 'ネクロマンサー'];
+                                    const mpRecoveryRoles = ['ソーサラー', 'メディック', 'モンク', 'ギャンブラー', 'サモナー', 'アルケミスト', 'ダンサー', 'ネクロマンサー'];
                                     if (mpRecoveryRoles.includes(character.role)) {
                                         // MP回復ジョブの処理
                                         const mpRecovery = Math.floor(character.maxMp * 0.1);
@@ -4879,6 +4887,15 @@
                                             await animateStatChange(character, 'mp', mpRecovery, 'increase');
                                             log(`${character.name}は攻撃から魔力を吸収した！(MP+${mpRecovery})`);
                                         }
+                                    } else if (character.role === 'ドクター') {
+                                        // ドクターの特殊攻撃
+                                        if (target.statusEffects && (target.statusEffects.poison || target.statusEffects.slow)) {
+                                            damage = Math.floor(damage * 1.5);
+                                            logMessageText = `${character.name}は弱った${target.name}に追撃！ ${damage}のダメージ！`;
+                                        }
+                                        // MP回復効果も追加
+                                        const mpRecovery = Math.floor(character.maxMp * 0.1);
+                                        if (mpRecovery > 0) await animateStatChange(character, 'mp', mpRecovery, 'increase');
                                     } else {
                                         // クリティカルヒット判定ジョブの処理
                                         const criticalRoles = ['ファイター', 'ナイト', 'サムライ', 'ガーディアン', 'トラブルメーカー'];
@@ -5167,7 +5184,7 @@
                                     const effect = skill.effects[Math.floor(Math.random() * skill.effects.length)];
                                     let effectName = '';
                                     if (effect === 'poison') {
-                                        t.statusEffects.poison = { // 敵に状態異常を付与
+                                        t.statusEffects.poison = {
                                             turns: 3
                                         };
                                         effectName = '毒';
@@ -5175,13 +5192,27 @@
                                         t.statusEffects.paralysis = true;
                                         effectName = '麻痺';
                                     } else if (effect === 'slow') {
-                                        t.statusEffects.slow = { // 敵に状態異常を付与
+                                        t.statusEffects.slow = {
                                             turns: 3
                                         };
                                         effectName = '鈍化';
                                     }
                                     flashCard(t, 'yellow');
                                     log(`${t.name}は${effectName}状態になった！`);
+
+                                    // 「衰弱ガス」の場合のみ、追加でステータス低下効果を付与
+                                    if (skill.name === '衰弱ガス') {
+                                        await new Promise(resolve => setTimeout(resolve, 500)); // 少し間を置く
+                                        if (Math.random() < 0.5) {
+                                            t.buffs = t.buffs || {};
+                                            t.buffs.atk_down = 3;
+                                            log(`さらに、${t.name}の攻撃力が低下した！`);
+                                        } else {
+                                            t.buffs = t.buffs || {};
+                                            t.buffs.def_down = 3;
+                                            log(`さらに、${t.name}の防御力が低下した！`);
+                                        }
+                                    }
                                 }
                                 break;
                             case 'gambling_damage': // ダーツショット
@@ -5768,6 +5799,22 @@
                         if (canUseRegen && enemy.currentHp / enemy.maxHp < 0.5 && Math.random() < 0.7) {
                             enemy.regenUses++; // 使用回数をインクリメント
                             await regenSkill.func(enemy);
+                        } else if (enemy.specialAIType === 'phantom_hero' && Math.random() < 0.6) {
+                            // 英雄の幻影の特殊AI
+                            const skill = enemy.skills[Math.floor(Math.random() * enemy.skills.length)];
+                            // チェインロックとヒロイックエンドは状態異常を伴うため、ゴーレムや防壁を無視してパーティメンバーを狙う
+                            if (skill.name === 'チェインロック' || skill.name === 'ヒロイックエンド') {
+                                const aliveParty = gameState.party.filter(p => p.currentHp > 0);
+                                if (aliveParty.length > 0) {
+                                    const target = aliveParty[Math.floor(Math.random() * aliveParty.length)];
+                                    await skill.func(enemy, target); // ターゲットを直接渡してスキルを実行
+                                } else {
+                                    await defaultEnemyAttack(enemy, findTarget(enemy)); // ターゲットがいない場合は通常攻撃
+                                }
+                            } else {
+                                // フォーカスはターゲット不要
+                                await skill.func(enemy);
+                            }
                         } else if (enemy.skills && enemy.skills.length > 0 && Math.random() < 0.6) {
                             // スキル使用判定 (自己再生以外のスキル)
                             const skill = enemy.skills[Math.floor(Math.random() * enemy.skills.length)];
@@ -6201,6 +6248,17 @@
                             gameState.golem = null;
                         }
 
+                        // 防壁が残っている場合の処理
+                        if (gameState.walls.length > 0) {
+                            log("戦闘が終わり、残っていた防壁の魔力が少し失われた。");
+                            gameState.walls.forEach(wall => {
+                                wall.hp = Math.ceil(wall.hp / 2);
+                                wall.maxHp = Math.ceil(wall.maxHp / 2); // 最大耐久値も半減
+                            });
+                            // 耐久値が0になった防壁を削除
+                            gameState.walls = gameState.walls.filter(wall => wall.hp > 0);
+                        }
+
                         dungeonCommands.classList.remove('hidden');
                         updateFloorDisplay();
                         battleCommands.classList.add('hidden');
@@ -6522,14 +6580,46 @@
                         }, {
                             id: 'becomeCute',
                             text: (target) => `${target.name}がかわいくなる`,
-                            effect: (target) => {
-                                if (target.heightLocked) {
-                                    log(`突然の光に包まれたが、${target.name}の体は変化を拒んだ！`);
-                                    return;
+                            effect: async(target) => {
+                                log(`突然の光に包まれ、${target.name}は…`);
+                                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                                const outcomes = ['shrink', 'strip', 'glow', 'dress'];
+                                const outcome = outcomes[Math.floor(Math.random() * outcomes.length)];
+
+                                switch (outcome) {
+                                    case 'shrink':
+                                        if (target.heightLocked) {
+                                            log(`…しかし、${target.name}の体は変化を拒んだ！`);
+                                            return;
+                                        }
+                                        const diff = 1 - target.height;
+                                        await animateStatChange(target, 'height', diff, 'decrease');
+                                        log(`…なんと、身長が1cmになってしまった！`);
+                                        break;
+                                    case 'strip':
+                                        const immuneRoles = ['ナイト', 'サムライ', '聖女'];
+                                        if (immuneRoles.includes(target.role)) {
+                                            log(`…しかし、${target.name}は恥じらいを覚えず、何も起こらなかった。`);
+                                        } else {
+                                            target.statusEffects.stripped = {
+                                                turns: 0
+                                            };
+                                            log(`…なんと、恥ずかしい格好になってしまった！`);
+                                        }
+                                        break;
+                                    case 'glow':
+                                        log(`…肌がつやつやになり、いつもより魅力的に見える！(特に効果はない)`);
+                                        break;
+                                    case 'dress':
+                                        if (target.statusEffects.stripped) {
+                                            delete target.statusEffects.stripped;
+                                            log(`…服がかわいらしいドレスに変化し、脱衣状態が治った！`);
+                                        } else {
+                                            log(`…服がかわいらしいドレスに変化した！(特に効果はない)`);
+                                        }
+                                        break;
                                 }
-                                const diff = 1 - target.height;
-                                animateStatChange(target, 'height', diff, 'decrease');
-                                log(`突然の光に包まれ、${target.name}の身長が1cmになってしまった！`);
                             },
                             weight: 1,
                             needsTarget: true
