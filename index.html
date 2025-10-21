@@ -778,14 +778,14 @@
                             description: '元気で前向きなパーティのムードメーカー。考えるより先に体が動くタイプで、巨大な剣を軽々と振り回す。',
                             skills: [{
                                 name: '強攻撃',
-                                cost: 10,
+                                cost: 8,
                                 power: 1.8,
                                 type: 'physical',
                                 targetType: 'enemy',
                                 description: '敵一体に物理ダメージを与える。'
                             }, {
                                 name: 'なぎ払い',
-                                cost: 15,
+                                cost: 12,
                                 power: 1.0,
                                 type: 'physical',
                                 targetType: 'enemies',
@@ -793,7 +793,7 @@
                             }],
                             unlockableSkill: {
                                 name: '渾身斬り',
-                                cost: 8,
+                                cost: 6,
                                 power: 1.5,
                                 type: 'physical',
                                 targetType: 'enemy',
@@ -801,7 +801,7 @@
                             },
                             unlockableSkillLv4: {
                                 name: '乱舞',
-                                cost: 25,
+                                cost: 20,
                                 type: 'multi_hit_physical',
                                 targetType: 'random_enemies',
                                 description: '敵にランダムで4～6回の物理ダメージを与える。'
@@ -820,14 +820,14 @@
                             description: '無口で冷静な魔術の探求者。古代の知識に精通しており、強力な攻撃魔法を操る。アカリの突進を諌めることもしばしば。',
                             skills: [{
                                 name: 'ファイア',
-                                cost: 10,
+                                cost: 8,
                                 power: 3.5,
                                 type: 'magic',
                                 targetType: 'enemy',
                                 description: '敵一体に炎の魔法ダメージを与える。'
                             }, {
                                 name: 'エンチャント',
-                                cost: 10,
+                                cost: 8,
                                 type: 'buff',
                                 targetType: 'ally',
                                 effect: 'atk_up',
@@ -835,7 +835,7 @@
                             }],
                             unlockableSkill: {
                                 name: 'ストーム',
-                                cost: 20,
+                                cost: 16,
                                 power: 1.8,
                                 type: 'magic',
                                 targetType: 'enemies',
@@ -902,7 +902,7 @@
                             description: '心優しく、誰かのために尽くすことを厭わない少女。パーティの回復役として、その身を挺して仲間を癒す。',
                             skills: [{
                                 name: 'ヒール',
-                                cost: 12,
+                                cost: 10,
                                 power: 50,
                                 type: 'heal',
                                 targetType: 'ally',
@@ -1404,7 +1404,7 @@
                                 description: '何が起こるかわからない箱を開ける。敵全体に大ダメージか、味方全体が強化されるか、あるいは味方全体が縮んでしまうか…。'
                             }, {
                                 name: 'びっくりクラッカー',
-                                cost: 12,
+                                cost: 5,
                                 power: 1.5,
                                 type: 'trouble_maker_debuff',
                                 targetType: 'enemy',
@@ -1412,10 +1412,10 @@
                             }],
                             unlockableSkill: {
                                 name: 'ばっちりチェック',
-                                cost: 10,
+                                cost: 4,
                                 type: 'self_buff_trouble',
                                 targetType: 'self',
-                                description: '次の「ハプニングボックス」の成功率を大幅に上げる。'
+                                description: '次の「ハプニングボックス」か「ミラクルギフト」の成功率を大幅に上げる。'
                             },
                             unlockableSkillLv4: {
                                 name: 'ミラクルギフト',
@@ -3195,10 +3195,13 @@
                         let agi = char.agi;
                         atk += Math.floor(char.atk * (heightDiff / char.initialHeight * 0.8));
                         def += Math.floor(char.def * (heightDiff / char.initialHeight * 0.8));
-                        agi += Math.floor(char.agi * (heightDiff / char.initialHeight * -1.5)); // 小さいほど素早い
+                        agi += Math.floor(char.agi * (heightDiff / char.initialHeight * -1.5)); // 小さいほど素早い 
+                        if (char.buffs && char.buffs.agi_up) {
+                            const power = char.buffs.agi_up.power || 1.5; // powerプロパティがなければ1.5をデフォルト値とする
+                            agi *= power;
+                        }
                         if (char.buffs && char.buffs.atk_up) atk *= 1.5;
                         if (char.buffs && char.buffs.protect) def *= 1.5;
-                        if (char.buffs && char.buffs.agi_up) agi *= 1.5;
                         if (char.buffs && char.buffs.def_down) {
                             def *= 0.7;
                         }
@@ -3240,7 +3243,13 @@
                             // 比率の3乗に比例してヘイトが変動。大きいと急増し、小さいと急減する。
                             char.hate = Math.pow(heightRatio, 3) * 100;
                             if (char.role === 'ナイト') char.hate *= 1.5;
-                            if (char.buffs.provoke) char.hate *= 3;
+                            if (char.buffs.provoke) {
+                                char.hate *= 3;
+                                // ダンサーが挑発中に縮んでいても、最低限のヘイトを保証
+                                if (char.role === 'ダンサー') {
+                                    char.hate = Math.max(char.hate, 150); // 最低ヘイト値を150に設定
+                                }
+                            }
                         });
                     }
 
@@ -3408,8 +3417,8 @@
                             restoreClothesEvent,
                             suspiciousDeviceEvent,
                             bewilderingStatueEvent,
-                            shrineOfPrayerEvent,
-                            shamePilloryEvent
+                            shrineOfPrayerEvent, // ファイター, ソーサラー, ナイト, メディック
+                            shamePilloryEvent,
                         ].filter(event => event.weight > 0);
 
                         const totalWeight = events.reduce((sum, event) => sum + event.weight, 0);
@@ -4162,7 +4171,7 @@
                                 // agiは補正対象外
                                 isEnemy: true,
                                 statusEffects: {},
-                                regenUses: 0, // 自己再生の使用回数カウンター
+                                regenUses: 0, // 自己再生の使用回数カウンター 
                             };
                         }
                         const enemyBlueprints = [{
@@ -4201,7 +4210,17 @@
                                 mDefRatio: 1.1
                             }, // 脱衣や自己回復を使う
                         ];
-                        const blueprint = enemyBlueprints[Math.floor(Math.random() * enemyBlueprints.length)];
+
+                        let availableBlueprints = enemyBlueprints;
+                        // 5階の戦闘ではスキルを持たない敵のみ出現させる
+                        if (floor === 5) {
+                            availableBlueprints = enemyBlueprints.filter(bp =>
+                                bp.name !== 'ウィスプ' &&
+                                bp.name !== 'リトルメイジ' &&
+                                bp.name !== 'インプ'
+                            );
+                        }
+                        const blueprint = availableBlueprints[Math.floor(Math.random() * availableBlueprints.length)];
                         const baseDef = 5 + floor * 0.8;
 
                         // ステータスに補正を適用
@@ -4796,10 +4815,23 @@
                                     flashCard(target, 'yellow');
                                     log(`${caster.name}は${target.name}に${skill.name}を唱えた！ 防御力が下がった！`);
                                 } else { // 既存のプロテクト
-                                    if (skill.effect === 'agi_up') {
-                                        target.buffs.agi_up = 3;
+                                    if (skill.effect === 'agi_up') { // 応援の舞
+                                        let power = 1.5; // 基本倍率
+                                        // ダンサーの身長が高いほど効果アップ
+                                        if (caster.role === 'ダンサー') {
+                                            const heightDiff = caster.height - caster.initialHeight;
+                                            if (heightDiff > 0) {
+                                                // 身長が10cm高くなるごとに倍率が0.05アップ
+                                                power += Math.floor(heightDiff / 10) * 0.05;
+                                            }
+                                            power = parseFloat(power.toFixed(2)); // 小数点第2位までに丸める
+                                        }
+                                        target.buffs.agi_up = {
+                                            turns: 3,
+                                            power: power
+                                        };
                                         flashCard(target, 'yellow');
-                                        log(`${caster.name}の${skill.name}で、${target.name}の素早さが上がった！`);
+                                        log(`${caster.name}の${skill.name}で、${target.name}の素早さが上がった！ (効果: x${power})`);
                                     } else { // プロテクト
                                         target.buffs.protect = 3;
                                         flashCard(target, 'yellow');
@@ -4836,10 +4868,11 @@
                                 }
                                 await animateStatChange(caster, 'height', -costHeight, 'decrease');
                                 log(`${caster.name}は身長を${costHeight}cm捧げて、味方を癒した！`);
-                                handleItem(caster, null, {
-                                    id: 'cure_mist',
-                                    quantity: 1
-                                }, true); // キュアミストの効果を流用
+                                // 味方全体のHPを40%回復
+                                for (const p of gameState.party.filter(p => p.currentHp > 0)) {
+                                    const healAmount = Math.ceil(p.maxHp * 0.4);
+                                    await animateStatChange(p, 'hp', healAmount, 'increase');
+                                }
                                 break;
                                 // 新しいLv4スキル
                             case 'multi_hit_physical': // 乱舞
@@ -4859,7 +4892,7 @@
                                 }
                                 break;
                             case 'mp_burst_magic': // マジックバースト
-                                const damage = caster.currentMp * 3;
+                                const damage = caster.currentMp * 4;
                                 await animateStatChange(caster, 'mp', -caster.currentMp, 'decrease');
                                 log(`${caster.name}は${skill.name}を放った！`);
                                 await dealDamage(target, damage);
@@ -4989,13 +5022,13 @@
                                     damageMultiplier = 0;
                                     message = "しかし、ダーツは大きく外れてしまった！";
                                 } else if (roll < 0.5) { // 40%で通常ヒット
-                                    damageMultiplier = 1.2;
+                                    damageMultiplier = 1.5;
                                     message = `${target.name}にヒット！`;
                                 } else if (roll < 0.9) { // 40%でクリティカル
-                                    damageMultiplier = 2.5;
+                                    damageMultiplier = 3.0;
                                     message = `クリティカルヒット！ ${target.name}に大ダメージ！`;
                                 } else { // 10%でミラクルヒット
-                                    damageMultiplier = 4.0;
+                                    damageMultiplier = 5.0;
                                     message = `ミラクルヒット！ ${target.name}に超特大ダメージ！`;
                                 }
                                 const gamblingDamage = calculateDamage(caster, target, {...skill,
@@ -5037,8 +5070,9 @@
                                 if (allInRoll < 0.4) { // 40% 敵全体にダメージ
                                     log("賭けは成功！敵全体にダメージ！");
                                     for (const t of target) {
-                                        const damage = calculateDamage(caster, t, {...skill,
-                                            power: 1.5
+                                        const damage = calculateDamage(caster, t, {
+                                            ...skill,
+                                            power: 1.8
                                         });
                                         await dealDamage(t, damage);
                                     }
@@ -5220,15 +5254,25 @@
                                 // シスター
                             case 'regeneration_ally':
                             case 'regeneration_party':
-                                const regenTargets = skill.targetType === 'party' ? gameState.party.filter(p => p.currentHp > 0) : [target];
                                 log(`${caster.name}は${skill.name}を唱えた！`);
-                                regenTargets.forEach(t => {
+                                const regenTargets = skill.targetType === 'party' ? gameState.party.filter(p => p.currentHp > 0) : [target];
+
+                                // 「祈りの円環」の場合、追加で少量回復
+                                if (skill.name === '祈りの円環') {
+                                    log("円環の光が、味方全体のHPを少しだけ癒した！");
+                                    for (const t of regenTargets) {
+                                        const healAmount = Math.ceil(t.maxHp * 0.15); // 最大HPの15%回復
+                                        await animateStatChange(t, 'hp', healAmount, 'increase');
+                                    }
+                                }
+
+                                for (const t of regenTargets) {
                                     t.statusEffects.regeneration = {
                                         turns: 3
                                     };
                                     flashCard(t, 'green');
                                     log(`${t.name}は聖なる光に包まれ、傷が再生し始めた！`);
-                                });
+                                }
                                 break;
                         }
                     }
@@ -5504,8 +5548,15 @@
                     }
 
                     async function handleTroubleMakerMiracle(caster) {
+                        const isChecked = caster.buffs.trouble_check;
                         log(`${caster.name}は${caster.skills.find(s => s.type === 'trouble_maker_miracle').name}を使った！`);
-                        if (Math.random() < 0.05) { // 5%で失敗
+                        if (isChecked) {
+                            delete caster.buffs.trouble_check;
+                            log("ばっちりチェックの効果で、奇跡は確実に起こる！");
+                        }
+
+                        // ばっちりチェック中ではない場合、5%で失敗
+                        if (!isChecked && Math.random() < 0.05) {
                             log("…しかし、何も起こらなかった！");
                         } else {
                             log("奇跡の光がパーティを包む！");
@@ -5598,11 +5649,18 @@
 
                     async function defaultEnemyAttack(enemy, target) {
                         const damage = calculateDamage(enemy, target);
-                        await dealDamage(target, damage);
-                        if (target.isWall) {
-                            log(`${enemy.name}の攻撃！ 防壁に${damage}のダメージ！`);
+                        if (damage === 'evaded') {
+                            // 回避した場合の処理
+                            showDamagePopup(target, '回避');
+                            flashCard(target, 'yellow');
                         } else {
-                            log(`${enemy.name}の攻撃！ ${target.name}に${damage}のダメージ！`);
+                            // 通常のダメージ処理
+                            await dealDamage(target, damage);
+                            if (target.isWall) {
+                                log(`${enemy.name}の攻撃！ 防壁に${damage}のダメージ！`);
+                            } else {
+                                log(`${enemy.name}の攻撃！ ${target.name}に${damage}のダメージ！`);
+                            }
                         }
                     }
 
@@ -5752,6 +5810,27 @@
                         // ダメージから防御力を減算
                         baseDamage -= effectiveDefense;
 
+                        // ダンサーの回避判定 (スポットライト効果中)
+                        if (defender.buffs && defender.buffs.evade_up) {
+                            let evadeRate = 0.7; // 基本回避率70%
+                            const heightDiff = defender.initialHeight - defender.height;
+
+                            // 身長が初期値より低い場合、回避率にボーナス
+                            if (heightDiff > 0) {
+                                // 1cm低くなるごとに0.15%回避率が上昇
+                                const bonusEvadeRate = heightDiff * 0.0015;
+                                evadeRate += bonusEvadeRate;
+                            }
+
+                            // 回避率の上限を95%に設定
+                            const finalEvadeRate = Math.min(0.95, evadeRate);
+
+                            if (Math.random() < finalEvadeRate) {
+                                log(`${defender.name}は華麗に攻撃をかわした！`);
+                                return 'evaded'; // 回避したことを示す特別な値を返す
+                            }
+                        }
+
                         return Math.max(1, Math.ceil(baseDamage * (Math.random() * 0.2 + 0.9))); // ダメージは最低1
                     }
 
@@ -5840,7 +5919,11 @@
 
                         const popup = document.createElement('div');
                         popup.textContent = amount;
-                        popup.className = `damage-popup ${isHeal ? 'heal-popup' : ''}`;
+                        popup.className = `damage-popup ${isHeal ? 'heal-popup' : ''}`; // 回避ポップアップのスタイル調整
+                        if (amount === '回避') {
+                            popup.style.color = '#3b82f6'; // 青色
+                            popup.style.fontSize = '1.25rem'; // 少し小さく
+                        }
                         targetCard.appendChild(popup);
                         setTimeout(() => popup.remove(), 1500);
                     }
