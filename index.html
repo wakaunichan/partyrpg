@@ -6558,7 +6558,7 @@
                             text: () => 'アイテムを5個獲得',
                             effect: () => { // ファイター, ソーサラー, ナイト, メディック
                                 const foundItems = [];
-                                const itemIds = Object.keys(itemBlueprints).filter(id => !itemBlueprints[id].battleOnly && !itemBlueprints[id].rare);
+                                const itemIds = Object.keys(itemBlueprints).filter(id => !itemBlueprints[id].battleOnly && !itemBlueprints[id].rare && !itemBlueprints[id].special);
                                 for (let i = 0; i < 5; i++) {
                                     const foundItemId = itemIds[Math.floor(Math.random() * itemIds.length)];
                                     addItemToInventory(foundItemId);
