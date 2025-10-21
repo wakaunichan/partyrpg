@@ -3600,12 +3600,14 @@
                     function foundEquipment() {
                         // パーティ内に未発見の装備を持つキャラがいるかチェック
                         const partyRolesWithRemainingEquipment = gameState.party
-                            .filter(p => p.currentHp > 0) // 生存しているキャラのみ
+                            .filter(p => p.currentHp > 0)
                             .map(p => p.role)
-                            .filter(role => getRemainingEquipment().some(id => equipmentBlueprints[id].targetRole === role));
+                            .filter((role, index, self) => self.indexOf(role) === index)
+                            .filter(role => getRemainingEquipment().some(id => equipmentBlueprints[id] && equipmentBlueprints[id].targetRole === role));
 
                         if (partyRolesWithRemainingEquipment.length === 0) {
-                            nothingHappened(); // 装備を見つけられるキャラがいない場合は何もしない
+                            // 装備を見つけられるキャラがいない場合は別のイベントを再抽選
+                            triggerRandomEvent();
                             return;
                         }
 
@@ -3617,12 +3619,6 @@
                             }
                             const target = aliveParty[Math.floor(Math.random() * aliveParty.length)];
                             const targetId = gameState.party.indexOf(target);
-
-                            // 既にウォールがある場合は何もしない
-                            if (gameState.walls.some(w => w.targetId === targetId)) {
-                                log(`${target.name}の前には既に防壁があったため、何も起こらなかった。`);
-                                return;
-                            }
 
                             log("どこからか岩が集まり、防壁を形成した！");
 
@@ -3926,8 +3922,14 @@
 
                     async function foundShamePillory() {
                         log("部屋の中央に、一枚の透明なガラス板が立っている…");
-                        await new Promise(resolve => setTimeout(resolve, 1500));
+                        const strippedMembersCheck = gameState.party.filter(p => p.currentHp > 0 && p.statusEffects.stripped);
+                        if (strippedMembersCheck.length === 0) {
+                            // 対象がいない場合は別のイベントを再抽選
+                            triggerRandomEvent();
+                            return;
+                        }
 
+                        await new Promise(resolve => setTimeout(resolve, 1500));
                         const strippedMembers = gameState.party.filter(p => p.currentHp > 0 && p.statusEffects.stripped);
                         const victim = strippedMembers[Math.floor(Math.random() * strippedMembers.length)];
 
@@ -4316,20 +4318,24 @@
                         const golemActive = gameState.golem && gameState.golem.hp > 0;
                         const wallActive = gameState.walls.length > 0;
 
-                        if (provokingChar || golemActive || wallActive) {
+                        if (provokingChar || (golemActive && !provokingChar) || (wallActive && !provokingChar && !golemActive)) {
                             let target;
+                            let targetName = '';
                             // ターゲットの優先順位: 挑発/かばう > ゴーレム > ウォール
                             if (provokingChar) {
                                 target = provokingChar;
+                                targetName = target.name;
                             } else if (golemActive) {
                                 target = gameState.golem;
+                                targetName = 'ゴーレム';
                             } else {
                                 // ウォールを持つキャラクターをターゲットにする
                                 const wall = gameState.walls[0]; // 最初のウォールを対象とする
                                 target = gameState.party[wall.targetId];
+                                targetName = `${target.name}の防壁`;
                             }
 
-                            log(`${enemy.name}は防御を固める${target.name}に狙いを定めた！`);
+                            log(`${enemy.name}は防御を固める${targetName}に狙いを定めた！`);
                             await new Promise(resolve => setTimeout(resolve, 1000));
                             log(`${enemy.name}の強打！`);
                             // 強打は高火力の単体攻撃 (威力2.5倍)
@@ -4363,6 +4369,12 @@
                             defaultEnemyAttack(enemy, target);
                             return;
                         }
+                        if (target.isDefending) {
+                            log(`${enemy.name}の攻撃！ しかし、${target.name}は防御していて効かなかった！`);
+                            flashCard(target, 'yellow');
+                            return;
+                        }
+
                         if (target.isDefending) {
                             log(`${enemy.name}の攻撃！ しかし、${target.name}は防御していて効かなかった！`);
                             flashCard(target, 'yellow');
