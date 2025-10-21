@@ -6647,18 +6647,15 @@
                                 } else {
                                     showLevelUpModal(true); // 通常のボーナス選択モーダルを表示
                                 }
-                            } else if (gameState.gameMode === 'divine_trial') {
-                                if (gameState.floor === 30 && !gameState.isEndlessVersion) {
-                                    showModal("神々の試練 達成", "あなたは神々の試練を乗り越え、ダンジョンを制覇しました。その魂は、神々の間で語り継がれるでしょう。");
-                                }
                             } else if (gameState.gameMode === 'endgame' && gameState.floor === 1) { // この条件は isEndlessVersion の影響を受けない
                                 showModal("ゲームクリア？", "あなたはダンジョンの入り口で待ち構えていたボスを打ち破りました！…これでよかったのでしょうか？");
                                 gameState.gameOver = true;
                             } else if (gameState.floor === 30 && gameState.gameMode !== 'endless' && !gameState.isEndlessVersion) {
                                 let title = "ゲームクリア！";
                                 let text = "おめでとう！あなたはダンジョンの最深部に到達し、ボスを打ち破りました！";
-
                                 switch (gameState.gameMode) {
+                                    case 'divine_trial':
+                                        showModal("神々の試練 達成", "あなたは神々の試練を乗り越え、ダンジョンを制覇しました。その魂は、神々の間で語り継がれるでしょう。");
                                     case 'normal':
                                     case 'trial':
                                         text += "\nもしもの物語では、異なる結末があなたを待っているかもしれません。";
@@ -6705,8 +6702,6 @@
                                 }
                                 showModal(title, text);
                                 gameState.gameOver = true;
-                            } else if (gameState.gameMode === 'divine_trial') {
-                                showBlessingModal();
                             } else {
                                 showLevelUpModal();
                             }
