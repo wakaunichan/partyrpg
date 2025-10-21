@@ -4699,27 +4699,44 @@
 
                         switch (action.type) {
                             case 'attack': // Player attack
-                                let damage = calculateDamage(character, target);
-                                let logMessageText = `${character.name}の攻撃！ ${target.name}に${damage}のダメージ！`;
-
-                                const mpRecoveryRoles = ['ソーサラー', 'メディック', 'モンク', 'ギャンブラー', 'サモナー', 'アルケミスト', 'ダンサー', 'ドクター', 'ネクロマンサー'];
-                                if (mpRecoveryRoles.includes(character.role)) {
-                                    // MP回復ジョブの処理
-                                    const mpRecovery = Math.floor(character.maxMp * 0.1);
-                                    if (mpRecovery > 0) {
-                                        await animateStatChange(character, 'mp', mpRecovery, 'increase');
-                                        log(`${character.name}は攻撃から魔力を吸収した！(MP+${mpRecovery})`);
+                                // 身長が500cmを超えている場合、全体攻撃になる
+                                if (character.height > 500) {
+                                    log(`${character.name}はその巨体で敵全体をなぎ払った！`);
+                                    const aliveEnemies = gameState.enemies.filter(e => e.currentHp > 0);
+                                    const damagePromises = [];
+                                    for (const enemy of aliveEnemies) {
+                                        // 全体攻撃なので威力を少し下げる (0.7倍)
+                                        const damage = calculateDamage(character, enemy, {
+                                            power: 0.7,
+                                            type: 'physical'
+                                        });
+                                        damagePromises.push(dealDamage(enemy, damage));
                                     }
+                                    await Promise.all(damagePromises);
                                 } else {
-                                    // クリティカルヒット判定ジョブの処理
-                                    const criticalRoles = ['ファイター', 'ナイト', 'サムライ', 'ガーディアン', 'トラブルメーカー'];
-                                    if (criticalRoles.includes(character.role) && Math.random() < 0.2) { // 20%の確率でクリティカル
-                                        damage = Math.floor(damage * 1.5);
-                                        logMessageText = `会心の一撃！ ${target.name}に${damage}の大ダメージ！`;
+                                    // 通常の単体攻撃
+                                    let damage = calculateDamage(character, target);
+                                    let logMessageText = `${character.name}の攻撃！ ${target.name}に${damage}のダメージ！`;
+
+                                    const mpRecoveryRoles = ['ソーサラー', 'メディック', 'モンク', 'ギャンブラー', 'サモナー', 'アルケミスト', 'ダンサー', 'ドクター', 'ネクロマンサー'];
+                                    if (mpRecoveryRoles.includes(character.role)) {
+                                        // MP回復ジョブの処理
+                                        const mpRecovery = Math.floor(character.maxMp * 0.1);
+                                        if (mpRecovery > 0) {
+                                            await animateStatChange(character, 'mp', mpRecovery, 'increase');
+                                            log(`${character.name}は攻撃から魔力を吸収した！(MP+${mpRecovery})`);
+                                        }
+                                    } else {
+                                        // クリティカルヒット判定ジョブの処理
+                                        const criticalRoles = ['ファイター', 'ナイト', 'サムライ', 'ガーディアン', 'トラブルメーカー'];
+                                        if (criticalRoles.includes(character.role) && Math.random() < 0.2) { // 20%の確率でクリティカル
+                                            damage = Math.floor(damage * 1.5);
+                                            logMessageText = `会心の一撃！ ${target.name}に${damage}の大ダメージ！`;
+                                        }
                                     }
+                                    await dealDamage(target, damage); // Await the damage animation
+                                    log(logMessageText); // Log after animation
                                 }
-                                await dealDamage(target, damage); // Await the damage animation
-                                log(logMessageText); // Log after animation
                                 break;
                             case 'skill':
                                 if (action.skill.type && action.skill.type.includes('hp_cost')) { // HPコスト
@@ -6522,19 +6539,31 @@
                         // Update the actual game state value
                         if (statName === 'hp') target.currentHp += changeAmount;
                         else if (statName === 'mp') target.currentMp += changeAmount;
-                        else if (statName === 'height') target.height += changeAmount;
+                        else if (statName === 'height') {
+                            const newHeight = target.height + changeAmount;
+                            if (newHeight > 2000) {
+                                if (target.height < 2000) {
+                                    // 上限に達した瞬間にメッセージを表示
+                                    log(`${target.name}は成長の限界に達した！これ以上大きくはなれない！`);
+                                }
+                                changeAmount = 2000 - target.height; // 実際に変化する量に修正
+                                target.height = 2000; // 上限値に設定
+                            } else {
+                                target.height += changeAmount;
+                            }
+                        }
 
                         // Clamp values to min/max
                         target.currentHp = Math.min(target.maxHp, Math.max(0, target.currentHp));
                         target.currentMp = Math.min(target.maxMp, Math.max(0, target.currentMp));
-                        target.height = Math.max(1, Math.round(target.height)); // 整数にして1cmでクランプ
+                        target.height = Math.min(2000, Math.max(1, Math.round(target.height))); // 整数にして1cmと2000cmでクランプ
 
                         const endValue = (statName === 'hp') ? target.currentHp :
                             (statName === 'mp') ? target.currentMp :
                             (statName === 'height') ? target.height : startValue; // Fallback
 
                         const startTime = performance.now();
-                        let resolveAnimation;
+                        let resolveAnimation; // アニメーション完了を通知するためのPromise
                         const animationPromise = new Promise(resolve => {
                             resolveAnimation = resolve;
                         });
@@ -6581,7 +6610,7 @@
                                         const diff = endValue - target.initialHeight;
                                         heightDiffElement.innerHTML = `身長: <span class="font-semibold">${endValue}cm</span> (${diff >= 0 ? '+' : ''}${diff})`;
                                     }
-                                }
+                                } // アニメーション完了
                                 resolveAnimation();
                             }
                         }
