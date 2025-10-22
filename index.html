@@ -1531,19 +1531,19 @@
                                 description: '敵単体にダメージを与え、自身の攻撃力が上がるかMPが大きく回復する。'
                             }, {
                                 name: 'サキュバスモード',
-                                cost: 15,
+                                cost: 0,
                                 type: 'transform_succubus',
                                 targetType: 'self',
                                 description: 'MPが尽きるまでサキュバスに変身する。変身時、身長が30cm伸びる。'
                             }, {
                                 name: 'フェアリーモード',
-                                cost: 15,
+                                cost: 0,
                                 type: 'transform_fairy',
                                 targetType: 'self',
                                 description: 'MPが尽きるまでフェアリーに変身する。変身時、身長が30cm縮む。'
                             }, {
                                 name: 'アルラウネモード',
-                                cost: 15,
+                                cost: 0,
                                 type: 'transform_alraune',
                                 targetType: 'self',
                                 description: 'MPが尽きるまでアルラウネに変身する。変身時、HPが全回復する。'
@@ -3772,11 +3772,14 @@
 
                         // 脱衣状態の場合
                         if (char.statusEffects && char.statusEffects.stripped) {
-                            if (char.role === 'リーパー') {
+                            if (char.role === 'サキュバス') {
+                                // サキュバスは脱衣で攻撃力が上がる
+                                atk *= 1.5;
+                            } else if (char.role === 'リーパー') {
                                 // リーパーは脱衣状態に非常に弱い
                                 atk *= 0.5; // 攻撃力半減
                                 def *= 0.5; // 防御力半減
-                            } else {
+                            } else if (char.role !== 'トレジャーハンター' && char.role !== 'フェアリー' && char.role !== 'アルラウネ') {
                                 def *= 0.8; // 他のジョブは防御力20%減少
                             }
                         }
@@ -5010,13 +5013,13 @@
                         updatePartyStatus();
                     }
 
-                    function inflictRegeneration(enemy) {
+                    async function inflictRegeneration(enemy) {
                         enemy.statusEffects.regeneration = {
                             turns: 3
                         };
                         flashCard(enemy, 'green');
                         log(`${enemy.name}は傷が再生し始めた！`);
-                        updateEnemyStatus(); // 敵のUIは無いが、将来的な拡張のため
+                        await new Promise(resolve => setTimeout(resolve, 1000)); // ログ表示のための待機
                     }
 
                     async function nextTurn() {
@@ -5083,8 +5086,10 @@
 
                         let actor = gameState.turnOrder[gameState.currentTurnIndex];
 
-                        // 脱衣チェック (ナイト、サムライ、モンクは対象外)
-                        if (actor.statusEffects && actor.statusEffects.stripped && actor.role !== 'ナイト' && actor.role !== 'サムライ' && actor.role !== 'モンク') {
+                        // 脱衣チェック (ナイト、サムライ、モンク、トレジャーハンターとその変身は対象外)
+                        const immuneToShameRoles = ['ナイト', 'サムライ', 'モンク', 'トレジャーハンター', 'サキュバス', 'フェアリー', 'アルラウネ'];
+
+                        if (actor.statusEffects && actor.statusEffects.stripped && !immuneToShameRoles.includes(actor.role)) {
                             let failChance = 0;
                             if (gameState.gameMode === 'indecent') {
                                 failChance = 0.3; // 確率が減少しない
@@ -5119,7 +5124,7 @@
 
                         // 変身中のMP消費
                         if (currentActor.isTransformed) {
-                            const mpCost = 5;
+                            const mpCost = 15;
                             // フェアリーモードの特殊効果
                             if (currentActor.role === 'フェアリー') {
                                 const shrinkAmount = Math.floor(Math.random() * 21) + 20; // 20-40cm縮む
