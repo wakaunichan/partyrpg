@@ -7270,18 +7270,10 @@
                                     case 'treasure_map':
                                         title = "秘宝の在り処";
                                         text = "リリィはついにダンジョンの最奥に眠る秘宝を手に入れました。しかし、世界にはまだ見ぬお宝がたくさん眠っています。彼女の冒険は、まだ始まったばかりです。";
-                                        break;
-                                    case 'divine_trial':
-                                        title = "秘宝の在り処";
-                                        text = "リリィはついにダンジョンの最奥に眠る秘宝を手に入れました。しかし、世界にはまだ見ぬお宝がたくさん眠っています。彼女の冒険は、まだ始まったばかりです。";
                                         // トレジャーハンタークリアフラグを保存
                                         const clearFlagsTreasure = JSON.parse(localStorage.getItem('sizeDungeonClearFlags') || '{}');
                                         clearFlagsTreasure.treasureMapCleared = true;
                                         localStorage.setItem('sizeDungeonClearFlags', JSON.stringify(clearFlagsTreasure));
-                                        break;
-                                    case 'divine_trial':
-                                        title = "神々の試練 達成";
-                                        text = "あなたは神々の試練を乗り越え、ダンジョンを制覇しました。その魂は、神々の間で語り継がれるでしょう。";
                                         break;
                                     case 'indecent':
                                         title = "恥辱の先の勝利";
@@ -7302,7 +7294,7 @@
                                 showModal(title, text);
                                 gameState.gameOver = true;
                             } else {
-                                showLevelUpModal();
+                                showLevelUpModal(false);
                             }
                         } else {
                             if (gameState.party.length === 1) {
