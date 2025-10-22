@@ -506,7 +506,6 @@
                     <button data-mode="unstable_bodies" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-cyan-700">流転の体躯</strong><span class="block text-sm text-gray-600">戦闘に勝利するたび、生存者全員の身長が-50cm～+50cmの範囲でランダムに変動する。</span></button>
                     <button data-mode="fixed_path" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-indigo-700">決まった道程</strong><span class="block text-sm text-gray-600">5の倍数階以外の探索時、2つのイベントから好きな方を選んで進める。</span></button>
                     <button data-mode="veterans" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-purple-700">歴戦の勇者たち</strong><span class="block text-sm text-gray-600">全員レベル4の状態で冒険を開始する。</span></button>
-                    <button data-mode="divine_trial" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-amber-600">神々の試練</strong><span class="block text-sm text-gray-600">戦闘に勝利するたびに、レベルアップの代わりにランダムな3つの祝福から1つを選んで仲間を強化する。全スキルを習得した状態で開始。</span></button>
                     <button data-mode="saint_march" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-yellow-500">聖女の行進</strong><span class="block text-sm text-gray-600">特別なジョブ「聖女」ひとりで30階の踏破を目指す。彼女はターン開始時にHPとMPが回復し、脱衣を無効化する。</span></button>
                     <button data-mode="treasure_map" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-lime-700">秘宝の地図</strong><span class="block text-sm text-gray-600">特別なジョブ「トレジャーハンター」ひとりで30階の踏破を目指す。彼女は魔物に変身する能力を持つ。</span></button>
                     <button data-mode="solo" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-yellow-700">孤独な闘い</strong><span class="block text-sm text-gray-600">好きな仲間を一人選び、強化された状態で冒険に出る。</span></button>
@@ -541,13 +540,19 @@
         </div>
 
         <div id="scan-modal" class="hidden absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-            <div class="bg-white rounded-lg p-6 text-left shadow-2xl max-w-lg w-full">
-                <h2 id="scan-modal-title" class="text-2xl font-bold mb-4">調査結果</h2>
-                <div id="scan-modal-content" class="space-y-3 text-gray-700 max-h-96 overflow-y-auto pr-2">
-                    <!-- 調査結果がここに挿入されます -->
+            <div class="bg-white rounded-lg p-6 shadow-2xl max-w-3xl w-full flex gap-6">
+                <div id="scan-modal-text-content" class="w-full md:w-1/2">
+                    <h2 id="scan-modal-title" class="text-2xl font-bold mb-4">調査結果</h2>
+                    <div id="scan-modal-content" class="space-y-3 text-gray-700 max-h-96 overflow-y-auto pr-2">
+                        <!-- 調査結果がここに挿入されます -->
+                    </div>
+                    <div class="text-right mt-4">
+                        <button id="scan-modal-close" class="action-button bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded-lg shadow-lg">閉じる</button>
+                    </div>
                 </div>
-                <div class="text-right mt-4">
-                    <button id="scan-modal-close" class="action-button bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded-lg shadow-lg">閉じる</button></div>
+                <div id="scan-modal-image-container" class="hidden md:block w-1/2 relative rounded-lg overflow-hidden">
+                    <!-- 立ち絵がここに挿入されます -->
+                </div>
             </div>
         </div>
 
@@ -810,7 +815,7 @@
                         isEndlessVersion: false, // 無限版フラグ
                         gameMode: 'normal', // normal, veterans, dwarves, brawl, solo, endgame, endless, indecent, enjoy, saint_march, fixed_path, uninhibited_souls, random_party, divine_trial, treasure_map
                     };
-                    gameState.triggeredSpecialConvos = [];
+                    gameState.triggeredSpecialConvos = []; // ファイター, ソーサラー, ナイト, メディック
 
                     const allCharacterBlueprints = [{
                             name: 'アカリ',
@@ -3331,12 +3336,6 @@
                             gameState.party.forEach(char => {
                                 applyLevelUp(char, 3); // Lv1 -> Lv4
                             });
-                        } else if (gameState.gameMode === 'divine_trial') {
-                            gameState.party.forEach(char => {
-                                // 全スキルを習得
-                                if (char.unlockableSkill) char.skills.push(char.unlockableSkill);
-                                if (char.unlockableSkillLv4) char.skills.push(char.unlockableSkillLv4);
-                            });
                         } else if (gameState.gameMode === 'dwarves') {
                             gameState.party.forEach(char => {
                                 char.height = 10;
@@ -4661,7 +4660,7 @@
                     }
 
                     function startBattle(isBoss = false, isEnhancedBoss = false) {
-                        log(isBoss ? 'ボスの気配がする…！' : '敵が現れた！');
+                        log(isBoss ? "ボスの気配がする…！" : "敵が現れた！");
                         gameState.inBattle = true; // ファイター, ソーサラー, ナイト, メディック
                         dungeonCommands.classList.add('hidden');
                         emergencyButton.classList.add('battle-active'); // 緊急ボタンを有効化
@@ -4686,7 +4685,9 @@
                         gameState.turnOrder = combatants.sort((a, b) => getEffectiveStats(b).agi - getEffectiveStats(a).agi);
                         gameState.currentTurnIndex = 0;
 
-                        nextTurn();
+                        setTimeout(() => {
+                            nextTurn();
+                        }, 1000); // メッセージ表示のための待機
                     }
 
                     function createEnemy(isBoss, isEnhanced = false) {
@@ -5535,6 +5536,23 @@
                                     flashCard(target, 'green'); // Flash the card itself
                                     showDamagePopup(target, skillHealAmount, true);
                                     log(`${caster.name}は${target.name}に${skill.name}を唱えた！ HPが${skillHealAmount}回復した。`);
+                                    // メディックの「ヒール」の場合、状態異常を解除
+                                    if (skill.name === 'ヒール' && caster.role === 'メディック') {
+                                        let curedEffects = [];
+                                        if (target.statusEffects.poison) {
+                                            delete target.statusEffects.poison;
+                                            curedEffects.push('毒');
+                                        }
+                                        if (target.statusEffects.paralysis) {
+                                            delete target.statusEffects.paralysis;
+                                            curedEffects.push('麻痺');
+                                        }
+                                        if (target.statusEffects.slow) {
+                                            delete target.statusEffects.slow;
+                                            curedEffects.push('鈍化');
+                                        }
+                                        if (curedEffects.length > 0) log(`さらに、${target.name}の${curedEffects.join('、')}が治った！`);
+                                    }
                                     break;
                                 }
                             case 'buff':
@@ -5672,13 +5690,13 @@
                                         log(`しかし、${caster.name}の体は聖なる力による成長を受け付けなかった！`);
                                     }
 
-                                    gameState.party.forEach(p => {
+                                    for (const p of gameState.party) {
                                         if (p.currentHp > 0) {
-                                            animateStatChange(p, 'hp', p.maxHp, 'increase'); // 全回復
+                                            await animateStatChange(p, 'hp', p.maxHp, 'increase'); // 全回復
                                             p.statusEffects = {}; // 状態異常回復
-                                            if (p !== caster) animateStatChange(p, 'height', skill.growth, 'increase'); // 身長アップ
+                                            if (p !== caster) await animateStatChange(p, 'height', skill.growth, 'increase'); // 身長アップ
                                         }
-                                    });
+                                    }
                                     break;
                                 }
                                 // 新キャラクタースキル
@@ -6023,7 +6041,7 @@
                                 // ネクロマンサー
                             case 'necro_magic':
                                 {
-                                    const killBonus = Math.ceil(gameState.killCount / 5); // 5体倒すごとに威力アップ // ファイター, ソーサラー, ナイト, メディック
+                                    const killBonus = Math.ceil(gameState.killCount / 2); // 2体倒すごとに威力アップ
                                     const necroSkill = {
                                         ...skill,
                                         power: skill.power + killBonus * 0.2
@@ -7077,7 +7095,7 @@
                                 }
                             }
                         }
-                        // 祝福: 過剰治癒
+                        // 祝福: 過剰治癒 // ファイター, ソーサラー, ナイト, メディック
                         if (target && !target.isEnemy && target.blessings && target.blessings.over_heal && isHeal && target.currentHp === target.maxHp) {
                             const overHealAmount = (target.currentHp + amount) - target.maxHp;
                             if (overHealAmount > 0) {
@@ -7090,7 +7108,7 @@
                                 log(`${target.name}の超過した回復力が、耐久値${wallHp}の防壁に変換された！`);
                             }
                         }
-                    }
+                    } // ファイター, ソーサラー, ナイト, メディック
 
                     function triggerLiberationEvent() {
                         liberationModal.classList.remove('hidden');
@@ -7242,8 +7260,6 @@
                                 let title = "ゲームクリア！";
                                 let text = "おめでとう！あなたはダンジョンの最深部に到達し、ボスを打ち破りました！";
                                 switch (gameState.gameMode) {
-                                    case 'divine_trial':
-                                        showModal("神々の試練 達成", "あなたは神々の試練を乗り越え、ダンジョンを制覇しました。その魂は、神々の間で語り継がれるでしょう。");
                                     case 'normal':
                                     case 'trial':
                                         text += "\nもしもの物語では、異なる結末があなたを待っているかもしれません。";
@@ -7313,9 +7329,6 @@
                     }
 
                     function showBlessingModal() {
-                        log('敵を倒した！神々の祝福が降り注ぐ！');
-                        enemyContainer.innerHTML = '';
-                        dungeonCommands.classList.add('hidden');
 
                         blessingCharSelectList.innerHTML = '';
                         blessingOptionsList.innerHTML = '';
@@ -7339,51 +7352,29 @@
                         blessingModal.classList.remove('hidden');
                     }
 
-                    function selectRandomBlessings(character) {
-                        const blessingPool = Object.values(blessings);
-                        const selected = [];
-                        const available = blessingPool.filter(b => {
-                            // 既に習得済みの祝福は除外
-                            return !Object.values(character.blessings).some(owned => owned.name === b.name);
-                        });
-
-                        while (selected.length < 3 && available.length > 0) {
-                            const randomIndex = Math.floor(Math.random() * available.length);
-                            selected.push(available[randomIndex]);
-                            available.splice(randomIndex, 1);
-                        }
-                        return selected;
-                    }
-
-                    function presentBlessingChoices(character) {
+                    function presentBlessingChoices(char) {
                         blessingCharSelectList.classList.add('hidden');
                         blessingOptionsList.classList.remove('hidden');
-                        blessingModalPrompt.textContent = `${character.name}に授ける祝福を選んでください。`;
+                        blessingModalPrompt.textContent = `${char.name}に授ける祝福を選んでください。`;
+                        blessingOptionsList.innerHTML = '';
 
-                        const choices = selectRandomBlessings(character);
-
-                        if (choices.length === 0) {
-                            log(`${character.name}は全ての祝福を授かった！`);
-                            blessingModal.classList.add('hidden');
-                            dungeonCommands.classList.remove('hidden');
-                            return;
+                        const blessingPool = Object.values(blessings);
+                        const available = blessingPool.filter(b => !Object.values(char.blessings).some(owned => owned.name === b.name));
+                        const choices = [];
+                        while (choices.length < 3 && available.length > 0) {
+                            const randomIndex = Math.floor(Math.random() * available.length);
+                            choices.push(available.splice(randomIndex, 1)[0]);
                         }
 
                         choices.forEach(blessing => {
                             const button = document.createElement('button');
-                            button.className = 'action-button bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 px-4 rounded-lg shadow-lg text-left';
-                            button.innerHTML = `
-                                <strong class="text-lg">${blessing.name}</strong>
-                                <span class="block text-sm text-amber-200 mt-1">${blessing.description}</span>
-                            `;
+                            button.className = 'action-button bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg text-left';
+                            button.innerHTML = `<strong class="text-lg">${blessing.name}</strong><span class="block text-sm text-amber-100 mt-1">${blessing.description}</span>`;
                             button.onclick = () => {
+                                blessing.effect(char);
+                                log(`${char.name}は神々の祝福「${blessing.name}」を授かった！`);
                                 blessingModal.classList.add('hidden');
-                                log(`${character.name}は「${blessing.name}」の祝福を授かった！`);
-                                blessing.effect(character); // effect関数を呼び出して祝福を適用
-                                setTimeout(() => {
-                                    updatePartyStatus();
-                                    dungeonCommands.classList.remove('hidden');
-                                }, 1000);
+                                dungeonCommands.classList.remove('hidden');
                             };
                             blessingOptionsList.appendChild(button);
                         });
@@ -7408,8 +7399,9 @@
                             } else { // ファイター, ソーサラー, ナイト, メディック
                                 levelUpCharacter(gameState.party[0]);
                             }
-                            return;
+                            return; // ファイター, ソーサラー, ナイト, メディック
                         }
+
 
                         gameState.party.forEach((char, index) => {
                             if (char.currentHp <= 0) return; // 戦闘不能のキャラは選択不可
@@ -7601,6 +7593,28 @@
                                 }
                             },
                             weight: 1,
+                            needsTarget: true
+                        }, {
+                            id: 'getBlessing',
+                            text: (target) => `${target.name}に神々の祝福を授ける`,
+                            effect: (target) => {
+                                const blessingPool = Object.values(blessings);
+                                const available = blessingPool.filter(b => !Object.values(target.blessings).some(owned => owned.name === b.name));
+
+                                if (available.length === 0) {
+                                    log(`${target.name}は既に全ての祝福を授かっている！`);
+                                    // 代わりにランダムなアイテムを獲得
+                                    const itemIds = Object.keys(itemBlueprints).filter(id => !itemBlueprints[id].battleOnly && !itemBlueprints[id].rare && !itemBlueprints[id].special);
+                                    const foundItemId = itemIds[Math.floor(Math.random() * itemIds.length)];
+                                    addItemToInventory(foundItemId);
+                                    log(`代わりに「${itemBlueprints[foundItemId].name}」を手に入れた！`);
+                                } else {
+                                    const chosenBlessing = available[Math.floor(Math.random() * available.length)];
+                                    chosenBlessing.effect(target);
+                                    log(`${target.name}は神々の祝福「${chosenBlessing.name}」を授かった！`);
+                                }
+                            },
+                            weight: 5,
                             needsTarget: true
                         }, ];
 
@@ -7845,6 +7859,7 @@
                         setTimeout(() => statElement.classList.remove(flashClassName), flashDuration);
 
                         // Get current displayed value (before gameState update)
+                        if (!statSpan) return animationPromise; // statSpanがない場合はアニメーションをスキップ
                         let startValue;
                         if (statName === 'height') startValue = parseInt(statSpan.textContent.replace('cm', ''));
                         else startValue = parseInt(statSpan.textContent);
@@ -8032,10 +8047,74 @@
                                 const turns = (typeof allEffects[key] === 'object' && allEffects[key].turns !== undefined) ? allEffects[key].turns : (typeof allEffects[key] === 'number' ? allEffects[key] : null);
                                 html += `<p class="${effect.color} font-semibold">${effect.name} ${turns !== null ? `(残り ${turns} ターン)` : ''}</p>`;
                     }
-                        }
+                    }
 
                 if (!hasEffect) return ''; // 効果がなければ何も返さない
                 return html + '</div>';
+            }
+
+            function showScanResult(target) {
+                const scanModalTitle = document.getElementById('scan-modal-title');
+                const scanModalContent = document.getElementById('scan-modal-content');
+                const scanModalTextContainer = document.getElementById('scan-modal-text-content');
+                const scanModalImageContainer = document.getElementById('scan-modal-image-container');
+                scanModalContent.innerHTML = ''; // コンテンツをクリア
+
+                if (target.isEnemy) {
+                    scanModalTitle.textContent = `${target.name} の調査結果`;
+
+                    let weakness = '物理・魔法ともに同程度有効。';
+                    if (target.pDef < target.mDef * 0.8) {
+                        weakness = '<strong class="text-red-600">物理攻撃が有効。</strong> 魔法攻撃は効きにくい。';
+                    } else if (target.mDef < target.pDef * 0.8) {
+                        weakness = '<strong class="text-blue-600">魔法攻撃が有効。</strong> 物理攻撃は効きにくい。';
+                    }
+
+                    let skillInfo = '特別なスキルは使用しない。';
+                    if (target.skills && target.skills.length > 0) {
+                        skillInfo = '使用スキル: ' + target.skills.map(s => s.name).join('、');
+                    }
+
+                    scanModalContent.innerHTML = `
+                        <p>HP: ${target.currentHp} / ${target.maxHp}</p>
+                        <p>弱点: ${weakness}</p>
+                        <p>${skillInfo}</p>
+                        ${getStatusAndBuffsHtml(target)}
+                    `;
+                    // 敵の場合は立ち絵を隠し、テキストエリアを全幅にする
+                    scanModalImageContainer.classList.add('hidden');
+                    scanModalTextContainer.classList.replace('md:w-1/2', 'w-full');
+                } else { // 味方の場合
+                    scanModalTitle.textContent = `${target.name} の情報`;
+                    const blueprint = allCharacterBlueprints.find(c => c.name === (target.originalState ? target.originalState.name : target.name));
+                    let skillHtml = target.skills.map(skill => {
+                        return `<div class="p-2 bg-gray-100 rounded-md">
+                                    <p class="font-bold">${skill.name} <span class="text-sm font-normal text-gray-600">(${skill.type && skill.type.includes('hp_cost') ? 'HP' : 'MP'}:${skill.cost})</span></p>
+                                    <p class="text-sm">${skill.description}</p>
+                                </div>`;
+                    }).join('');
+
+                    scanModalContent.innerHTML = `
+                        <p class="italic">"${blueprint.description}"</p>
+                        <div class="space-y-2 mt-2">${skillHtml}</div>
+                        ${getStatusAndBuffsHtml(target)}
+                    `;
+                    // 味方の場合は立ち絵を表示し、テキストエリアを半分の幅にする
+                    scanModalImageContainer.classList.remove('hidden');
+                    scanModalTextContainer.classList.replace('w-full', 'md:w-1/2');
+
+                    // 立ち絵の表示
+                    scanModalImageContainer.innerHTML = ''; // クリア
+                    const imgDiv = document.createElement('div');
+                    imgDiv.className = `absolute inset-0 bg-no-repeat opacity-80 ${target.bgClass}`;
+                    imgDiv.style.backgroundSize = 'contain';
+                    imgDiv.style.backgroundPosition = 'center';
+                    scanModalImageContainer.appendChild(imgDiv);
+                }
+
+                scanModal.classList.remove('hidden');
+                pendingAction = null; // アクションをクリア
+                document.querySelectorAll('.enemy-card, .character-card').forEach(c => c.classList.remove('targeted'));
             }
 
             function showAmountChoiceModal(title, text, choices, callback) {
@@ -8081,54 +8160,6 @@
                 });
             }
 
-            function showScanResult(target) {
-                const scanModalTitle = document.getElementById('scan-modal-title');
-                const scanModalContent = document.getElementById('scan-modal-content');
-                scanModalContent.innerHTML = ''; // コンテンツをクリア
-
-                if (target.isEnemy) {
-                    scanModalTitle.textContent = `${target.name} の調査結果`;
-
-                    let weakness = '物理・魔法ともに同程度有効。';
-                    if (target.pDef < target.mDef * 0.8) {
-                        weakness = '<strong class="text-red-600">物理攻撃が有効。</strong> 魔法攻撃は効きにくい。';
-                    } else if (target.mDef < target.pDef * 0.8) {
-                        weakness = '<strong class="text-blue-600">魔法攻撃が有効。</strong> 物理攻撃は効きにくい。';
-                    }
-
-                    let skillInfo = '特別なスキルは使用しない。';
-                    if (target.skills && target.skills.length > 0) {
-                        skillInfo = '使用スキル: ' + target.skills.map(s => s.name).join('、');
-                    }
-
-                    scanModalContent.innerHTML = `
-                        <p>HP: ${target.currentHp} / ${target.maxHp}</p>
-                        <p>弱点: ${weakness}</p>
-                        <p>${skillInfo}</p>
-                        ${getStatusAndBuffsHtml(target)}
-                    `;
-                } else { // 味方の場合
-                    scanModalTitle.textContent = `${target.name} の情報`;
-                    const blueprint = allCharacterBlueprints.find(c => c.name === target.name);
-                    let skillHtml = target.skills.map(skill => {
-                        return `<div class="p-2 bg-gray-100 rounded-md">
-                                    <p class="font-bold">${skill.name} <span class="text-sm font-normal text-gray-600">(${skill.type.includes('hp_cost') ? 'HP' : 'MP'}:${skill.cost})</span></p>
-                                    <p class="text-sm">${skill.description}</p>
-                                </div>`;
-                    }).join('');
-
-                    scanModalContent.innerHTML = `
-                        <p class="italic">"${blueprint.description}"</p>
-                        <div class="space-y-2 mt-2">${skillHtml}</div>
-                        ${getStatusAndBuffsHtml(target)}
-                    `;
-                }
-
-                scanModal.classList.remove('hidden');
-                pendingAction = null; // アクションをクリア
-                document.querySelectorAll('.enemy-card, .character-card').forEach(c => c.classList.remove('targeted'));
-            }
-
             function showItemModal(character = null) {
                 itemList.innerHTML = '';
                 const availableItems = gameState.inventory.filter(item => item.quantity > 0);
@@ -8170,7 +8201,7 @@
                     });
                 }
                 itemModal.classList.remove('hidden');
-            }
+            } // ファイター, ソーサラー, ナイト, メディック
 
             function useItem(character, item) {
                 itemModal.classList.add('hidden');
@@ -8218,7 +8249,7 @@
                         // 全体対象や対象不要のアイテム
                         executePlayerAction();
                     }
-                }
+                } // ファイター, ソーサラー, ナイト, メディック
             }
 
             function startGame(mode = 'normal', selectedMembers = null, fromSave = false) {
@@ -8274,10 +8305,6 @@
 
                 if (mode === 'saint_march') {
                     selectedMembers = ['セレスティア'];
-                }
-
-                if (mode === 'treasure_map') {
-                    selectedMembers = ['リリィ'];
                 }
 
                 if (mode === 'treasure_map') {
