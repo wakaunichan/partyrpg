@@ -4902,18 +4902,23 @@
 
                     function inflictStripped(enemy) {
                         const target = findTarget(enemy);
+                        // 対象がナイト、サムライ、聖女、または防御中の場合、スキルは失敗し通常攻撃に切り替わる
                         if (target.role === 'ナイト' || target.role === 'サムライ' || target.role === '聖女') {
                             log(`${enemy.name}は${target.name}にいたずらを仕掛けたが、全く動じなかった！`);
-                            return;
+                            // 通常攻撃にフォールバック
+                            defaultEnemyAttack(enemy, target);
+                            return; // この後の処理は行わない
                         }
 
                         if (target.isDefending) {
                             log(`${enemy.name}のいたずら！ しかし、${target.name}は身構えていて効果がなかった！`);
                             flashCard(target, 'yellow');
-                            return;
+                            // 通常攻撃にフォールバック
+                            defaultEnemyAttack(enemy, target);
+                            return; // この後の処理は行わない
                         }
 
-                        target.statusEffects.stripped = {
+                        target.statusEffects.stripped = { // ターンカウンターを追加
                             turns: 0
                         }; // ターンカウンターを追加
                         flashCard(target, 'yellow');
@@ -5606,7 +5611,7 @@
                                         target.statusEffects.poison = {
                                             turns: 3
                                         };
-                                        flashCard(p, 'yellow');
+                                        flashCard(target, 'yellow');
                                         log(`${caster.name}の${skill.name}！ ${target.name}は毒状態になった！`);
                                     }
                                     break;
@@ -7122,7 +7127,7 @@
                             } else if (gameState.gameMode === 'endgame' && gameState.floor === 1) { // この条件は isEndlessVersion の影響を受けない
                                 showModal("ゲームクリア？", "あなたはダンジョンの入り口で待ち構えていたボスを打ち破りました！…これでよかったのでしょうか？");
                                 gameState.gameOver = true;
-                            } else if (gameState.floor === 30 && gameState.gameMode !== 'endless' && !gameState.isEndlessVersion) {
+                            } else if (gameState.floor === 30 && gameState.gameMode !== 'endless' && gameState.gameMode !== 'monster_march' && !gameState.isEndlessVersion) {
                                 let title = "ゲームクリア！";
                                 let text = "おめでとう！あなたはダンジョンの最深部に到達し、ボスを打ち破りました！";
                                 switch (gameState.gameMode) {
