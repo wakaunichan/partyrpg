@@ -4624,9 +4624,24 @@
                                 }
                                 break;
                             case 'トレジャーハンター':
+                            case 'サキュバス':
+                            case 'フェアリー':
+                            case 'アルラウネ':
                                 message = "お宝探しの勘が働き、ほこらの隠し場所から珍しいアイテムを見つけた！";
-                                const rareItemIdsForHunter = Object.keys(itemBlueprints).filter(id => itemBlueprints[id].rare);
-                                const foundItemIdForHunter = rareItemIdsForHunter[Math.floor(Math.random() * rareItemIdsForHunter.length)];
+                                let foundItemIdForHunter;
+                                if (prayer.isTransformed) {
+                                    if (prayer.role === 'サキュバス') {
+                                        foundItemIdForHunter = 'gigantes_ale';
+                                    } else if (prayer.role === 'フェアリー') {
+                                        foundItemIdForHunter = 'mana_element';
+                                    } else if (prayer.role === 'アルラウネ') {
+                                        foundItemIdForHunter = 'heart_element';
+                                    }
+                                } else {
+                                    // 変身していない場合はランダムなレアアイテム
+                                    const rareItemIdsForHunter = Object.keys(itemBlueprints).filter(id => itemBlueprints[id].rare);
+                                    foundItemIdForHunter = rareItemIdsForHunter[Math.floor(Math.random() * rareItemIdsForHunter.length)];
+                                }
                                 addItemToInventory(foundItemIdForHunter);
                                 message += ` (${itemBlueprints[foundItemIdForHunter].name} を手に入れた)`;
                                 break;
