@@ -344,6 +344,23 @@
         .bg-char-celestia {
             --char-bg-image: url('sgd_17.png');
         }
+        /* トレジャーハンター用 */
+        
+        .bg-char-lily {
+            --char-bg-image: url('sgd_18.png');
+        }
+        
+        .bg-char-lily-succubus {
+            --char-bg-image: url('sgd_18-1.png');
+        }
+        
+        .bg-char-lily-fairy {
+            --char-bg-image: url('sgd_18-2.png');
+        }
+        
+        .bg-char-lily-alraune {
+            --char-bg-image: url('sgd_18-3.png');
+        }
         /* 緊急ボタンの表示制御 */
         
         #emergency-button {
@@ -491,6 +508,7 @@
                     <button data-mode="veterans" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-purple-700">歴戦の勇者たち</strong><span class="block text-sm text-gray-600">全員レベル4の状態で冒険を開始する。</span></button>
                     <button data-mode="divine_trial" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-amber-600">神々の試練</strong><span class="block text-sm text-gray-600">戦闘に勝利するたびに、レベルアップの代わりにランダムな3つの祝福から1つを選んで仲間を強化する。全スキルを習得した状態で開始。</span></button>
                     <button data-mode="saint_march" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-yellow-500">聖女の行進</strong><span class="block text-sm text-gray-600">特別なジョブ「聖女」ひとりで30階の踏破を目指す。彼女はターン開始時にHPとMPが回復し、脱衣を無効化する。</span></button>
+                    <button data-mode="treasure_map" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-lime-700">秘宝の地図</strong><span class="block text-sm text-gray-600">特別なジョブ「トレジャーハンター」ひとりで30階の踏破を目指す。彼女は魔物に変身する能力を持つ。</span></button>
                     <button data-mode="solo" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-yellow-700">孤独な闘い</strong><span class="block text-sm text-gray-600">好きな仲間を一人選び、強化された状態で冒険に出る。</span></button>
                     <button data-mode="brawl" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-red-700">武闘の宴</strong><span class="block text-sm text-gray-600">2フロアごとに必ず戦闘が発生する。</span></button>
                     <button data-mode="monster_march" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-red-800">魔物の行軍</strong><span class="block text-sm text-gray-600">全てのフロアで戦闘が発生する。勝利する度にレベルアップし、アイテムを獲得する。50階踏破を目指せ。</span></button>
@@ -789,8 +807,8 @@
                         foundEquipment: [],
                         killCount: 0, // ネクロマンサー用
                         walls: [], // ガーディアン用
-                        isEndlessVersion: false, // 無限版フラグ,
-                        gameMode: 'normal', // normal, veterans, dwarves, brawl, solo, endgame, endless, indecent, enjoy, saint_march, fixed_path, uninhibited_souls, random_party, divine_trial
+                        isEndlessVersion: false, // 無限版フラグ
+                        gameMode: 'normal', // normal, veterans, dwarves, brawl, solo, endgame, endless, indecent, enjoy, saint_march, fixed_path, uninhibited_souls, random_party, divine_trial, treasure_map
                     };
                     gameState.triggeredSpecialConvos = [];
 
@@ -1495,6 +1513,79 @@
                             },
                             bgClass: 'bg-char-olivia',
                             themeColor: 'sky',
+                        }, {
+                            name: 'リリィ',
+                            role: 'トレジャーハンター',
+                            hp: 100,
+                            mp: 80,
+                            atk: 25,
+                            def: 12,
+                            agi: 18,
+                            height: 120,
+                            description: '様々なダンジョンの宝物を漁ってきた、小柄で可愛らしい見た目とは裏腹に経験が豊富。周囲への気配りができて、優しく元気な少女。過去にダンジョンで魔力を取り込み、一時的に魔物の姿に変身できる能力を持つ。',
+                            skills: [{
+                                name: 'ジュエルショット',
+                                cost: 10,
+                                type: 'treasure_hunter_attack',
+                                targetType: 'enemy',
+                                description: '敵単体にダメージを与え、自身の攻撃力が上がるかMPが大きく回復する。'
+                            }, {
+                                name: 'サキュバスモード',
+                                cost: 15,
+                                type: 'transform_succubus',
+                                targetType: 'self',
+                                description: 'MPが尽きるまでサキュバスに変身する。変身時、身長が30cm伸びる。'
+                            }, {
+                                name: 'フェアリーモード',
+                                cost: 15,
+                                type: 'transform_fairy',
+                                targetType: 'self',
+                                description: 'MPが尽きるまでフェアリーに変身する。変身時、身長が30cm縮む。'
+                            }, {
+                                name: 'アルラウネモード',
+                                cost: 15,
+                                type: 'transform_alraune',
+                                targetType: 'self',
+                                description: 'MPが尽きるまでアルラウネに変身する。変身時、HPが全回復する。'
+                            }],
+                            bgClass: 'bg-char-lily',
+                            themeColor: 'lime',
+                            // 変身後の情報
+                            transforms: {
+                                succubus: {
+                                    role: 'サキュバス',
+                                    bgClass: 'bg-char-lily-succubus',
+                                    skills: [{
+                                        name: '変身解除',
+                                        cost: 0,
+                                        type: 'transform_revert',
+                                        targetType: 'self',
+                                        description: 'トレジャーハンターの姿に戻る。'
+                                    }, {
+                                        name: 'チャーム',
+                                        cost: 0,
+                                        type: 'status_ailment_multi',
+                                        effects: ['paralysis'],
+                                        targetType: 'enemies',
+                                        description: '敵全体を高確率で麻痺させる。'
+                                    }, {
+                                        name: 'ハートドレイン',
+                                        cost: 0,
+                                        power: 2.5,
+                                        type: 'drain_physical',
+                                        targetType: 'enemy',
+                                        description: '敵単体に大ダメージを与え、HPを吸収する。'
+                                    }, {
+                                        name: 'ボディドロップ',
+                                        cost: 0,
+                                        power: 4.0,
+                                        type: 'height_power_physical',
+                                        targetType: 'enemy',
+                                        description: '敵単体に超特大ダメージ。身長が高いほど威力が上がる。'
+                                    }, ]
+                                },
+                                // フェアリーとアルラウネも同様に定義
+                            }
                         },
 
                     ];
@@ -3524,15 +3615,33 @@
                             if (heightDiff > 0) { // 身長が高い場合は通常通り攻撃力が上がる
                                 atk += Math.floor(char.atk * (heightDiff / char.initialHeight * 0.8));
                             }
+                        } else if (char.role === 'サキュバス') {
+                            // サキュバスは身長ボーナスが高い
+                            atk += Math.floor(char.atk * (heightDiff / char.initialHeight * 1.2));
+                            def += Math.floor(char.def * (heightDiff / char.initialHeight * 1.2));
+                        } else if (char.role === 'アルラウネ') {
+                            // アルラウネは全体的にステータスボーナスが高い
+                            atk += Math.floor(char.atk * (heightDiff / char.initialHeight * 1.0));
+                            def += Math.floor(char.def * (heightDiff / char.initialHeight * 1.0));
+                            agi += Math.floor(char.agi * (heightDiff / char.initialHeight * -1.0)); // 素早さ低下は少し緩やか
+                        } else if (char.role === 'フェアリー') {
+                            // フェアリーは身長が低くてもステータスが低下しない
+                            if (heightDiff > 0) {
+                                atk += Math.floor(char.atk * (heightDiff / char.initialHeight * 0.8));
+                            }
                         } else {
                             atk += Math.floor(char.atk * (heightDiff / char.initialHeight * 0.8));
                         }
                         def += Math.floor(char.def * (heightDiff / char.initialHeight * 0.8));
                         agi += Math.floor(char.agi * (heightDiff / char.initialHeight * -1.5)); // 小さいほど素早い 
-                        if (char.buffs && char.buffs.agi_up) {
-                            const power = char.buffs.agi_up.power || 1.5; // powerプロパティがなければ1.5をデフォルト値とする
-                            agi *= power;
+                        if (char.role !== 'フェアリー') {
+                            agi += Math.floor(char.agi * (heightDiff / char.initialHeight * -1.5)); // 小さいほど素早い
+                        } else {
+                            // フェアリーは素早さボーナスが倍
+                            agi += Math.floor(char.agi * (heightDiff / char.initialHeight * -3.0));
                         }
+
+                        if (char.buffs && char.buffs.agi_up) agi *= 1.5;
                         if (char.buffs && char.buffs.atk_up) atk *= 1.5;
                         if (char.buffs && char.buffs.protect) def *= 1.5;
                         if (char.buffs && char.buffs.def_down) {
@@ -4550,25 +4659,23 @@
                                 }, ]
                             }];
                             const blueprint = bossBlueprints[Math.floor(Math.random() * bossBlueprints.length)];
-
-                            // ステータスに補正を適用
-                            const finalMaxHp = Math.ceil((blueprint.maxHp + floor * 15) * statMultiplier);
-                            const finalAtk = Math.ceil((blueprint.atk + Math.ceil(floor * 1.2)) * statMultiplier);
-                            const finalPDef = Math.ceil((blueprint.pDef + Math.ceil(floor * 0.8)) * statMultiplier);
-                            const finalMDef = Math.ceil((blueprint.mDef + Math.ceil(floor * 0.8)) * statMultiplier);
-
-                            return {
+                            const boss = {
                                 ...blueprint,
-                                maxHp: finalMaxHp,
-                                currentHp: finalMaxHp,
-                                atk: finalAtk,
-                                pDef: finalPDef,
-                                mDef: finalMDef,
-                                // agiは補正対象外
                                 isEnemy: true,
+                                isBoss: true,
                                 statusEffects: {},
                                 regenUses: 0, // 自己再生の使用回数カウンター 
                             };
+
+                            // ステータスに補正を適用
+                            boss.maxHp = Math.ceil((boss.maxHp + floor * 15) * statMultiplier);
+                            boss.currentHp = boss.maxHp;
+                            boss.atk = Math.ceil((boss.atk + Math.ceil(floor * 1.2)) * statMultiplier);
+                            boss.pDef = Math.ceil((boss.pDef + Math.ceil(floor * 0.8)) * statMultiplier);
+                            boss.mDef = Math.ceil((boss.mDef + Math.ceil(floor * 0.8)) * statMultiplier);
+                            // agiは補正対象外
+
+                            return boss;
                         }
                         const enemyBlueprints = [{
                                 name: 'スライム',
@@ -4872,6 +4979,25 @@
                             return;
                         }
 
+                        // 変身中のMP消費
+                        if (currentActor.isTransformed) {
+                            const mpCost = 5;
+                            if (currentActor.currentMp < mpCost) {
+                                log(`${currentActor.name}はMPが尽き、変身が解けてしまった！`);
+                                handleTransform(currentActor, {
+                                    type: 'transform_revert'
+                                });
+                                // 変身解除後は即座にターン終了
+                                setTimeout(() => {
+                                    gameState.currentTurnIndex = (gameState.currentTurnIndex + 1) % gameState.turnOrder.length;
+                                    nextTurn();
+                                }, 1000);
+                                return;
+                            } else {
+                                animateStatChange(currentActor, 'mp', -mpCost, 'decrease');
+                            }
+                        }
+
                         // 毒ダメージ処理 (ターン終了時)
                         // nextTurnの最後に移動させるため、ここでは何もしない
 
@@ -5063,7 +5189,19 @@
                         pendingAction = null;
                         document.querySelectorAll('.enemy-card').forEach(c => c.classList.remove('targeted'));
                         actionButtons.innerHTML = '<p>コマンド実行中...</p>';
-
+                        // トレジャーハンターの通常攻撃
+                        if (action.type === 'attack' && character.role === 'トレジャーハンター' && !character.isTransformed) {
+                            await handleTreasureHunterAttack(character, target);
+                            // ターン終了処理
+                            setTimeout(() => {
+                                // ターン終了時の毒ダメージなどの処理
+                                if (gameState.inBattle) {
+                                    gameState.currentTurnIndex = (gameState.currentTurnIndex + 1) % gameState.turnOrder.length;
+                                    setTimeout(nextTurn, 0); // 即座に次のターンへ
+                                }
+                            }, 1000);
+                            return;
+                        }
                         switch (action.type) {
                             case 'attack': // Player attack
                                 // 身長が500cmを超えている場合、全体攻撃になる
@@ -5141,7 +5279,7 @@
                                 // 祝福: 魔力残響
                                 if (character.blessings && character.blessings.spell_echo && action.skill.type.includes('magic') && !action.skill.type.includes('status') && Math.random() < 0.3) {
                                     log(`魔力残響が${action.skill.name}を反響させる！`);
-                                    await new Promise(resolve => setTimeout(resolve, 1000));
+                                    await new Promise(resolve => setTimeout(resolve, 500));
                                     // MP消費なしで同じスキルを再実行
                                     const secondTarget = action.skill.targetType === 'enemy' ?
                                         gameState.enemies.filter(e => e.currentHp > 0)[Math.floor(Math.random() * gameState.enemies.filter(e => e.currentHp > 0).length)] :
@@ -5215,512 +5353,691 @@
                         switch (skill.type) {
                             case 'physical':
                             case 'magic':
-                                if (Array.isArray(target) && target.every(t => t.isEnemy)) { // 敵全体への攻撃の場合
-                                    log(`${caster.name}は${skill.name}を放った！`);
-                                    const damages = target.map(t => calculateDamage(caster, t, skill));
-                                    const damagePromises = [];
-                                    for (const t of target) {
-                                        // dealDamageを直接awaitせず、Promiseを配列に格納
-                                        damagePromises.push(dealDamage(t, calculateDamage(caster, t, skill)));
+                                {
+                                    if (Array.isArray(target) && target.every(t => t.isEnemy)) { // 敵全体への攻撃の場合
+                                        log(`${caster.name}は${skill.name}を放った！`);
+                                        const damages = target.map(t => calculateDamage(caster, t, skill));
+                                        const damagePromises = [];
+                                        for (const t of target) {
+                                            // dealDamageを直接awaitせず、Promiseを配列に格納
+                                            damagePromises.push(dealDamage(t, calculateDamage(caster, t, skill)));
+                                        }
+                                        // 全てのダメージ処理アニメーションを並行して実行
+                                        await Promise.all(damagePromises);
+                                    } else { // 単体攻撃の場合
+                                        const skillDamage = calculateDamage(caster, target, skill);
+                                        await dealDamage(target, skillDamage);
+                                        log(`${caster.name}は${skill.name}を放った！ ${target.name}に${skillDamage}のダメージ！`);
                                     }
-                                    // 全てのダメージ処理アニメーションを並行して実行
-                                    await Promise.all(damagePromises);
-                                } else { // 単体攻撃の場合
-                                    const skillDamage = calculateDamage(caster, target, skill);
-                                    await dealDamage(target, skillDamage);
-                                    log(`${caster.name}は${skill.name}を放った！ ${target.name}に${skillDamage}のダメージ！`);
+                                    break;
                                 }
-                                break;
                             case 'heal':
-                                const skillHealAmount = skill.power + Math.ceil(getEffectiveStats(caster).atk * 0.5); // Calculate amount first
-                                await animateStatChange(target, 'hp', skillHealAmount, 'increase'); // Await HP animation
-                                flashCard(target, 'green'); // Flash the card itself
-                                showDamagePopup(target, skillHealAmount, true);
-                                log(`${caster.name}は${target.name}に${skill.name}を唱えた！ HPが${skillHealAmount}回復した。`);
-                                break;
+                                {
+                                    const skillHealAmount = skill.power + Math.ceil(getEffectiveStats(caster).atk * 0.5); // Calculate amount first
+                                    await animateStatChange(target, 'hp', skillHealAmount, 'increase'); // Await HP animation
+                                    flashCard(target, 'green'); // Flash the card itself
+                                    showDamagePopup(target, skillHealAmount, true);
+                                    log(`${caster.name}は${target.name}に${skill.name}を唱えた！ HPが${skillHealAmount}回復した。`);
+                                    break;
+                                }
                             case 'buff':
-                                if (skill.effect === 'atk_up') {
-                                    target.buffs.atk_up = 3; // 3ターン攻撃力アップ
-                                    flashCard(target, 'yellow');
-                                    log(`${caster.name}は${target.name}に${skill.name}を唱えた！ 攻撃力が上がった！`);
-                                } else if (skill.effect === 'def_down') {
-                                    target.buffs.def_down = 3; // 3ターン防御力ダウン
-                                    flashCard(target, 'yellow');
-                                    log(`${caster.name}は${target.name}に${skill.name}を唱えた！ 防御力が下がった！`);
-                                } else { // 既存のプロテクト
-                                    if (skill.effect === 'agi_up') { // 応援の舞
-                                        let power = 1.5; // 基本倍率
-                                        // ダンサーの身長が高いほど効果アップ
-                                        if (caster.role === 'ダンサー') {
-                                            const heightDiff = caster.height - caster.initialHeight;
-                                            if (heightDiff > 0) {
-                                                // 身長が10cm高くなるごとに倍率が0.05アップ
-                                                power += Math.floor(heightDiff / 10) * 0.05;
-                                            } // ファイター, ソーサラー, ナイト, メディック
-                                            power = parseFloat(power.toFixed(2)); // 小数点第2位までに丸める
+                                {
+                                    if (skill.effect === 'atk_up') {
+                                        target.buffs.atk_up = 3; // 3ターン攻撃力アップ
+                                        flashCard(target, 'yellow');
+                                        log(`${caster.name}は${target.name}に${skill.name}を唱えた！ 攻撃力が上がった！`);
+                                    } else if (skill.effect === 'def_down') {
+                                        target.buffs.def_down = 3; // 3ターン防御力ダウン
+                                        flashCard(target, 'yellow');
+                                        log(`${caster.name}は${target.name}に${skill.name}を唱えた！ 防御力が下がった！`);
+                                    } else { // 既存のプロテクト
+                                        if (skill.effect === 'agi_up') { // 応援の舞
+                                            let power = 1.5; // 基本倍率
+                                            // ダンサーの身長が高いほど効果アップ
+                                            if (caster.role === 'ダンサー') {
+                                                const heightDiff = caster.height - caster.initialHeight;
+                                                if (heightDiff > 0) {
+                                                    // 身長が10cm高くなるごとに倍率が0.05アップ
+                                                    power += Math.floor(heightDiff / 10) * 0.05;
+                                                } // ファイター, ソーサラー, ナイト, メディック
+                                                power = parseFloat(power.toFixed(2)); // 小数点第2位までに丸める
+                                            }
+                                            target.buffs.agi_up = {
+                                                turns: 3,
+                                                power: power
+                                            };
+                                            flashCard(target, 'yellow');
+                                            log(`${caster.name}の${skill.name}で、${target.name}の素早さが上がった！ (効果: x${power})`);
+                                        } else { // プロテクト
+                                            target.buffs.protect = 3;
+                                            flashCard(target, 'yellow');
+                                            log(`${caster.name}は${target.name}に${skill.name}を唱えた！ 防御力が上がった！`);
                                         }
-                                        target.buffs.agi_up = {
-                                            turns: 3,
-                                            power: power
-                                        };
-                                        flashCard(target, 'yellow');
-                                        log(`${caster.name}の${skill.name}で、${target.name}の素早さが上がった！ (効果: x${power})`);
-                                    } else { // プロテクト
-                                        target.buffs.protect = 3;
-                                        flashCard(target, 'yellow');
-                                        log(`${caster.name}は${target.name}に${skill.name}を唱えた！ 防御力が上がった！`);
                                     }
+                                    break;
                                 }
-                                break;
                             case 'utility':
-                                flashCard(caster, 'yellow');
-                                caster.buffs.provoke = 3; // 挑発は自分自身が対象
-                                log(`${caster.name}は${skill.name}で敵の注意を引いた！`);
-                                break;
+                                {
+                                    flashCard(caster, 'yellow');
+                                    caster.buffs.provoke = 3; // 挑発は自分自身が対象
+                                    log(`${caster.name}は${skill.name}で敵の注意を引いた！`);
+                                    break;
+                                }
                             case 'charge':
-                                caster.isCharging = true;
-                                flashCard(caster, 'yellow');
-                                log(`${caster.name}は${skill.name}！力を溜めている…！`);
-                                break;
-                            case 'special_heal': // 献身
-                                if (caster.heightLocked) {
-                                    log(`${caster.name}は献身を使おうとしたが、体が変化を拒んだ！`);
-                                    caster.currentMp += skill.cost; // MPを消費しない
+                                {
+                                    caster.isCharging = true;
+                                    flashCard(caster, 'yellow');
+                                    log(`${caster.name}は${skill.name}！力を溜めている…！`);
                                     break;
                                 }
-                                const costHeight = Math.min(20, caster.height - 1);
-                                if (costHeight < 1) {
-                                    log(`${caster.name}は献身を使おうとしたが、身長が足りなかった！`);
-                                    break; // 身長が1cmだと使えない
-                                }
-                                // 献身使用後に身長が1cm未満になる場合は使用不可
-                                if (caster.height - costHeight < 1) {
-                                    log(`${caster.name}は献身を使おうとしたが、これ以上身長を捧げられなかった！`);
-                                    caster.currentMp += skill.cost; // MPを消費しない
-                                    break;
-                                }
-                                await animateStatChange(caster, 'height', -costHeight, 'decrease');
-                                log(`${caster.name}は身長を${costHeight}cm捧げて、味方を癒した！`);
-                                // 味方全体のHPを40%回復
-                                for (const p of gameState.party.filter(p => p.currentHp > 0)) {
-                                    const healAmount = Math.ceil(p.maxHp * 0.4);
-                                    await animateStatChange(p, 'hp', healAmount, 'increase');
-                                }
-                                break;
-                                // 新しいLv4スキル
-                            case 'multi_hit_physical': // 乱舞
-                                const hitCount = Math.ceil(Math.random() * 3) + 4; // 4〜6回
-                                log(`${caster.name}の${skill.name}！`);
-                                await new Promise(resolve => setTimeout(resolve, 500)); // メッセージ表示のための短い待機
-                                log(`${hitCount}回攻撃！`);
-                                for (let i = 0; i < hitCount; i++) {
-                                    const randomTarget = gameState.enemies.filter(e => e.currentHp > 0)[Math.floor(Math.random() * gameState.enemies.filter(e => e.currentHp > 0).length)];
-                                    if (randomTarget) {
-                                        const damage = calculateDamage(caster, randomTarget, {...skill,
-                                            power: 0.6
-                                        }); // 1ヒットあたりの威力は調整
-                                        // 連続攻撃なので、一体ずつ待機してダメージを与える
-                                        await dealDamage(randomTarget, damage);
-                                    }
-                                }
-                                break;
-                            case 'mp_burst_magic': // マジックバースト
-                                const damage = caster.currentMp * 4;
-                                await animateStatChange(caster, 'mp', -caster.currentMp, 'decrease');
-                                log(`${caster.name}は${skill.name}を放った！`);
-                                await dealDamage(target, damage);
-                                log(`${target.name}に${damage}の特大ダメージ！`);
-                                break;
-                            case 'self_buff_special': // 堅守の構え
-                                log(`${caster.name}は${skill.name}をとった！`);
-                                caster.buffs.provoke = 3;
-                                caster.statusEffects.regeneration = {
-                                    turns: 3
-                                };
-                                flashCard(caster, 'yellow');
-                                log(`${caster.name}は敵の注意を引きつけ、傷が再生し始めた！`);
-                                break;
-                            case 'party_restore_growth': // サンクチュアリ
-                                log(`${caster.name}は${skill.name}を唱えた！聖なる光がパーティを包み込む！`);
-                                if (caster.heightLocked) {
-                                    log(`しかし、${caster.name}の体は聖なる力による成長を受け付けなかった！`);
-                                }
-
-                                gameState.party.forEach(p => {
-                                    if (p.currentHp > 0) {
-                                        animateStatChange(p, 'hp', p.maxHp, 'increase'); // 全回復
-                                        p.statusEffects = {}; // 状態異常回復
-                                        if (p !== caster) animateStatChange(p, 'height', skill.growth, 'increase'); // 身長アップ
-                                    }
-                                });
-                                break;
-                                // 新キャラクタースキル
-                            case 'status_magic': // ポイズンミスト
-                                if (skill.effect === 'poison') {
-                                    target.statusEffects.poison = {
-                                        turns: 3
-                                    };
-                                    flashCard(target, 'yellow');
-                                    log(`${caster.name}の${skill.name}！ ${target.name}は毒状態になった！`);
-                                }
-                                break;
-                            case 'evade_provoke': // スポットライト
-                                caster.buffs.provoke = 3;
-                                caster.buffs.evade_up = 3;
-                                flashCard(caster, 'yellow');
-                                log(`${caster.name}は${skill.name}を浴びて、敵の注目と視線を集めた！`);
-                                break;
-                            case 'party_buff': // アンコール
-                                log(`${caster.name}の${skill.name}！ 仲間たちの攻撃力が上がった！`);
-                                gameState.party.forEach(p => {
-                                    if (p.currentHp > 0) {
-                                        p.buffs.atk_up = 3;
-                                        flashCard(p, 'yellow');
-                                    }
-                                });
-                                break;
-                            case 'party_buff_special': // センターオブステージ
-                                log(`${caster.name}は${skill.name}に立った！ パーティの士気が最高潮に達した！`);
-                                gameState.party.forEach(p => {
-                                    if (p.currentHp > 0) {
-                                        p.buffs.atk_up = 3;
-                                        p.buffs.agi_up = 3;
-                                        flashCard(p, 'yellow');
-                                    }
-                                });
-                                break;
-                            case 'hp_cost_physical': // 居合, 無明の一閃
-                                const samuraiDamage = calculateDamage(caster, target, skill);
-                                await dealDamage(target, samuraiDamage);
-                                log(`${caster.name}は${skill.name}を放った！ ${target.name}に${samuraiDamage}のダメージ！`);
-                                break;
-                            case 'self_buff_samurai': // 明鏡止水
-                                caster.buffs.atk_up = 3;
-                                log(`${caster.name}は${skill.name}の構え。精神を研ぎ澄まし、攻撃力が上がった！`);
-                                break;
-                            case 'def_ignore_physical': // 破砕拳
-                                const monkDamage = calculateDamage(caster, target, skill);
-                                await dealDamage(target, monkDamage);
-                                log(`${caster.name}の${skill.name}！ ${target.name}に${monkDamage}の防御無視ダメージ！`);
-                                break;
-                            case 'growth_ally': // 成長促進剤
-                                if (target.heightLocked) {
-                                    log(`${caster.name}は${target.name}に薬を投与したが、体が変化を拒んだ！`);
-                                    caster.currentMp += skill.cost; // MPを消費しない
-                                    break;
-                                }
-                                await animateStatChange(target, 'height', skill.power, 'increase');
-                                flashCard(target, 'yellow');
-                                log(`${caster.name}は${target.name}に${skill.name}を投与した！ ${target.name}の体が巨大化した！(身長+${skill.power}cm)`);
-                                break;
-                            case 'shrink_ally': // 縮小薬
-                                if (target.heightLocked) {
-                                    log(`${caster.name}は${target.name}に薬を投与したが、体が変化を拒んだ！`);
-                                    caster.currentMp += skill.cost; // MPを消費しない
-                                    break;
-                                }
-                                await animateStatChange(target, 'height', -skill.power, 'decrease');
-                                flashCard(target, 'yellow');
-                                log(`${caster.name}は${target.name}に${skill.name}を投与した！ 身長が${skill.power}cm縮んだ！`);
-                                break;
-                            case 'status_ailment_multi': // 衰弱ガス, パンデミック
-                                log(`${caster.name}は${skill.name}を散布した！`);
-                                const ailmentTargets = Array.isArray(target) ? target : [target];
-                                for (const t of ailmentTargets) {
-                                    const effect = skill.effects[Math.floor(Math.random() * skill.effects.length)];
-                                    let effectName = '';
-                                    if (effect === 'poison') {
-                                        t.statusEffects.poison = {
-                                            turns: 3
-                                        };
-                                        effectName = '毒';
-                                    } else if (effect === 'paralysis') {
-                                        t.statusEffects.paralysis = true;
-                                        effectName = '麻痺';
-                                    } else if (effect === 'slow') {
-                                        t.statusEffects.slow = {
-                                            turns: 3
-                                        };
-                                        effectName = '鈍化';
-                                    }
-                                    flashCard(t, 'yellow');
-                                    log(`${t.name}は${effectName}状態になった！`);
-
-                                    // 「衰弱ガス」の場合のみ、追加でステータス低下効果を付与
-                                    if (skill.name === '衰弱ガス') {
-                                        await new Promise(resolve => setTimeout(resolve, 500)); // 少し間を置く
-                                        if (Math.random() < 0.5) {
-                                            t.buffs = t.buffs || {};
-                                            t.buffs.atk_down = 3;
-                                            log(`さらに、${t.name}の攻撃力が低下した！`);
-                                        } else {
-                                            t.buffs = t.buffs || {};
-                                            t.buffs.def_down = 3;
-                                            log(`さらに、${t.name}の防御力が低下した！`);
-                                        }
-                                    }
-                                }
-                                break;
-                            case 'gambling_damage': // ダーツショット
-                                const roll = Math.random();
-                                let damageMultiplier = 1.0;
-                                let message = "";
-                                if (roll < 0.1) { // 10%でミス
-                                    damageMultiplier = 0;
-                                    message = "しかし、ダーツは大きく外れてしまった！"; // ファイター, ソーサラー, ナイト, メディック
-                                } else if (roll < 0.5) { // 40%で通常ヒット
-                                    damageMultiplier = 1.5;
-                                    message = `${target.name}にヒット！`;
-                                } else if (roll < 0.9) { // 40%でクリティカル // ファイター, ソーサラー, ナイト, メディック
-                                    damageMultiplier = 3.0;
-                                    message = `クリティカルヒット！ ${target.name}に大ダメージ！`;
-                                } else { // 10%でミラクルヒット
-                                    damageMultiplier = 5.0;
-                                    message = `ミラクルヒット！ ${target.name}に超特大ダメージ！`;
-                                }
-                                const gamblingDamage = calculateDamage(caster, target, {...skill,
-                                    power: damageMultiplier
-                                });
-                                log(`${caster.name}の${skill.name}！ ${message}`);
-                                if (gamblingDamage > 0) await dealDamage(target, gamblingDamage);
-                                break;
-                            case 'gambling_support': // ラッキースター
-                                const supportRoll = Math.random();
-                                log(`${caster.name}は${target.name}に${skill.name}を祈った！`);
-                                if (supportRoll < 0.4) { // 40% HP回復
-                                    const healAmount = Math.ceil(target.maxHp * (Math.random() * 0.4 + 0.2)); // 20-60% // ファイター, ソーサラー, ナイト, メディック
-                                    await animateStatChange(target, 'hp', healAmount, 'increase');
-                                    showDamagePopup(target, healAmount, true);
-                                    log(`幸運の星が輝き、${target.name}のHPが${healAmount}回復した！`);
-                                } else if (supportRoll < 0.7) { // 30% MP回復 // ファイター, ソーサラー, ナイト, メディック
-                                    const mpAmount = Math.ceil(target.maxMp * (Math.random() * 0.5 + 0.3)); // 30-80%
-                                    await animateStatChange(target, 'mp', mpAmount, 'increase');
-                                    log(`幸運の星が輝き、${target.name}のMPが${mpAmount}回復した！`);
-                                } else if (supportRoll < 0.9) { // 20% 攻撃バフ
-                                    target.buffs.atk_up = 3;
-                                    log(`幸運の星が輝き、${target.name}の攻撃力が上がった！`);
-                                } else { // 10% 身長アップ
-                                    const growthAmount = Math.ceil(Math.random() * 21) + 10; // 10-30cm // ファイター, ソーサラー, ナイト, メディック
-                                    if (target.heightLocked) {
-                                        log(`幸運の星が輝いたが、${target.name}の体は変化を拒んだ！`);
+                            case 'special_heal':
+                                { // 献身
+                                    if (caster.heightLocked) {
+                                        log(`${caster.name}は献身を使おうとしたが、体が変化を拒んだ！`);
                                         caster.currentMp += skill.cost; // MPを消費しない
                                         break;
                                     }
-                                    await animateStatChange(target, 'height', growthAmount, 'increase');
-                                    log(`幸運の星が輝き、${target.name}の身長が${growthAmount}cm伸びた！`);
-                                }
-                                flashCard(target, 'yellow');
-                                break;
-                            case 'gambling_all_in': // オールイン
-                                const allInRoll = Math.random();
-                                log(`${caster.name}は${skill.name}！全てを賭けた！`);
-                                if (allInRoll < 0.4) { // 40% 敵全体にダメージ
-                                    log("賭けは成功！敵全体にダメージ！");
-                                    for (const t of target) {
-                                        const damage = calculateDamage(caster, t, {
-                                            ...skill,
-                                            power: 1.8
-                                        });
-                                        await dealDamage(t, damage);
+                                    const costHeight = Math.min(20, caster.height - 1);
+                                    if (costHeight < 1) {
+                                        log(`${caster.name}は献身を使おうとしたが、身長が足りなかった！`);
+                                        break; // 身長が1cmだと使えない
                                     }
-                                } else if (allInRoll < 0.6) { // 20% 味方全体を小回復
-                                    log("悪くない！味方全体が少し回復した！");
-                                    for (const p of gameState.party) {
-                                        if (p.currentHp > 0) await animateStatChange(p, 'hp', Math.ceil(p.maxHp * 0.2), 'increase');
+                                    // 献身使用後に身長が1cm未満になる場合は使用不可
+                                    if (caster.height - costHeight < 1) {
+                                        log(`${caster.name}は献身を使おうとしたが、これ以上身長を捧げられなかった！`);
+                                        caster.currentMp += skill.cost; // MPを消費しない
+                                        break;
                                     }
-                                } else if (allInRoll < 0.9) { // 30% 何も起こらない
-                                    log("…しかし、何も起こらなかった。");
-                                } else { // 10% 自分がダメージ
-                                    log("賭けに負けた！術者にダメージ！");
-                                    await dealDamage(caster, Math.ceil(caster.maxHp * 0.25));
-                                }
-                                break;
-                            case 'gambling_jackpot': // ジャックポット
-                                log(`${caster.name}は${skill.name}を狙う！`);
-                                if (Math.random() < 0.2) { // 20%で成功
-                                    log("大当たり！ジャックポット！パーティが完全に回復し、強化された！");
-                                    for (const p of gameState.party) {
-                                        if (p.currentHp > 0) {
-                                            await animateStatChange(p, 'hp', p.maxHp, 'increase');
-                                            await animateStatChange(p, 'mp', p.maxMp, 'increase');
-                                            p.buffs.atk_up = 3;
-                                            p.buffs.protect = 3;
-                                            flashCard(p, 'green');
-                                        }
+                                    await animateStatChange(caster, 'height', -costHeight, 'decrease');
+                                    log(`${caster.name}は身長を${costHeight}cm捧げて、味方を癒した！`);
+                                    // 味方全体のHPを40%回復
+                                    for (const p of gameState.party.filter(p => p.currentHp > 0)) {
+                                        const healAmount = Math.ceil(p.maxHp * 0.4);
+                                        await animateStatChange(p, 'hp', healAmount, 'increase');
                                     }
-                                } else {
-                                    log("…しかし、何も起こらなかった。MPだけが無駄になった！");
-                                }
-                                break;
-                            case 'reaper_instant_death': // 魂狩り
-                                log(`${caster.name}は${skill.name}を唱えた…！`);
-                                if (!target.isBoss && Math.random() < 0.15) { // 15%で即死
-                                    log(`鎌が${target.name}の魂を捉えた！`);
-                                    await dealDamage(target, target.currentHp);
-                                } else {
-                                    log("…しかし、魂を狩るには至らなかった！");
-                                    const failDamage = calculateDamage(caster, target, skill);
-                                    await dealDamage(target, failDamage);
-                                }
-                                break;
-                            case 'reaper_height_scaling': // 影の一撃
-                                const heightDiff = Math.max(0, caster.initialHeight - caster.height);
-                                const bonusDamage = Math.ceil(heightDiff * 2); // 1cmあたり2ダメージ追加
-                                const baseDamage = calculateDamage(caster, target, skill);
-                                const totalDamage = baseDamage + bonusDamage;
-                                log(`${caster.name}の${skill.name}！`);
-                                await dealDamage(target, totalDamage);
-                                log(`${target.name}に${totalDamage}のダメージ！`);
-                                break;
-                            case 'reaper_soul_exchange': // 魂の交換
-                                const hpCost = Math.ceil(caster.currentHp / 2);
-                                await dealDamage(caster, hpCost, false, true); // isHeal=false, isSelfDamage=true
-                                const soulHealAmount = Math.ceil(hpCost * 1.5); // 削ったHPの1.5倍回復
-                                const mpAmount = Math.ceil(hpCost * 1.0); // 削ったHPと同じだけMP回復
-                                log(`${caster.name}は${skill.name}で自らの魂を分け与えた！`);
-                                await animateStatChange(target, 'hp', soulHealAmount, 'increase');
-                                await animateStatChange(target, 'mp', mpAmount, 'increase');
-                                log(`${target.name}のHPとMPが回復した！`);
-                                break;
-                            case 'reaper_height_scaling_multi': // 冥府の鎌
-                                log(`${caster.name}は${skill.name}を振るった！`);
-                                const heightDiffMulti = Math.max(0, caster.initialHeight - caster.height);
-                                const bonusDamageMulti = Math.ceil(heightDiffMulti * 1); // 全体攻撃なのでボーナスは少し控えめ
-                                const damagePromisesReaper = [];
-                                for (const t of target) {
-                                    const totalDamageMulti = calculateDamage(caster, t, skill) + bonusDamageMulti;
-                                    damagePromisesReaper.push(dealDamage(t, totalDamageMulti));
-                                }
-                                await Promise.all(damagePromisesReaper);
-                                break;
-                            case 'summon_golem': // ゴーレム召喚
-                                const golemHp = Math.ceil(caster.maxHp * skill.power);
-                                gameState.golem = {
-                                    name: 'ゴーレム',
-                                    hp: golemHp,
-                                    maxHp: golemHp
-                                };
-                                log(`${caster.name}は${skill.name}を唱えた！パーティの前にゴーレムが現れた！`);
-                                updatePartyStatus();
-                                flashCard(caster, 'yellow');
-                                break;
-                                // ネクロマンサー
-                            case 'necro_magic':
-                                const killBonus = Math.ceil(gameState.killCount / 5); // 5体倒すごとに威力アップ // ファイター, ソーサラー, ナイト, メディック
-                                const necroSkill = {...skill,
-                                    power: skill.power + killBonus * 0.2
-                                };
-                                if (Array.isArray(target)) { // 全体攻撃
-                                    const damagePromisesNecro = [];
-                                    log(`${caster.name}は${skill.name}を放った！`);
-                                    for (const t of target) {
-                                        damagePromisesNecro.push(dealDamage(t, calculateDamage(caster, t, necroSkill)));
-                                    }
-                                    await Promise.all(damagePromisesNecro);
-                                } else { // 単体攻撃
-                                    const damage = calculateDamage(caster, target, necroSkill);
-                                    await dealDamage(target, damage);
-                                    log(`${caster.name}は${skill.name}を放った！ ${target.name}に${damage}のダメージ！`);
-                                }
-                                break;
-                            case 'revive_full': // リザレクション
-                                if (target.currentHp > 0) {
-                                    log(`しかし、${target.name}は戦闘不能ではなかった！`);
-                                    caster.currentMp += skill.cost; // MPを消費しない
                                     break;
                                 }
-                                log(`${caster.name}は${skill.name}を唱えた！`);
-                                await animateStatChange(target, 'hp', target.maxHp, 'increase');
-                                flashCard(target, 'green');
-                                log(`${target.name}は完全な状態で戦線に復帰した！`);
-                                break;
-                                // ネクロマンサー MPドレイン
-                            case 'mp_drain':
-                                const drainDamage = Math.ceil(calculateDamage(caster, target, skill));
-                                await dealDamage(target, drainDamage);
-                                const mpDrainAmount = Math.max(1, Math.ceil(drainDamage * 0.2));
-                                await animateStatChange(caster, 'mp', mpDrainAmount, 'increase');
-                                log(`${caster.name}は${skill.name}で${target.name}に${drainDamage}のダメージを与え、MPを${mpDrainAmount}吸収した！`);
-                                break;
-                                // ガーディアン
-                            case 'guardian_wall':
-                                const wallHp = Math.ceil(caster.maxHp * (caster.buffs.guardian_high ? skill.power * 1.5 : skill.power));
-                                gameState.walls.push({
-                                    targetId: gameState.party.indexOf(target),
-                                    hp: wallHp,
-                                    maxHp: wallHp
-                                });
-                                if (caster.buffs.guardian_high) delete caster.buffs.guardian_high;
-                                log(`${caster.name}は${target.name}の前に${skill.name}を展開した！`);
-                                break;
-                            case 'guardian_wall_party':
-                                log(`${caster.name}は${skill.name}を展開した！`);
-                                gameState.party.forEach((p, index) => {
-                                    if (p.currentHp > 0) {
-                                        const wallHp = Math.ceil(caster.maxHp * skill.power);
-                                        gameState.walls.push({
-                                            targetId: index,
-                                            hp: wallHp,
-                                            maxHp: wallHp
-                                        });
-                                    }
-                                });
-                                break;
-                            case 'self_buff_guardian':
-                                caster.buffs.protect = 3;
-                                caster.buffs.guardian_high = true;
-                                log(`${caster.name}は${skill.name}を発動！防御力が上がり、次のウォールが強化される！`);
-                                break;
-                                // トラブルメーカー
-                            case 'trouble_maker_box':
-                                // 実装は handleTroubleMakerBox に集約
-                                await handleTroubleMakerBox(caster);
-                                break;
-                            case 'trouble_maker_debuff':
-                                const debuffDamage = calculateDamage(caster, target, skill);
-                                await dealDamage(target, debuffDamage);
-                                log(`${caster.name}は${skill.name}で${target.name}に${debuffDamage}のダメージを与えた！`);
-                                if (Math.random() < 0.4) { // 40%の確率でデバフ発動
-                                    if (Math.random() < 0.5) {
-                                        target.buffs.atk_down = 3;
-                                        log(`さらに${target.name}の攻撃力が下がった！`);
-                                    } else {
-                                        target.buffs.def_down = 3;
-                                        log(`さらに${target.name}の防御力が下がった！`);
-                                    }
-                                    flashCard(target, 'yellow');
+                                // 新しいLv4スキル
+                            case 'height_power_physical':
+                                { // ボディドロップ
+                                    const heightBonus = Math.max(0, (caster.height - caster.initialHeight) * 0.1);
+                                    const bodyDropDamage = calculateDamage(caster, target, {
+                                        ...skill,
+                                        power: skill.power + heightBonus
+                                    });
+                                    await dealDamage(target, bodyDropDamage);
+                                    log(`${caster.name}の${skill.name}！ ${target.name}に${bodyDropDamage}の超特大ダメージ！`);
+                                    break;
                                 }
-                                break;
-                            case 'self_buff_trouble':
-                                caster.buffs.trouble_check = true;
-                                log(`${caster.name}は${skill.name}を開始！次のハプニングボックスはきっとうまくいく！`);
-                                break;
-                            case 'trouble_maker_miracle':
-                                handleTroubleMakerMiracle(caster);
-                                break;
-                                // シスター
-                            case 'regeneration_ally':
-                            case 'regeneration_party':
-                                log(`${caster.name}は${skill.name}を唱えた！`);
-                                const regenTargets = skill.targetType === 'party' ? gameState.party.filter(p => p.currentHp > 0) : [target];
-
-                                // 「祈りの円環」の場合、追加で少量回復
-                                if (skill.name === '祈りの円環') {
-                                    log("円環の光が、味方全体のHPを少しだけ癒した！");
-                                    for (const t of regenTargets) {
-                                        const healAmount = Math.ceil(t.maxHp * 0.15); // 最大HPの15%回復
-                                        await animateStatChange(t, 'hp', healAmount, 'increase');
+                            case 'multi_hit_physical':
+                                { // 乱舞
+                                    const hitCount = Math.ceil(Math.random() * 3) + 4; // 4〜6回
+                                    log(`${caster.name}の${skill.name}！`);
+                                    await new Promise(resolve => setTimeout(resolve, 500)); // メッセージ表示のための短い待機
+                                    log(`${hitCount}回攻撃！`);
+                                    for (let i = 0; i < hitCount; i++) {
+                                        const randomTarget = gameState.enemies.filter(e => e.currentHp > 0)[Math.floor(Math.random() * gameState.enemies.filter(e => e.currentHp > 0).length)];
+                                        if (randomTarget) {
+                                            const damage = calculateDamage(caster, randomTarget, {
+                                                ...skill,
+                                                power: 0.6
+                                            }); // 1ヒットあたりの威力は調整
+                                            // 連続攻撃なので、一体ずつ待機してダメージを与える
+                                            await dealDamage(randomTarget, damage);
+                                        }
                                     }
+                                    break;
                                 }
-
-                                for (const t of regenTargets) {
-                                    t.statusEffects.regeneration = {
+                            case 'mp_burst_magic':
+                                { // マジックバースト
+                                    const damage = caster.currentMp * 4;
+                                    await animateStatChange(caster, 'mp', -caster.currentMp, 'decrease');
+                                    log(`${caster.name}は${skill.name}を放った！`);
+                                    await dealDamage(target, damage);
+                                    log(`${target.name}に${damage}の特大ダメージ！`);
+                                    break;
+                                }
+                            case 'self_buff_special':
+                                { // 堅守の構え
+                                    log(`${caster.name}は${skill.name}をとった！`);
+                                    caster.buffs.provoke = 3;
+                                    caster.statusEffects.regeneration = {
                                         turns: 3
                                     };
-                                    flashCard(t, 'green');
-                                    log(`${t.name}は聖なる光に包まれ、傷が再生し始めた！`);
+                                    flashCard(caster, 'yellow');
+                                    log(`${caster.name}は敵の注意を引きつけ、傷が再生し始めた！`);
+                                    break;
                                 }
+                            case 'party_restore_growth':
+                                { // サンクチュアリ
+                                    log(`${caster.name}は${skill.name}を唱えた！聖なる光がパーティを包み込む！`);
+                                    if (caster.heightLocked) {
+                                        log(`しかし、${caster.name}の体は聖なる力による成長を受け付けなかった！`);
+                                    }
+
+                                    gameState.party.forEach(p => {
+                                        if (p.currentHp > 0) {
+                                            animateStatChange(p, 'hp', p.maxHp, 'increase'); // 全回復
+                                            p.statusEffects = {}; // 状態異常回復
+                                            if (p !== caster) animateStatChange(p, 'height', skill.growth, 'increase'); // 身長アップ
+                                        }
+                                    });
+                                    break;
+                                }
+                                // 新キャラクタースキル
+                            case 'transform_succubus':
+                            case 'transform_fairy':
+                            case 'transform_alraune':
+                                await handleTransform(caster, skill);
                                 break;
+                            case 'transform_revert':
+                                await handleTransform(caster, skill);
+                                break;
+                            case 'treasure_hunter_attack':
+                                { // ジュエルショット
+                                    const jewelDamage = calculateDamage(caster, target, {
+                                        ...skill,
+                                        power: 1.5
+                                    });
+                                    await dealDamage(target, jewelDamage);
+                                    log(`${caster.name}は${skill.name}を放った！ ${target.name}に${jewelDamage}のダメージ！`);
+                                    if (Math.random() < 0.5) {
+                                        caster.buffs.atk_up = 3;
+                                        log(`${caster.name}の攻撃力が上がった！`);
+                                    } else {
+                                        const mpHeal = Math.ceil(caster.maxMp * 0.3);
+                                        await animateStatChange(caster, 'mp', mpHeal, 'increase');
+                                        log(`${caster.name}のMPが${mpHeal}回復した！`);
+                                    }
+                                    break;
+                                }
+                            case 'status_magic':
+                                { // ポイズンミスト
+                                    if (skill.effect === 'poison') {
+                                        target.statusEffects.poison = {
+                                            turns: 3
+                                        };
+                                        flashCard(p, 'yellow');
+                                        log(`${caster.name}の${skill.name}！ ${target.name}は毒状態になった！`);
+                                    }
+                                    break;
+                                }
+                            case 'evade_provoke':
+                                { // スポットライト
+                                    caster.buffs.provoke = 3;
+                                    caster.buffs.evade_up = 3;
+                                    flashCard(caster, 'yellow');
+                                    log(`${caster.name}は${skill.name}を浴びて、敵の注目と視線を集めた！`);
+                                    break;
+                                }
+                            case 'party_buff':
+                                { // アンコール
+                                    log(`${caster.name}の${skill.name}！ 仲間たちの攻撃力が上がった！`);
+                                    gameState.party.forEach(p => {
+                                        if (p.currentHp > 0) {
+                                            p.buffs.atk_up = 3;
+                                            flashCard(p, 'yellow');
+                                        }
+                                    });
+                                    break;
+                                }
+                            case 'party_buff_special':
+                                { // センターオブステージ
+                                    log(`${caster.name}は${skill.name}に立った！ パーティの士気が最高潮に達した！`);
+                                    gameState.party.forEach(p => {
+                                        if (p.currentHp > 0) {
+                                            p.buffs.atk_up = 3;
+                                            p.buffs.agi_up = 3;
+                                            flashCard(p, 'yellow');
+                                        }
+                                    });
+                                    break;
+                                }
+                            case 'hp_cost_physical':
+                                { // 居合, 無明の一閃
+                                    const samuraiDamage = calculateDamage(caster, target, skill);
+                                    await dealDamage(target, samuraiDamage);
+                                    log(`${caster.name}は${skill.name}を放った！ ${target.name}に${samuraiDamage}のダメージ！`);
+                                    break;
+                                }
+                            case 'drain_physical':
+                                { // ハートドレイン
+                                    const drainDamage = calculateDamage(caster, target, skill);
+                                    if (drainDamage === 'evaded') {
+                                        log(`${target.name}は攻撃をかわした！`);
+                                        showDamagePopup(target, '回避');
+                                    } else {
+                                        const drainHeal = Math.ceil(drainDamage * 0.5);
+                                        await dealDamage(target, drainDamage);
+                                        await animateStatChange(caster, 'hp', drainHeal, 'increase');
+                                        log(`${caster.name}は${skill.name}で${target.name}に${drainDamage}のダメージを与え、HPを${drainHeal}回復した！`);
+                                    }
+                                    break;
+                                }
+                            case 'self_buff_samurai':
+                                { // 明鏡止水
+                                    caster.buffs.atk_up = 3;
+                                    log(`${caster.name}は${skill.name}の構え。精神を研ぎ澄まし、攻撃力が上がった！`);
+                                    break;
+                                }
+                            case 'def_ignore_physical':
+                                { // 破砕拳
+                                    const monkDamage = calculateDamage(caster, target, skill);
+                                    await dealDamage(target, monkDamage);
+                                    log(`${caster.name}の${skill.name}！ ${target.name}に${monkDamage}の防御無視ダメージ！`);
+                                    break;
+                                }
+                            case 'growth_ally':
+                                { // 成長促進剤
+                                    if (target.heightLocked) {
+                                        log(`${caster.name}は${target.name}に薬を投与したが、体が変化を拒んだ！`);
+                                        caster.currentMp += skill.cost; // MPを消費しない
+                                        break;
+                                    }
+                                    await animateStatChange(target, 'height', skill.power, 'increase');
+                                    flashCard(target, 'yellow');
+                                    log(`${caster.name}は${target.name}に${skill.name}を投与した！ ${target.name}の体が巨大化した！(身長+${skill.power}cm)`);
+                                    break;
+                                }
+                            case 'shrink_ally':
+                                { // 縮小薬
+                                    if (target.heightLocked) {
+                                        log(`${caster.name}は${target.name}に薬を投与したが、体が変化を拒んだ！`);
+                                        caster.currentMp += skill.cost; // MPを消費しない
+                                        break;
+                                    }
+                                    await animateStatChange(target, 'height', -skill.power, 'decrease');
+                                    flashCard(target, 'yellow');
+                                    log(`${caster.name}は${target.name}に${skill.name}を投与した！ 身長が${skill.power}cm縮んだ！`);
+                                    break;
+                                }
+                            case 'status_ailment_multi':
+                                { // 衰弱ガス, パンデミック
+                                    log(`${caster.name}は${skill.name}を散布した！`);
+                                    const ailmentTargets = Array.isArray(target) ? target : [target];
+                                    for (const t of ailmentTargets) {
+                                        const effect = skill.effects[Math.floor(Math.random() * skill.effects.length)];
+                                        let effectName = '';
+                                        if (effect === 'poison') {
+                                            t.statusEffects.poison = {
+                                                turns: 3
+                                            };
+                                            effectName = '毒';
+                                        } else if (effect === 'paralysis') {
+                                            t.statusEffects.paralysis = true;
+                                            effectName = '麻痺';
+                                        } else if (effect === 'slow') {
+                                            t.statusEffects.slow = {
+                                                turns: 3
+                                            };
+                                            effectName = '鈍化';
+                                        }
+                                        flashCard(t, 'yellow');
+                                        log(`${t.name}は${effectName}状態になった！`);
+
+                                        // 「衰弱ガス」の場合のみ、追加でステータス低下効果を付与
+                                        if (skill.name === '衰弱ガス') {
+                                            await new Promise(resolve => setTimeout(resolve, 500)); // 少し間を置く
+                                            if (Math.random() < 0.5) {
+                                                t.buffs = t.buffs || {};
+                                                t.buffs.atk_down = 3;
+                                                log(`さらに、${t.name}の攻撃力が低下した！`);
+                                            } else {
+                                                t.buffs = t.buffs || {};
+                                                t.buffs.def_down = 3;
+                                                log(`さらに、${t.name}の防御力が低下した！`);
+                                            }
+                                        }
+                                    }
+                                    break;
+                                }
+                            case 'gambling_damage':
+                                { // ダーツショット
+                                    const roll = Math.random();
+                                    let damageMultiplier = 1.0;
+                                    let message = "";
+                                    if (roll < 0.1) { // 10%でミス
+                                        damageMultiplier = 0;
+                                        message = "しかし、ダーツは大きく外れてしまった！"; // ファイター, ソーサラー, ナイト, メディック
+                                    } else if (roll < 0.5) { // 40%で通常ヒット
+                                        damageMultiplier = 1.5;
+                                        message = `${target.name}にヒット！`;
+                                    } else if (roll < 0.9) { // 40%でクリティカル // ファイター, ソーサラー, ナイト, メディック
+                                        damageMultiplier = 3.0;
+                                        message = `クリティカルヒット！ ${target.name}に大ダメージ！`;
+                                    } else { // 10%でミラクルヒット
+                                        damageMultiplier = 5.0;
+                                        message = `ミラクルヒット！ ${target.name}に超特大ダメージ！`;
+                                    }
+                                    const gamblingDamage = calculateDamage(caster, target, {
+                                        ...skill,
+                                        power: damageMultiplier
+                                    });
+                                    log(`${caster.name}の${skill.name}！ ${message}`);
+                                    if (gamblingDamage > 0) await dealDamage(target, gamblingDamage);
+                                    break;
+                                }
+                            case 'gambling_support':
+                                { // ラッキースター
+                                    const supportRoll = Math.random();
+                                    log(`${caster.name}は${target.name}に${skill.name}を祈った！`);
+                                    if (supportRoll < 0.4) { // 40% HP回復
+                                        const healAmount = Math.ceil(target.maxHp * (Math.random() * 0.4 + 0.2)); // 20-60% // ファイター, ソーサラー, ナイト, メディック
+                                        await animateStatChange(target, 'hp', healAmount, 'increase');
+                                        showDamagePopup(target, healAmount, true);
+                                        log(`幸運の星が輝き、${target.name}のHPが${healAmount}回復した！`);
+                                    } else if (supportRoll < 0.7) { // 30% MP回復 // ファイター, ソーサラー, ナイト, メディック
+                                        const mpAmount = Math.ceil(target.maxMp * (Math.random() * 0.5 + 0.3)); // 30-80%
+                                        await animateStatChange(target, 'mp', mpAmount, 'increase');
+                                        log(`幸運の星が輝き、${target.name}のMPが${mpAmount}回復した！`);
+                                    } else if (supportRoll < 0.9) { // 20% 攻撃バフ
+                                        target.buffs.atk_up = 3;
+                                        log(`幸運の星が輝き、${target.name}の攻撃力が上がった！`);
+                                    } else { // 10% 身長アップ
+                                        const growthAmount = Math.ceil(Math.random() * 21) + 10; // 10-30cm // ファイター, ソーサラー, ナイト, メディック
+                                        if (target.heightLocked) {
+                                            log(`幸運の星が輝いたが、${target.name}の体は変化を拒んだ！`);
+                                            caster.currentMp += skill.cost; // MPを消費しない
+                                            break;
+                                        }
+                                        await animateStatChange(target, 'height', growthAmount, 'increase');
+                                        log(`幸運の星が輝き、${target.name}の身長が${growthAmount}cm伸びた！`);
+                                    }
+                                    flashCard(target, 'yellow');
+                                    break;
+                                }
+                            case 'gambling_all_in':
+                                { // オールイン
+                                    const allInRoll = Math.random();
+                                    log(`${caster.name}は${skill.name}！全てを賭けた！`);
+                                    if (allInRoll < 0.4) { // 40% 敵全体にダメージ
+                                        log("賭けは成功！敵全体にダメージ！");
+                                        for (const t of target) {
+                                            const damage = calculateDamage(caster, t, {
+                                                ...skill,
+                                                power: 1.8
+                                            });
+                                            await dealDamage(t, damage);
+                                        }
+                                    } else if (allInRoll < 0.6) { // 20% 味方全体を小回復
+                                        log("悪くない！味方全体が少し回復した！");
+                                        for (const p of gameState.party) {
+                                            if (p.currentHp > 0) await animateStatChange(p, 'hp', Math.ceil(p.maxHp * 0.2), 'increase');
+                                        }
+                                    } else if (allInRoll < 0.9) { // 30% 何も起こらない
+                                        log("…しかし、何も起こらなかった。");
+                                    } else { // 10% 自分がダメージ
+                                        log("賭けに負けた！術者にダメージ！");
+                                        await dealDamage(caster, Math.ceil(caster.maxHp * 0.25));
+                                    }
+                                    break;
+                                }
+                            case 'gambling_jackpot':
+                                { // ジャックポット
+                                    log(`${caster.name}は${skill.name}を狙う！`);
+                                    if (Math.random() < 0.2) { // 20%で成功
+                                        log("大当たり！ジャックポット！パーティが完全に回復し、強化された！");
+                                        for (const p of gameState.party) {
+                                            if (p.currentHp > 0) {
+                                                await animateStatChange(p, 'hp', p.maxHp, 'increase');
+                                                await animateStatChange(p, 'mp', p.maxMp, 'increase');
+                                                p.buffs.atk_up = 3;
+                                                p.buffs.protect = 3;
+                                                flashCard(p, 'green');
+                                            }
+                                        }
+                                    } else {
+                                        log("…しかし、何も起こらなかった。MPだけが無駄になった！");
+                                    }
+                                    break;
+                                }
+                            case 'reaper_instant_death':
+                                { // 魂狩り
+                                    log(`${caster.name}は${skill.name}を唱えた…！`);
+                                    if (!target.isBoss && Math.random() < 0.15) { // 15%で即死
+                                        log(`鎌が${target.name}の魂を捉えた！`);
+                                        await dealDamage(target, target.currentHp);
+                                    } else {
+                                        log("…しかし、魂を狩るには至らなかった！");
+                                        const failDamage = calculateDamage(caster, target, skill);
+                                        await dealDamage(target, failDamage);
+                                    }
+                                    break;
+                                }
+                            case 'reaper_height_scaling':
+                                { // 影の一撃
+                                    const heightDiff = Math.max(0, caster.initialHeight - caster.height);
+                                    const bonusDamage = Math.ceil(heightDiff * 2); // 1cmあたり2ダメージ追加
+                                    const baseDamage = calculateDamage(caster, target, skill);
+                                    const totalDamage = baseDamage + bonusDamage;
+                                    log(`${caster.name}の${skill.name}！`);
+                                    await dealDamage(target, totalDamage);
+                                    log(`${target.name}に${totalDamage}のダメージ！`);
+                                    break;
+                                }
+                            case 'reaper_soul_exchange':
+                                { // 魂の交換
+                                    const hpCost = Math.ceil(caster.currentHp / 2);
+                                    await dealDamage(caster, hpCost, false, true); // isHeal=false, isSelfDamage=true
+                                    const soulHealAmount = Math.ceil(hpCost * 1.5); // 削ったHPの1.5倍回復
+                                    const mpAmount = Math.ceil(hpCost * 1.0); // 削ったHPと同じだけMP回復
+                                    log(`${caster.name}は${skill.name}で自らの魂を分け与えた！`);
+                                    await animateStatChange(target, 'hp', soulHealAmount, 'increase');
+                                    await animateStatChange(target, 'mp', mpAmount, 'increase');
+                                    log(`${target.name}のHPとMPが回復した！`);
+                                    break;
+                                }
+                            case 'reaper_height_scaling_multi':
+                                { // 冥府の鎌
+                                    log(`${caster.name}は${skill.name}を振るった！`);
+                                    const heightDiffMulti = Math.max(0, caster.initialHeight - caster.height);
+                                    const bonusDamageMulti = Math.ceil(heightDiffMulti * 1); // 全体攻撃なのでボーナスは少し控えめ
+                                    const damagePromisesReaper = [];
+                                    for (const t of target) {
+                                        const totalDamageMulti = calculateDamage(caster, t, skill) + bonusDamageMulti;
+                                        damagePromisesReaper.push(dealDamage(t, totalDamageMulti));
+                                    }
+                                    await Promise.all(damagePromisesReaper);
+                                    break;
+                                }
+                            case 'summon_golem':
+                                { // ゴーレム召喚
+                                    const golemHp = Math.ceil(caster.maxHp * skill.power);
+                                    gameState.golem = {
+                                        name: 'ゴーレム',
+                                        hp: golemHp,
+                                        maxHp: golemHp
+                                    };
+                                    log(`${caster.name}は${skill.name}を唱えた！パーティの前にゴーレムが現れた！`);
+                                    updatePartyStatus();
+                                    flashCard(caster, 'yellow');
+                                    break;
+                                }
+                                // ネクロマンサー
+                            case 'necro_magic':
+                                {
+                                    const killBonus = Math.ceil(gameState.killCount / 5); // 5体倒すごとに威力アップ // ファイター, ソーサラー, ナイト, メディック
+                                    const necroSkill = {
+                                        ...skill,
+                                        power: skill.power + killBonus * 0.2
+                                    };
+                                    if (Array.isArray(target)) { // 全体攻撃
+                                        const damagePromisesNecro = [];
+                                        log(`${caster.name}は${skill.name}を放った！`);
+                                        for (const t of target) {
+                                            damagePromisesNecro.push(dealDamage(t, calculateDamage(caster, t, necroSkill)));
+                                        }
+                                        await Promise.all(damagePromisesNecro);
+                                    } else { // 単体攻撃
+                                        const damage = calculateDamage(caster, target, necroSkill);
+                                        await dealDamage(target, damage);
+                                        log(`${caster.name}は${skill.name}を放った！ ${target.name}に${damage}のダメージ！`);
+                                    }
+                                    break;
+                                }
+                            case 'revive_full':
+                                { // リザレクション
+                                    if (target.currentHp > 0) {
+                                        log(`しかし、${target.name}は戦闘不能ではなかった！`);
+                                        caster.currentMp += skill.cost; // MPを消費しない
+                                        break;
+                                    }
+                                    log(`${caster.name}は${skill.name}を唱えた！`);
+                                    await animateStatChange(target, 'hp', target.maxHp, 'increase');
+                                    flashCard(target, 'green');
+                                    log(`${target.name}は完全な状態で戦線に復帰した！`);
+                                    break;
+                                }
+                                // ネクロマンサー MPドレイン
+                            case 'mp_drain':
+                                {
+                                    const drainDamage = Math.ceil(calculateDamage(caster, target, skill));
+                                    await dealDamage(target, drainDamage);
+                                    const mpDrainAmount = Math.max(1, Math.ceil(drainDamage * 0.2));
+                                    await animateStatChange(caster, 'mp', mpDrainAmount, 'increase');
+                                    log(`${caster.name}は${skill.name}で${target.name}に${drainDamage}のダメージを与え、MPを${mpDrainAmount}吸収した！`);
+                                    break;
+                                }
+                                // ガーディアン
+                            case 'guardian_wall':
+                                {
+                                    const wallHp = Math.ceil(caster.maxHp * (caster.buffs.guardian_high ? skill.power * 1.5 : skill.power));
+                                    gameState.walls.push({
+                                        targetId: gameState.party.indexOf(target),
+                                        hp: wallHp,
+                                        maxHp: wallHp
+                                    });
+                                    if (caster.buffs.guardian_high) delete caster.buffs.guardian_high;
+                                    log(`${caster.name}は${target.name}の前に${skill.name}を展開した！`);
+                                    break;
+                                }
+                            case 'guardian_wall_party':
+                                {
+                                    log(`${caster.name}は${skill.name}を展開した！`);
+                                    gameState.party.forEach((p, index) => {
+                                        if (p.currentHp > 0) {
+                                            const wallHp = Math.ceil(caster.maxHp * skill.power);
+                                            gameState.walls.push({
+                                                targetId: index,
+                                                hp: wallHp,
+                                                maxHp: wallHp
+                                            });
+                                        }
+                                    });
+                                    break;
+                                }
+                            case 'self_buff_guardian':
+                                {
+                                    caster.buffs.protect = 3;
+                                    caster.buffs.guardian_high = true;
+                                    log(`${caster.name}は${skill.name}を発動！防御力が上がり、次のウォールが強化される！`);
+                                    break;
+                                }
+                                // トラブルメーカー
+                            case 'trouble_maker_box':
+                                {
+                                    // 実装は handleTroubleMakerBox に集約
+                                    await handleTroubleMakerBox(caster);
+                                    break;
+                                }
+                            case 'trouble_maker_debuff':
+                                {
+                                    const debuffDamage = calculateDamage(caster, target, skill);
+                                    await dealDamage(target, debuffDamage);
+                                    log(`${caster.name}は${skill.name}で${target.name}に${debuffDamage}のダメージを与えた！`);
+                                    if (Math.random() < 0.4) { // 40%の確率でデバフ発動
+                                        if (Math.random() < 0.5) {
+                                            target.buffs.atk_down = 3;
+                                            log(`さらに${target.name}の攻撃力が下がった！`);
+                                        } else {
+                                            target.buffs.def_down = 3;
+                                            log(`さらに${target.name}の防御力が下がった！`);
+                                        }
+                                        flashCard(target, 'yellow');
+                                    }
+                                    break;
+                                }
+                            case 'self_buff_trouble':
+                                {
+                                    caster.buffs.trouble_check = true;
+                                    log(`${caster.name}は${skill.name}を開始！次のハプニングボックスはきっとうまくいく！`);
+                                    break;
+                                }
+                            case 'trouble_maker_miracle':
+                                {
+                                    handleTroubleMakerMiracle(caster);
+                                    break;
+                                }
+                                // シスター
+                            case 'special_magic':
+                                { // ワンダーカーニバル, ソーンウィップ
+                                    if (skill.name === 'ワンダーカーニバル') {
+                                        const heightDiff = Math.max(0, caster.initialHeight - caster.height);
+                                        const powerBonus = heightDiff * 0.05;
+                                        log(`${caster.name}は${skill.name}を放った！`);
+                                        for (const t of target) {
+                                            const damage = calculateDamage(caster, t, {
+                                                ...skill,
+                                                power: skill.power + powerBonus
+                                            });
+                                            await dealDamage(t, damage);
+                                            if (Math.random() < 0.3) {
+                                                t.statusEffects.poison = {
+                                                    turns: 3
+                                                };
+                                                log(`${t.name}は毒状態になった！`);
+                                            }
+                                        }
+                                    } else if (skill.name === 'ソーンウィップ') {
+                                        caster.thornWhipUses = (caster.thornWhipUses || 0) + 1;
+                                        const powerBonus = caster.thornWhipUses * 0.5;
+                                        log(`${caster.name}は${skill.name}を放った！`);
+                                        for (const t of target) {
+                                            const damage = calculateDamage(caster, t, {
+                                                ...skill,
+                                                power: skill.power + powerBonus
+                                            });
+                                            await dealDamage(t, damage);
+                                        }
+                                    }
+                                    break;
+                                }
+                            case 'special_heal_alraune':
+                                { // グロウヒール
+                                    log(`${caster.name}は${skill.name}を唱えた！`);
+                                    await animateStatChange(target, 'hp', target.maxHp, 'increase');
+                                    target.buffs.protect = 3;
+                                    log(`${target.name}のHPが全回復し、防御力が上がった！`);
+                                    if (target === caster) {
+                                        addItemToInventory('potion', 1);
+                                        log(`さらに、${caster.name}はポーションを1つ手に入れた！`);
+                                    }
+                                    break;
+                                }
+                            case 'regeneration_ally':
+                            case 'regeneration_party':
+                                {
+                                    log(`${caster.name}は${skill.name}を唱えた！`);
+                                    const regenTargets = skill.targetType === 'party' ? gameState.party.filter(p => p.currentHp > 0) : [target];
+
+                                    // 「祈りの円環」の場合、追加で少量回復
+                                    if (skill.name === '祈りの円環') {
+                                        log("円環の光が、味方全体のHPを少しだけ癒した！");
+                                        for (const t of regenTargets) {
+                                            const healAmount = Math.ceil(t.maxHp * 0.15); // 最大HPの15%回復
+                                            await animateStatChange(t, 'hp', healAmount, 'increase');
+                                        }
+                                    }
+
+                                    for (const t of regenTargets) {
+                                        t.statusEffects.regeneration = {
+                                            turns: 3
+                                        };
+                                        flashCard(t, 'green');
+                                        log(`${t.name}は聖なる光に包まれ、傷が再生し始めた！`);
+                                    }
+                                    break;
+                                }
                         }
                     }
 
@@ -5890,6 +6207,100 @@
                         return true; // アイテム使用成功
                     }
 
+                    async function handleTreasureHunterAttack(character, target) {
+                        log(`${character.name}は${target.name}からアイテムを盗もうとした！`);
+
+                        if (target.stolen) {
+                            log(`しかし、${target.name}からはもう何も盗めない！`);
+                            if (Math.random() < 0.5) {
+                                target.buffs = target.buffs || {};
+                                target.buffs.atk_down = 3;
+                                log(`${target.name}の攻撃力が下がった！`);
+                            } else {
+                                target.buffs = target.buffs || {};
+                                target.buffs.def_down = 3;
+                                log(`${target.name}の防御力が下がった！`);
+                            }
+                            const mpHeal = Math.ceil(character.maxMp * 0.15);
+                            await animateStatChange(character, 'mp', mpHeal, 'increase');
+                            log(`${character.name}はMPを${mpHeal}回復した！`);
+                            return;
+                        }
+
+                        const successRate = 0.5 + (getEffectiveStats(character).agi - getEffectiveStats(target).agi) * 0.02;
+                        if (Math.random() < successRate) {
+                            const itemIds = Object.keys(itemBlueprints).filter(id => !itemBlueprints[id].rare && !itemBlueprints[id].special);
+                            const foundItemId = itemIds[Math.floor(Math.random() * itemIds.length)];
+                            addItemToInventory(foundItemId);
+                            log(`盗みに成功！「${itemBlueprints[foundItemId].name}」を手に入れた！`);
+                            target.stolen = true; // 盗み済みフラグ
+                            flashCard(character, 'yellow');
+                        } else {
+                            log("しかし、盗みは失敗した！");
+                            flashCard(character, 'red');
+                        }
+                    }
+
+                    async function handleTransform(character, skill) {
+                        if (skill.type === 'transform_revert') {
+                            // 変身解除
+                            if (character.originalState) {
+                                log(`${character.name}は変身を解き、元の姿に戻った！`);
+                                const heightChange = character.originalState.height - character.height;
+                                await animateStatChange(character, 'height', heightChange, heightChange > 0 ? 'increase' : 'decrease');
+
+                                character.role = character.originalState.role;
+                                character.skills = character.originalState.skills;
+                                character.bgClass = character.originalState.bgClass;
+                                delete character.originalState;
+                                delete character.isTransformed;
+                                delete character.thornWhipUses;
+                            }
+                        } else {
+                            // 変身処理
+                            const transformType = skill.type.split('_')[1]; // 'succubus', 'fairy', 'alraune'
+                            const blueprint = allCharacterBlueprints.find(c => c.name === 'リリィ');
+                            const transformData = blueprint.transforms[transformType];
+
+                            if (!transformData) return;
+
+                            // 元の状態を保存
+                            character.originalState = {
+                                role: character.role,
+                                skills: character.skills,
+                                bgClass: character.bgClass,
+                                height: character.height
+                            };
+
+                            log(`${character.name}は${transformData.role}に変身した！`);
+
+                            // ステータス、スキル、見た目を変更
+                            character.role = transformData.role;
+                            character.skills = transformData.skills;
+                            character.bgClass = transformData.bgClass;
+                            character.isTransformed = true;
+
+                            // 変身時の特殊効果
+                            switch (transformType) {
+                                case 'succubus':
+                                    await animateStatChange(character, 'height', 30, 'increase');
+                                    break;
+                                case 'fairy':
+                                    await animateStatChange(character, 'height', -30, 'decrease');
+                                    break;
+                                case 'alraune':
+                                    await animateStatChange(character, 'hp', character.maxHp, 'increase');
+                                    break;
+                            }
+                        }
+                        updatePartyStatus();
+                        // 変身後は即座にコマンドを再表示
+                        if (gameState.inBattle) {
+                            playerTurn(character);
+                        }
+                    }
+
+
                     async function handleTroubleMakerBox(caster) {
                         log(`${caster.name}は${caster.skills[0].name}を開けた！`);
                         const isChecked = caster.buffs.trouble_check;
@@ -6057,7 +6468,7 @@
                             // インプのAI修正
                             if (enemy.name === 'インプ' && skill.name === 'いたずら') {
                                 const target = findTarget(enemy);
-                                const isDefensiveTarget = target.isWall || target === gameState.golem || (target.buffs && target.buffs.provoke);
+                                const isDefensiveTarget = target.isWall || target === gameState.golem || (target.buffs && (target.buffs.provoke || target.buffs.cover));
                                 const isAlreadyStripped = target.statusEffects && target.statusEffects.stripped;
 
                                 // 挑発/ウォール/ゴーレム、または既に脱衣状態の相手には通常攻撃
@@ -6371,6 +6782,12 @@
                         if (defender.blessings && defender.blessings.physical_shield && (!skill || skill.type === 'physical' || skill.type.includes('physical'))) {
                             baseDamage *= 0.7;
                         }
+                        // フェアリーのワンダーカーニバル
+                        if (skill && skill.name === 'ワンダーカーニバル') {
+                            const defenderStats = getEffectiveStats(defender);
+                            effectiveDefense = Math.min(defenderStats.pDef, defenderStats.mDef);
+                            baseDamage = attackerStats.atk * skill.power; // 攻撃力ベースで計算
+                        }
                         if (defender.blessings && defender.blessings.magic_shield && skill && (skill.type === 'magic' || skill.type.includes('magic'))) {
                             baseDamage *= 0.7;
                         }
@@ -6399,6 +6816,12 @@
                                 // 1cm低くなるごとに0.15%回避率が上昇
                                 const bonusEvadeRate = heightDiff * 0.0015;
                                 evadeRate += bonusEvadeRate;
+                            }
+                            // フェアリー変身中の素早さボーナス
+                            if (attacker.role === 'フェアリー') {
+                                const heightDiff = attacker.initialHeight - attacker.height;
+                                const agiBonus = Math.floor(attacker.agi * (heightDiff / attacker.initialHeight * -1.5));
+                                agi += agiBonus; // 通常の2倍のボーナス
                             }
                             // 祝福: 小人の俊敏
                             if (defender.blessings && defender.blessings.low_height_evade) {
@@ -6682,7 +7105,15 @@
                                         // 聖女クリアフラグを保存
                                         const clearFlags = JSON.parse(localStorage.getItem('sizeDungeonClearFlags') || '{}');
                                         clearFlags.saintMarchCleared = true;
-                                        localStorage.setItem('sizeDungeonClearFlags', JSON.stringify(clearFlags)); // ファイター, ソーサラー, ナイト, メディック
+                                        localStorage.setItem('sizeDungeonClearFlags', JSON.stringify(clearFlags));
+                                        break;
+                                    case 'treasure_map':
+                                        title = "秘宝の在り処";
+                                        text = "リリィはついにダンジョンの最奥に眠る秘宝を手に入れました。しかし、世界にはまだ見ぬお宝がたくさん眠っています。彼女の冒険は、まだ始まったばかりです。";
+                                        break;
+                                    case 'divine_trial':
+                                        title = "神々の試練 達成";
+                                        text = "あなたは神々の試練を乗り越え、ダンジョンを制覇しました。その魂は、神々の間で語り継がれるでしょう。";
                                         break;
                                     case 'indecent':
                                         title = "恥辱の先の勝利";
@@ -7435,11 +7866,11 @@
                                 const effect = effectMap[key];
                                 const turns = (typeof allEffects[key] === 'object' && allEffects[key].turns !== undefined) ? allEffects[key].turns : (typeof allEffects[key] === 'number' ? allEffects[key] : null);
                                 html += `<p class="${effect.color} font-semibold">${effect.name} ${turns !== null ? `(残り ${turns} ターン)` : ''}</p>`;
-                        }
                     }
+                        }
 
-                    if (!hasEffect) return ''; // 効果がなければ何も返さない
-                    return html + '</div>';
+                if (!hasEffect) return ''; // 効果がなければ何も返さない
+                return html + '</div>';
             }
 
             function showAmountChoiceModal(title, text, choices, callback) {
@@ -7654,8 +8085,13 @@
                     selectedMembers = characterPool.slice(0, 4); // シャッフルされたリストから先頭4人を選ぶ
                 }
 
+                if (mode === 'treasure_map') {
+                    selectedMembers = ['リリィ'];
+                }
+
+
                 // メンバー選択が必要なモードで、まだメンバーが選ばれていない場合 (聖女の行進は除く)
-                if ((mode === 'solo' || mode === 'indecent' || (mode === 'trial' && toggleSelectTeam.checked) || (toggleSelectTeam.checked && mode !== 'normal')) && !selectedMembers && mode !== 'saint_march') {
+                if ((mode === 'solo' || mode === 'indecent' || (mode === 'trial' && toggleSelectTeam.checked) || (toggleSelectTeam.checked && mode !== 'normal')) && !selectedMembers && mode !== 'saint_march' && mode !== 'treasure_map') {
                     whatIfModal.classList.add('hidden');
                     showSelectTeamModal(mode); // モードを引き継いで選択画面へ
                     return;
@@ -7673,6 +8109,14 @@
 
                 if (mode === 'saint_march') {
                     selectedMembers = ['セレスティア'];
+                }
+
+                if (mode === 'treasure_map') {
+                    selectedMembers = ['リリィ'];
+                }
+
+                if (mode === 'treasure_map') {
+                    selectedMembers = ['リリィ'];
                 }
 
                 initGame(selectedMembers, fromSave);
@@ -7738,6 +8182,10 @@
                     startGame(mode);
                 });
             });
+            // トレジャーハンターの変身定義
+            const lilyBlueprint = allCharacterBlueprints.find(c => c.name === 'リリィ');
+            lilyBlueprint.transforms.fairy = { role: 'フェアリー', bgClass: 'bg-char-lily-fairy', skills: [{ name: '変身解除', cost: 0, type: 'transform_revert', targetType: 'self', description: 'トレジャーハンターの姿に戻る。' }, { name: 'クイックブロー', cost: 0, power: 1.8, type: 'physical', targetType: 'enemy', description: '敵単体に物理攻撃し、防御力を低下させる。身長が低いほど威力ボーナス。' }, { name: 'マジックアロー', cost: 0, power: 3.0, type: 'magic', targetType: 'enemy', description: '敵単体に魔法攻撃し、攻撃力を低下させる。身長が低いほど威力ボーナス。' }, { name: 'ワンダーカーニバル', cost: 0, power: 2.0, type: 'special_magic', targetType: 'enemies', description: '敵全体に高威力攻撃。身長が低いほど威力ボーナス。敵の低い方の防御でダメージ計算。' }] };
+            lilyBlueprint.transforms.alraune = { role: 'アルラウネ', bgClass: 'bg-char-lily-alraune', skills: [{ name: '変身解除', cost: 0, type: 'transform_revert', targetType: 'self', description: 'トレジャーハンターの姿に戻る。' }, { name: 'シードショット', cost: 0, power: 3.5, type: 'magic', targetType: 'enemy', description: '敵単体に高威力魔法攻撃し、自身の攻撃力を上げる。' }, { name: 'グロウヒール', cost: 0, type: 'special_heal_alraune', targetType: 'ally', description: '味方単体のHPを全回復し、防御力を上げる。自身に使うとポーションも獲得。' }, { name: 'ソーンウィップ', cost: 0, power: 2.2, type: 'special_magic', targetType: 'enemies', description: '敵全体に超高威力魔法攻撃。使用回数で威力ボーナス。' }] };
             scanModalClose.addEventListener('click', () => {
                 scanModal.classList.add('hidden');
                 // 「調べる」をキャンセルした場合、元のキャラクターのターンに戻す
