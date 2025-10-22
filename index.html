@@ -48,6 +48,10 @@
             position: relative;
             overflow: hidden;
             /* 疑似要素をはみ出させない */
+            background-image: linear-gradient(to bottom, #fffbeb, #fef3c7);
+            /* 羊皮紙のような背景 */
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1), 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            /* 内側に影を追加して立体感を出す */
             display: flex;
             align-items: flex-end;
             /* 子要素を下揃えにする */
@@ -3570,7 +3574,7 @@
                             }
                             card.onclick = () => playerSelectAlly(index); // onclickを常に再設定
                             // Update card classes
-                            card.className = `character-card w-full sm:w-1/5 p-2 rounded-lg shadow-md border-2 border-${char.themeColor}-400 ${char.currentHp <= 0 ? 'opacity-50' : ''} ${char.bgClass || ''}`;
+                            card.className = `character-card w-full sm:w-1/5 p-2 rounded-lg shadow-md border-4 border-${char.themeColor}-400 ${char.currentHp <= 0 ? 'opacity-50' : ''} ${char.bgClass || ''}`;
 
                             // 身長に応じて背景の立ち絵を調整
                             const heightRatio = char.height / char.initialHeight;
@@ -3755,18 +3759,12 @@
                         if (char.buffs && char.buffs.atk_up) atk *= 1.5;
                         if (char.buffs && char.buffs.protect) def *= 1.5;
                         if (char.buffs && char.buffs.def_down) {
-                            def *= 0.7;
-                        }
-                        if (char.buffs && char.buffs.def_down) {
                             if (char.isEnemy) {
                                 char.pDef *= 0.7;
                                 char.mDef *= 0.7;
                             } else {
                                 def *= 0.7;
                             }
-                        }
-                        if (char.buffs && char.buffs.def_down) {
-                            def *= 0.7;
                         }
 
                         // 脱衣状態の場合
@@ -5016,6 +5014,21 @@
                         }
                     }
 
+                    async function sweepAttack(enemy) {
+                        log(`${enemy.name}のなぎ払い！`);
+                        const aliveParty = gameState.party.filter(p => p.currentHp > 0);
+                        const damagePromises = [];
+                        for (const member of aliveParty) {
+                            const damage = calculateDamage(enemy, member, {
+                                power: 1.0,
+                                type: 'physical'
+                            });
+                            damagePromises.push(dealDamage(member, damage));
+                        }
+                        // 全員へのダメージ処理を並行して実行し、完了を待つ
+                        await Promise.all(damagePromises);
+                    }
+
                     async function nextTurn() {
                         let currentActor = gameState.turnOrder[gameState.currentTurnIndex];
                         // 聖女のターン開始時回復
@@ -5121,9 +5134,11 @@
                             const mpCost = 15;
                             // フェアリーモードの特殊効果
                             if (currentActor.role === 'フェアリー') {
-                                const shrinkAmount = Math.floor(Math.random() * 21) + 20; // 20-40cm縮む
-                                log(`${currentActor.name}の体から魔力が抜け、体が縮んでいく！`);
-                                await animateStatChange(currentActor, 'height', -shrinkAmount, 'decrease');
+                                if (currentActor.height > 1) {
+                                    const shrinkAmount = Math.floor(Math.random() * 21) + 20; // 20-40cm縮む
+                                    log(`${currentActor.name}の体から魔力が抜け、体が縮んでいく！`);
+                                    await animateStatChange(currentActor, 'height', -shrinkAmount, 'decrease');
+                                }
                             }
                             // アルラウネモードの特殊効果
                             if (currentActor.role === 'アルラウネ') {
@@ -5256,7 +5271,7 @@
 
                         if (targetType === 'enemy') {
                             const aliveEnemies = gameState.enemies.filter(e => e.currentHp > 0);
-                            if (aliveEnemies.length === 1) {
+                            if (aliveEnemies.length === 1 && pendingAction.action.type !== 'scan') {
                                 pendingAction.target = aliveEnemies[0];
                                 executePlayerAction();
                             } else {
@@ -5267,8 +5282,9 @@
                             }
                         } else if (targetType === 'ally') {
                             commandMessage.textContent = '誰に使う？';
+                            const isReviveSkill = action.skill && action.skill.type === 'revive_full';
                             gameState.party.forEach((char, index) => {
-                                if (char.currentHp > 0) {
+                                if ((isReviveSkill && char.currentHp <= 0) || (!isReviveSkill && char.currentHp > 0)) {
                                     document.getElementById(`party-card-${index}`).classList.add('targeted');
                                 }
                             });
@@ -5308,19 +5324,18 @@
                         } else {
                             const targetCharacter = gameState.party[targetIndex];
                             const action = pendingAction.action;
+                            const skillInfo = action.skill;
                             const itemInfo = action.item ? itemBlueprints[action.item.id] : null;
 
                             // 復活アイテムの場合、戦闘不能の味方のみ対象
-                            if (itemInfo && itemInfo.effect === 'revive') {
+                            if ((itemInfo && itemInfo.effect === 'revive') || (skillInfo && skillInfo.type === 'revive_full')) {
                                 if (targetCharacter.currentHp <= 0) {
                                     pendingAction.target = targetCharacter;
                                     executePlayerAction();
                                 } else {
                                     log(`${targetCharacter.name}は戦闘不能ではない！`);
                                 }
-                            }
-                            // それ以外の味方対象アクションの場合、生存している味方のみ対象
-                            else if (targetCharacter.currentHp > 0) {
+                            } else if (targetCharacter.currentHp > 0) { // それ以外の味方対象アクションの場合
                                 pendingAction.target = targetCharacter;
                                 executePlayerAction();
                             } else {
@@ -6750,7 +6765,7 @@
 
                     async function counterAttack(counterAttacker, originalAttacker, damage) {
                         log(`${counterAttacker.name}の反撃！`);
-                        const counterDamage = Math.max(1, Math.ceil(damage * (Math.random() * 0.2 + 0.9))); // ファイター, ソーサラー, ナイト, メディック
+                        const counterDamage = calculateDamage(counterAttacker, originalAttacker);
                         await dealDamage(originalAttacker, counterDamage);
                         log(`${originalAttacker.name}に${counterDamage}のダメージ！`);
                     }
@@ -6968,10 +6983,10 @@
                                 return 'evaded'; // 回避したことを示す特別な値を返す
                             }
                         }
-
-                        return Math.max(1, Math.ceil(baseDamage * (Math.random() * 0.2 + 0.9))); // ダメージは最低1
+                        // ダメージに±10%の揺らぎを追加
+                        const finalDamage = Math.max(1, Math.ceil(baseDamage * (Math.random() * 0.2 + 0.9)));
+                        return finalDamage;
                     }
-
                     async function dealDamage(target, amount, isHeal = false) {
                         // ターゲットがウォールの場合
                         if (target && target.isWall) {
@@ -6986,12 +7001,13 @@
                             return;
                         }
                         if (amount === 0) return; // 回避などでダメージ0の場合は何もしない
+                        if (amount === 'evaded') return; // 回避の場合は何もしない
                         if (isHeal) {
                             // 回復の場合
                             if (target && !target.isEnemy) await animateStatChange(target, 'hp', -amount, 'increase');
                             else if (target) target.currentHp = Math.min(target.maxHp, target.currentHp - amount);
                             flashCard(target, 'green');
-                            if (target) showDamagePopup(target, -amount, true);
+                            if (target) showDamagePopup(target, Math.abs(amount), true);
                             return;
                         }
                         // ターゲットがゴーレムの場合
