@@ -1584,7 +1584,69 @@
                                         description: '敵単体に超特大ダメージ。身長が高いほど威力が上がる。'
                                     }, ]
                                 },
-                                // フェアリーとアルラウネも同様に定義
+                                fairy: {
+                                    role: 'フェアリー',
+                                    bgClass: 'bg-char-lily-fairy',
+                                    skills: [{
+                                        name: '変身解除',
+                                        cost: 0,
+                                        type: 'transform_revert',
+                                        targetType: 'self',
+                                        description: 'トレジャーハンターの姿に戻る。'
+                                    }, {
+                                        name: 'クイックブロー',
+                                        cost: 0,
+                                        power: 1.8,
+                                        type: 'physical',
+                                        targetType: 'enemy',
+                                        description: '敵単体に物理攻撃し、防御力を低下させる。身長が低いほど威力ボーナス。'
+                                    }, {
+                                        name: 'マジックアロー',
+                                        cost: 0,
+                                        power: 3.0,
+                                        type: 'magic',
+                                        targetType: 'enemy',
+                                        description: '敵単体に魔法攻撃し、攻撃力を低下させる。身長が低いほど威力ボーナス。'
+                                    }, {
+                                        name: 'ワンダーカーニバル',
+                                        cost: 0,
+                                        power: 2.0,
+                                        type: 'special_magic',
+                                        targetType: 'enemies',
+                                        description: '敵全体に高威力攻撃。身長が低いほど威力ボーナス。敵の低い方の防御でダメージ計算。'
+                                    }, ]
+                                },
+                                alraune: {
+                                    role: 'アルラウネ',
+                                    bgClass: 'bg-char-lily-alraune',
+                                    skills: [{
+                                        name: '変身解除',
+                                        cost: 0,
+                                        type: 'transform_revert',
+                                        targetType: 'self',
+                                        description: 'トレジャーハンターの姿に戻る。'
+                                    }, {
+                                        name: 'シードショット',
+                                        cost: 0,
+                                        power: 3.5,
+                                        type: 'magic',
+                                        targetType: 'enemy',
+                                        description: '敵単体に高威力魔法攻撃し、自身の攻撃力を上げる。'
+                                    }, {
+                                        name: 'グロウヒール',
+                                        cost: 0,
+                                        type: 'special_heal_alraune',
+                                        targetType: 'ally',
+                                        description: '味方単体のHPを全回復し、防御力を上げる。自身に使うとポーションも獲得。'
+                                    }, {
+                                        name: 'ソーンウィップ',
+                                        cost: 0,
+                                        power: 2.2,
+                                        type: 'special_magic',
+                                        targetType: 'enemies',
+                                        description: '敵全体に超高威力魔法攻撃。使用回数で威力ボーナス。'
+                                    }, ]
+                                }
                             }
                         },
 
@@ -4935,7 +4997,7 @@
                         updateEnemyStatus(); // 敵のUIは無いが、将来的な拡張のため
                     }
 
-                    function nextTurn() {
+                    async function nextTurn() {
                         let currentActor = gameState.turnOrder[gameState.currentTurnIndex];
                         // 聖女のターン開始時回復
                         if (!currentActor.isEnemy && currentActor.role === '聖女' && currentActor.currentHp > 0) {
@@ -5036,9 +5098,23 @@
                         // 変身中のMP消費
                         if (currentActor.isTransformed) {
                             const mpCost = 5;
+                            // フェアリーモードの特殊効果
+                            if (currentActor.role === 'フェアリー') {
+                                const shrinkAmount = Math.floor(Math.random() * 21) + 20; // 20-40cm縮む
+                                log(`${currentActor.name}の体から魔力が抜け、体が縮んでいく！`);
+                                await animateStatChange(currentActor, 'height', -shrinkAmount, 'decrease');
+                            }
+                            // アルラウネモードの特殊効果
+                            if (currentActor.role === 'アルラウネ') {
+                                log(`${currentActor.name}は魔力で養分を生成し、再生能力を高めた！`);
+                                currentActor.statusEffects.regeneration = {
+                                    turns: 2
+                                };
+                            }
+
                             if (currentActor.currentMp < mpCost) {
                                 log(`${currentActor.name}はMPが尽き、変身が解けてしまった！`);
-                                handleTransform(currentActor, {
+                                await handleTransform(currentActor, {
                                     type: 'transform_revert'
                                 });
                                 // 変身解除後は即座にターン終了
@@ -5657,12 +5733,22 @@
                             case 'drain_physical':
                                 { // ハートドレイン
                                     const drainDamage = calculateDamage(caster, target, skill);
+                                    const targetOriginalHp = target.currentHp;
                                     if (drainDamage === 'evaded') {
                                         log(`${target.name}は攻撃をかわした！`);
                                         showDamagePopup(target, '回避');
                                     } else {
                                         const drainHeal = Math.ceil(drainDamage * 0.5);
                                         await dealDamage(target, drainDamage);
+                                        const isDefeated = target.currentHp <= 0;
+                                        if (isDefeated) {
+                                            const overkill = drainDamage - targetOriginalHp;
+                                            const heightGain = Math.max(0, Math.floor(overkill / 2));
+                                            if (heightGain > 0) {
+                                                await animateStatChange(caster, 'height', heightGain, 'increase');
+                                                log(`${caster.name}は過剰な生命力を吸収し、身長が${heightGain}cm伸びた！`);
+                                            }
+                                        }
                                         await animateStatChange(caster, 'hp', drainHeal, 'increase');
                                         log(`${caster.name}は${skill.name}で${target.name}に${drainDamage}のダメージを与え、HPを${drainHeal}回復した！`);
                                     }
@@ -6300,12 +6386,10 @@
                             // 変身解除
                             if (character.originalState) {
                                 log(`${character.name}は変身を解き、元の姿に戻った！`);
-                                const heightChange = character.originalState.height - character.height;
-                                await animateStatChange(character, 'height', heightChange, heightChange > 0 ? 'increase' : 'decrease');
-
                                 character.role = character.originalState.role;
                                 character.skills = character.originalState.skills;
                                 character.bgClass = character.originalState.bgClass;
+                                // 身長は維持するため、originalState.height には戻さない
                                 delete character.originalState;
                                 delete character.isTransformed;
                                 delete character.thornWhipUses;
@@ -8236,10 +8320,6 @@
                     startGame(mode);
                 });
             });
-            // トレジャーハンターの変身定義
-            const lilyBlueprint = allCharacterBlueprints.find(c => c.name === 'リリィ');
-            lilyBlueprint.transforms.fairy = { role: 'フェアリー', bgClass: 'bg-char-lily-fairy', skills: [{ name: '変身解除', cost: 0, type: 'transform_revert', targetType: 'self', description: 'トレジャーハンターの姿に戻る。' }, { name: 'クイックブロー', cost: 0, power: 1.8, type: 'physical', targetType: 'enemy', description: '敵単体に物理攻撃し、防御力を低下させる。身長が低いほど威力ボーナス。' }, { name: 'マジックアロー', cost: 0, power: 3.0, type: 'magic', targetType: 'enemy', description: '敵単体に魔法攻撃し、攻撃力を低下させる。身長が低いほど威力ボーナス。' }, { name: 'ワンダーカーニバル', cost: 0, power: 2.0, type: 'special_magic', targetType: 'enemies', description: '敵全体に高威力攻撃。身長が低いほど威力ボーナス。敵の低い方の防御でダメージ計算。' }] };
-            lilyBlueprint.transforms.alraune = { role: 'アルラウネ', bgClass: 'bg-char-lily-alraune', skills: [{ name: '変身解除', cost: 0, type: 'transform_revert', targetType: 'self', description: 'トレジャーハンターの姿に戻る。' }, { name: 'シードショット', cost: 0, power: 3.5, type: 'magic', targetType: 'enemy', description: '敵単体に高威力魔法攻撃し、自身の攻撃力を上げる。' }, { name: 'グロウヒール', cost: 0, type: 'special_heal_alraune', targetType: 'ally', description: '味方単体のHPを全回復し、防御力を上げる。自身に使うとポーションも獲得。' }, { name: 'ソーンウィップ', cost: 0, power: 2.2, type: 'special_magic', targetType: 'enemies', description: '敵全体に超高威力魔法攻撃。使用回数で威力ボーナス。' }] };
             scanModalClose.addEventListener('click', () => {
                 scanModal.classList.add('hidden');
                 // 「調べる」をキャンセルした場合、元のキャラクターのターンに戻す
