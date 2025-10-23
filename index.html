@@ -852,8 +852,8 @@
                         walls: [], // ガーディアン用
                         isEndlessVersion: false, // 無限版フラグ
                         gameMode: 'normal', // normal, veterans, dwarves, brawl, solo, endgame, endless, indecent, enjoy, saint_march, fixed_path, uninhibited_souls, random_party, divine_trial, treasure_map
+                        triggeredSpecialConvos: [],
                     };
-                    gameState.triggeredSpecialConvos = []; // ファイター, ソーサラー, ナイト, メディック
 
                     const allCharacterBlueprints = [{
                             name: 'アカリ',
@@ -1121,7 +1121,7 @@
                                 type: 'hp_cost_physical',
                                 targetType: 'enemy',
                                 description: '自身のHPを15消費し、敵一体に強力な物理ダメージを与える。'
-                            }, { // ファイター, ソーサラー, ナイト, メディック
+                            }, {
                                 name: '後の先',
                                 cost: 5, // HP cost
                                 type: 'samurai_counter_stance',
@@ -1449,7 +1449,7 @@
                                 type: 'guardian_wall',
                                 targetType: 'ally',
                                 description: '味方一人に、自身の最大HPの60%の耐久値を持つ防壁を生成する。'
-                            }, { // ファイター, ソーサラー, ナイト, メディック
+                            }, {
                                 name: 'タイタンスタンプ',
                                 cost: 12,
                                 type: 'guardian_stomp',
@@ -1529,7 +1529,7 @@
                                 type: 'regeneration_ally',
                                 targetType: 'ally',
                                 description: '味方一人に、3ターンの間HPが自動で回復する祝福を与える。'
-                            }, {
+                            }, { // ファイター, ソーサラー, ナイト, メディック
                                 name: 'ファーストエイド',
                                 cost: 8,
                                 power: 60,
@@ -1538,10 +1538,10 @@
                                 description: '味方一人のHPを少し回復する。'
                             }],
                             unlockableSkill: { // ファイター, ソーサラー, ナイト, メディック
-                                name: 'ホーリーライト',
+                                name: 'ホーリーライト', // ファイター, ソーサラー, ナイト, メディック
                                 cost: 20,
-                                power: 120,
-                                type: 'heal', // ファイター, ソーサラー, ナイト, メディック
+                                power: 120, // ファイター, ソーサラー, ナイト, メディック
+                                type: 'heal',
                                 targetType: 'ally',
                                 description: '味方一人のHPを大きく回復する。'
                             },
@@ -2175,6 +2175,7 @@
                                 "リリィさん、砂のお城作り、上手ですね！私も手伝います！"
                             ],
                             summer_onsen: ["温泉…気持ちいいです…。なんだか、眠くなってきちゃいました…。", "このタオル、ちゃんと巻けてますか…？ちょっと心配です…。", "温泉まんじゅう、美味しいです！皆さん、どうぞ！", "ミコちゃん、温泉で泳いじゃだめですよー！"],
+                            onsen_towel_trouble: ["ひゃああっ！？い、いやです！こんな格好、恥ずかしいですぅ…！見ないでください！"],
                             pair_レンカ: ["レンカさん、その魔法、ちょっと怖いですけど…味方だと頼もしいです！", "何かあったら、私がヒールしますからね！"],
                             pair_セレスティア: ["セレスティアさん、なんだかとても温かい光を感じます…。", "疲れたらいつでも言ってくださいね。私、ヒールしますから！"],
                             pair_イオリ: ["イオリ先輩、小さくてもとっても頼りになります！尊敬します！", "先輩のこと、私がしっかりお守りしますね！"],
@@ -2284,6 +2285,7 @@
                                 "砂浜でダンスの練習！これもトレーニングだよね！",
                                 "ユイちゃん、日焼け止めちゃんと塗った？リリカが塗ってあげようか？"
                             ],
+                            onsen_towel_trouble: ["きゃー！ちょっと、タオルが…！で、でも、これもファンサービスってことで許して！"],
                             summer_onsen: ["温泉、気持ちい～！ライブの疲れが吹っ飛ぶね！", "このタオル、ちょっと危なくない！？でも、これもファンサービスってことで！", "温泉といえば卓球だよね！負けないよー！", "ミコちゃん、温泉でゴーレム召喚したらお湯が溢れちゃうよ！"],
                             giant_among_tinies: ["みんな、ちっちゃくて可愛い！リリカがおっきく守ってあげるね！", "ミニミニ軍団を引き連れる巨大アイドル、リリカだよー！みんな、ちゃんとついてきてね！"],
                             pair_レンカ: ["レンカさん、大人っぽくてセクシーだね！リリカも見習わなきゃ！", "その魔法、ステージ演出に使えそう！"],
@@ -2571,6 +2573,7 @@
                                 "海の水ってしょっぱいんだね！モコ、びっくりしてる！"
                             ],
                             summer_onsen: ["わーい、温泉だ！モコ、泳いでもいい？…え、だめなの？", "このお湯、なんだか体に良さそう！ゴーレムくんも元気になったりして！", "ユイちゃん、おまんじゅうありがとう！モコと半分こするね！", "リリィちゃん、背中流してあげようか？モコが！"],
+                            onsen_towel_trouble: ["わわっ！タオルが取れちゃった！モコ、隠してー！"],
                             pair_オリビア: ["オリビアさん、優しい匂いがするね！モコがすりすりしたがってる！", "その祈り、モンスターにも効くのかな？"],
                         },
                         // レンカ (ネクロマンサー): ミステリアス、お姉さん、死者と対話。
@@ -2806,6 +2809,7 @@
                                 "ミコちゃん、砂で変なモンスター作らないの！"
                             ],
                             summer_onsen: ["やっぱり冒険の後は温泉だよねー！極楽、極楽！", "タオル一枚って、結構スリリングだよね。まあ、私は慣れてるけど！", "ユイちゃん、のぼせてない？顔が真っ赤だよ？", "リリカちゃん、温泉で歌うのはいいけど、響きすぎるよ！"],
+                            onsen_towel_trouble: ["おっと、タオルが…。ふーん、面白いことするじゃない。まあ、見たいなら見れば？"],
                             pair_セレスティア: ["セレスティアちゃん、すごい力だね！私も負けてられないな！", "なんだか、見てるだけで心が洗われるみたい…不思議な感じ！お宝とは違うキラキラだね！"],
                         },
                         'セレスティア': {
@@ -3399,12 +3403,12 @@
                             maxMp: c.mp,
                             currentMp: c.mp,
                             initialHeight: c.height,
-                            buffs: {},
+                            buffs: {}, // ファイター, ソーサラー, ナイト, メディック
                             heightLocked: false, // 追加
                             blessings: {}, // 祝福用
                             level: 1,
                             isDefending: false,
-                            hate: 0,
+                            hate: 0, // ファイター, ソーサラー, ナイト, メディック
                             statusEffects: {}, // 状態異常
                         })); // ファイター, ソーサラー, ナイト, メディック
                         gameState.party.forEach(p => p.heightLocked = false); // 身長固定フラグを初期化
@@ -3420,7 +3424,7 @@
                         // 初期アイテムの配布
                         if (!fromSave) {
                             addItemToInventory('potion', gameState.party.length);
-                            addItemToInventory('milk', 1);
+                            addItemToInventory('milk', 1); // ファイター, ソーサラー, ナイト, メディック
                             addItemToInventory('mana_potion', 1);
                         }
 
@@ -3437,7 +3441,7 @@
 
                         // HP/MPを全快させる
                         gameState.party.forEach(char => {
-                            char.currentHp = char.maxHp;
+                            char.currentHp = char.maxHp; // ファイター, ソーサラー, ナイト, メディック
                             char.currentMp = char.maxMp;
                         });
 
@@ -3462,7 +3466,7 @@
 
                         // HP/MPを全快させる
                         gameState.party.forEach(char => {
-                            char.currentHp = char.maxHp;
+                            char.currentHp = char.maxHp; // ファイター, ソーサラー, ナイト, メディック
                             char.currentMp = char.maxMp;
                         });
 
@@ -3980,6 +3984,7 @@
 
                     async function triggerSummerLivePart2() {
                         log("ビーチでのライブを終えた一行は、打ち上げのために温泉へとやってきた！");
+                        dungeonView.style.backgroundImage = "url('https://image.pollinations.ai/prompt/Japanese%20open-air%20onsen,%20steam%20rising%20from%20the%20water,%20bamboo%20fences,%20stone%20lanterns,%20night,%20starry%20sky,%20anime%20style,%20digital%20painting')";
                         await new Promise(resolve => setTimeout(resolve, 2000));
                         log("後半戦は、温泉ステージでスタート！");
                         await new Promise(resolve => setTimeout(resolve, 2000));
@@ -4066,6 +4071,45 @@
                     }
 
                     function getRandomEvent() {
+                        // サマータイム・スペシャルライブ！専用イベント
+                        if (gameState.gameMode === 'summer_live') {
+                            let summerEvents;
+                            if (gameState.floor <= 30) {
+                                // ビーチイベント
+                                summerEvents = [{
+                                    name: "スイカ割り",
+                                    func: foundWatermelonSmash,
+                                    weight: 10
+                                }, {
+                                    name: "砂の城作り",
+                                    func: foundSandcastle,
+                                    weight: 10
+                                }, ];
+                            } else {
+                                // 温泉イベント
+                                summerEvents = [{
+                                    name: "温泉卓球",
+                                    func: foundOnsenPingPong,
+                                    weight: 10
+                                }, {
+                                    name: "温泉でリラックス",
+                                    func: foundHotSpringsSoak,
+                                    weight: 10
+                                }, {
+                                    name: "タオルトラブル！",
+                                    func: foundOnsenTowelTrouble,
+                                    weight: 10
+                                }, ];
+                            }
+                            const totalWeight = summerEvents.reduce((sum, event) => sum + event.weight, 0);
+                            let random = Math.random() * totalWeight;
+                            for (const event of summerEvents) {
+                                random -= event.weight;
+                                if (random <= 0) return event;
+                            }
+                            return summerEvents[summerEvents.length - 1];
+                        }
+
                         const isAnyoneStripped = gameState.party.some(p => p.statusEffects.stripped);
                         const restoreClothesEvent = {
                             name: "服を発見",
@@ -4092,7 +4136,7 @@
                         const shamePilloryEvent = {
                             name: "羞恥の張り付け",
                             func: foundShamePillory,
-                            weight: isAnyoneStripped ? 3 : 0
+                            weight: isAnyoneStripped && gameState.gameMode !== 'summer_live' ? 3 : 0 // サマーライブ中は発生しない
                         };
                         const shrineOfPrayerEvent = {
                             name: "祈りのほこら",
@@ -4166,7 +4210,7 @@
                             suspiciousDeviceEvent,
                             bewilderingStatueEvent,
                             shrineOfPrayerEvent, // ファイター, ソーサラー, ナイト, メディック
-                            shamePilloryEvent,
+                            shamePilloryEvent, // ファイター, ソーサラー, ナイト, メディック
                             liberationEvent,
                             highMouseHoleEvent,
                         ].filter(event => event.weight > 0);
@@ -4428,6 +4472,105 @@
                             log(`足元で禍々しく光る魔力の結晶を見つけた！「邪結晶」を手に入れた！`);
                         }
                         flashCard(getRandomPartyMember(), 'yellow');
+                    }
+
+                    async function foundOnsenTowelTrouble() {
+                        log("温泉の熱気にあてられて、少しのぼせてしまったようだ…");
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+
+                        const immuneRoles = ['ナイト', 'サムライ', '聖女'];
+                        const potentialVictims = gameState.party.filter(p => p.currentHp > 0 && !immuneRoles.includes(p.role) && !p.statusEffects.stripped);
+
+                        if (potentialVictims.length === 0) {
+                            log("…が、特に何も起こらなかった。");
+                            return;
+                        }
+
+                        const victim = potentialVictims[Math.floor(Math.random() * potentialVictims.length)];
+                        log(`ふらついた拍子に、${victim.name}のタオルがはだけてしまった！`);
+                        victim.statusEffects.stripped = {
+                            turns: 0
+                        };
+                        flashCard(victim, 'red');
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+
+                        const line = conversations[victim.name].onsen_towel_trouble[0];
+                        log(`${victim.name}「${line}」`);
+                    }
+
+                    // --- サマータイム・スペシャルライブ！専用イベント ---
+                    async function foundWatermelonSmash() {
+                        log("ビーチといえばスイカ割り！みんなで楽しむことにした。");
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        const blindfolded = getRandomPartyMember();
+                        log(`${blindfolded.name}が目隠しをして、スイカ割りに挑戦！`);
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+
+                        if (Math.random() < 0.7) { // 70%で成功
+                            log(`「そっちじゃない！もっと右！」「行き過ぎ！」「そこだー！」`);
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                            log(`パッカーン！ 見事にスイカは命中！`);
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                            log("甘くて冷たいスイカを食べて、全員のHPが少し回復した！");
+                            for (const p of gameState.party.filter(p => p.currentHp > 0)) {
+                                await animateStatChange(p, 'hp', Math.ceil(p.maxHp * 0.2), 'increase');
+                            }
+                        } else { // 30%で失敗
+                            const victim = gameState.party.filter(p => p.currentHp > 0 && p !== blindfolded)[Math.floor(Math.random() * (gameState.party.length - 1))];
+                            log(`「こっちだよー！」という${victim.name}の声の方へ、${blindfolded.name}は進んでいき…`);
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                            log(`ゴツン！ ${blindfolded.name}の振り下ろした棒が、${victim.name}の頭にクリーンヒット！`);
+                            await dealDamage(victim, 10);
+                        }
+                    }
+
+                    async function foundSandcastle() {
+                        log("みんなで砂の城を作ることにした。");
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        log("力を合わせて、立派な城を築き上げる！");
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+
+                        const quality = Math.random();
+                        if (quality < 0.3) {
+                            log("城は完成したが、波にさらわれてすぐに崩れてしまった…。");
+                        } else if (quality < 0.8) {
+                            log("立派な砂の城が完成した！達成感でパーティの士気が上がる！(3ターン攻撃力アップ)");
+                            gameState.party.forEach(p => {
+                                if (p.currentHp > 0) p.buffs.atk_up = 3;
+                            });
+                        } else {
+                            log("あまりに完璧な城が完成し、砂の精霊が祝福を与えてくれた！");
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                            log("全員のHPとMPが完全に回復した！");
+                            for (const p of gameState.party.filter(p => p.currentHp > 0)) {
+                                await animateStatChange(p, 'hp', p.maxHp, 'increase');
+                                await animateStatChange(p, 'mp', p.maxMp, 'increase');
+                            }
+                        }
+                    }
+
+                    async function foundOnsenPingPong() {
+                        log("温泉といえば卓球！トーナメント戦が始まった！");
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        const winner = gameState.party.filter(p => p.currentHp > 0).sort((a, b) => getEffectiveStats(b).agi - getEffectiveStats(a).agi)[0];
+                        log(`激しいラリーの末、最も素早い${winner.name}が優勝した！`);
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        log(`${winner.name}は温泉卓球マスターの称号を得て、ステータスが永続的に上昇した！`);
+                        winner.atk += 1;
+                        winner.def += 1;
+                        winner.agi += 1;
+                        flashCard(winner, 'green');
+                    }
+
+                    async function foundHotSpringsSoak() {
+                        log("一行は温泉にゆっくりと浸かり、冒険の疲れを癒した。");
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        log("全員のHPとMPが回復し、状態異常も治った。");
+                        for (const p of gameState.party.filter(p => p.currentHp > 0)) {
+                            await animateStatChange(p, 'hp', Math.ceil(p.maxHp * 0.5), 'increase');
+                            await animateStatChange(p, 'mp', Math.ceil(p.maxMp * 0.5), 'increase');
+                            p.statusEffects = {}; // 脱衣以外をリセット
+                        }
                     }
 
                     async function foundHighMouseHole() {
@@ -7484,7 +7627,7 @@
                             if (!target.isEnemy && gameState.gameMode === 'enjoy') {
                                 log(`${target.name}は倒れた...しかし、不思議な力ですぐに立ち上がった！`);
                                 // HPを即座に全回復させる
-                                target.currentHp = target.maxHp;
+                                target.currentHp = target.maxHp; // ファイター, ソーサラー, ナイト, メディック
                                 flashCard(target, 'green');
                                 updatePartyStatus(); // UIを更新 // ファイター, ソーサラー, ナイト, メディック
                             } else if (!target.isEnemy && target.blessings && target.blessings.last_stand) {
@@ -7610,7 +7753,7 @@
                         if (isVictory) {
                             // 「英雄の幻影」撃破ボーナス
                             if (gameState.enemies.some(e => e.name === '英雄の幻影')) {
-                                log("英雄の幻影を打ち破った！パーティ全員の魂が共鳴し、限界を超えて成長する！");
+                                log("英雄の幻影を打ち破った！パーティ全員の魂が共鳴し、限界を超えて成長する！"); // ファイター, ソーサラー, ナイト, メディック
                                 gameState.party.forEach(p => {
                                     if (p.currentHp > 0) {
                                         p.maxHp += 5;
@@ -7632,7 +7775,7 @@
                                 const aliveParty = gameState.party.filter(p => p.currentHp > 0);
                                 if (aliveParty.every(p => p.heightLocked)) {
                                     log("…しかし、全員の体が変化を拒んだ！");
-                                    await new Promise(resolve => setTimeout(resolve, 1500));
+                                    await new Promise(resolve => setTimeout(resolve, 1500)); // ファイター, ソーサラー, ナイト, メディック
                                 } // ファイター, ソーサラー, ナイト, メディック
                                 for (const char of aliveParty) {
                                     const change = Math.ceil(Math.random() * 101) - 50; // -50 から +50
@@ -7655,7 +7798,7 @@
                                     if (char.currentHp > 0) levelUpCharacter(char, false); // UIは表示しない
                                 });
 
-                                const foundItems = [];
+                                const foundItems = []; // ファイター, ソーサラー, ナイト, メディック
                                 const itemIds = Object.keys(itemBlueprints).filter(id => !itemBlueprints[id].battleOnly && !itemBlueprints[id].rare);
                                 for (let i = 0; i < 3; i++) { // ファイター, ソーサラー, ナイト, メディック
                                     const foundItemId = itemIds[Math.floor(Math.random() * itemIds.length)];
@@ -7672,7 +7815,7 @@
                                 } else {
                                     showLevelUpModal(true); // 通常のボーナス選択モーダルを表示
                                 }
-                            } else if (gameState.gameMode === 'endgame' && gameState.floor === 1) { // この条件は isEndlessVersion の影響を受けない
+                            } else if (gameState.gameMode === 'endgame' && gameState.floor === 1) {
                                 showModal("ゲームクリア？", "あなたはダンジョンの入り口で待ち構えていたボスを打ち破りました！…これでよかったのでしょうか？");
                                 gameState.gameOver = true;
                             } else if (gameState.floor === 30 && gameState.gameMode !== 'endless' && gameState.gameMode !== 'monster_march' && !gameState.isEndlessVersion) {
@@ -7680,7 +7823,7 @@
                                 let text = "おめでとう！あなたはダンジョンの最深部に到達し、ボスを打ち破りました！";
                                 switch (gameState.gameMode) {
                                     case 'normal':
-                                    case 'trial':
+                                    case 'trial': // ファイター, ソーサラー, ナイト, メディック
                                         text += "\nもしもの物語では、異なる結末があなたを待っているかもしれません。";
                                         break;
                                     case 'veterans':
@@ -7696,7 +7839,7 @@
                                         text = "戦い、戦い、そしてまた戦い…。武闘の宴の果てに、彼女たちは最強の称号を手にしました。その拳に宿るは、数多の強敵との記憶。";
                                         break;
                                     case 'solo':
-                                        title = "孤独な覇者";
+                                        title = "孤独な覇者"; // ファイター, ソーサラー, ナイト, メディック
                                         text = `たった一人で、${gameState.party[0].name}はダンジョンを制覇しました。その強さは伝説となり、後世まで語り継がれるでしょう。`;
                                         break;
                                     case 'saint_march':
@@ -7857,7 +8000,7 @@
                         character.atk += 1;
                         character.def += 1;
                         character.agi += 1;
-                        character.level += 1;
+                        character.level += 1; // ファイター, ソーサラー, ナイト, メディック
                         // HP/MPを全回復
                         character.currentHp = character.maxHp;
                         character.currentMp = character.maxMp; // ファイター, ソーサラー, ナイト, メディック
@@ -7938,7 +8081,7 @@
                                 log('全員が服を着て、元の状態に戻った！');
                             },
                             weight: 15,
-                            condition: () => gameState.party.some(p => p.statusEffects.stripped) // ファイター, ソーサラー, ナイト, メディック
+                            condition: () => gameState.party.some(p => p.statusEffects.stripped)
                         }, {
                             id: 'allLevelUp',
                             text: () => '全員がさらにレベルアップ',
@@ -7994,7 +8137,7 @@
                                         log(`…なんと、身長が1cmになってしまった！`);
                                         break;
                                     case 'strip':
-                                        const immuneRoles = ['ナイト', 'サムライ', '聖女'];
+                                        const immuneRoles = ['ナイト', 'サムライ', '聖女']; // ファイター, ソーサラー, ナイト, メディック
                                         if (immuneRoles.includes(target.role)) {
                                             log(`…しかし、${target.name}は恥じらいを覚えず、何も起こらなかった。`);
                                         } else {
@@ -8043,7 +8186,7 @@
                             needsTarget: true
                         }, ];
 
-                        let selectedBonuses = [];
+                        let selectedBonuses = []; // ファイター, ソーサラー, ナイト, メディック
                         let availableBonuses = [...bonusPool];
 
                         while (selectedBonuses.length < 4 && availableBonuses.length > 0) {
@@ -8124,7 +8267,7 @@
                             effect: () => {
                                 log("呪いが発動し、全員の生命力が吸い取られた！");
                                 gameState.party.forEach(p => {
-                                    if (p.currentHp > 0) {
+                                    if (p.currentHp > 0) { // ファイター, ソーサラー, ナイト, メディック
                                         const damage = Math.ceil(p.currentHp / 2); // ファイター, ソーサラー, ナイト, メディック
                                         animateStatChange(p, 'hp', -damage, 'decrease');
                                     }
@@ -8136,7 +8279,7 @@
                             text: '忘却の呪い',
                             description: '所持アイテムをランダムに3つ失う。',
                             effect: () => {
-                                const lostItems = [];
+                                const lostItems = []; // ファイター, ソーサラー, ナイト, メディック
                                 for (let i = 0; i < 3; i++) {
                                     const availableItems = gameState.inventory.filter(item => item.quantity > 0);
                                     if (availableItems.length > 0) {
@@ -8190,7 +8333,7 @@
                             },
                             weight: 7,
                             needsTarget: true
-                        }, ];
+                        }, ]; // ファイター, ソーサラー, ナイト, メディック
 
                         // 4つの異なる呪いを選択
                         let selectedCurses = [];
@@ -8242,7 +8385,7 @@
                                 card.style.zIndex = '10';
                             }
                             setTimeout(() => {
-                                card.classList.remove(className);
+                                card.classList.remove(className); // ファイター, ソーサラー, ナイト, メディック
                                 if (target.isEnemy) {
                                     card.style.zIndex = 'auto';
                                 }
@@ -8265,7 +8408,7 @@
                         const statElement = card.querySelector(`.stat-${statName}`);
                         if (!statElement) return;
 
-                        const statSpan = statElement.querySelector('.font-semibold'); // The span holding the actual number
+                        const statSpan = statElement.querySelector('.font-semibold');
                         if (!statSpan) {
                             // If there's no specific number span (e.g., for 'atk' if it were displayed)
                             // Just do the background flash and return
@@ -8278,7 +8421,7 @@
                         const duration = 500; // Animation duration for number change
                         const flashDuration = 800; // Animation duration for background flash
 
-                        // Apply background flash
+                        // Apply background flash // ファイター, ソーサラー, ナイト, メディック
                         const flashClassName = `stat-flash-${type}`;
                         statElement.classList.add(flashClassName);
                         setTimeout(() => statElement.classList.remove(flashClassName), flashDuration);
@@ -8350,7 +8493,7 @@
                             const progress = Math.min(1, elapsedTime / duration);
                             const currentValue = Math.ceil(startValue + (endValue - startValue) * progress);
 
-                            // Update the displayed number and bar
+                            // Update the displayed number and bar // ファイター, ソーサラー, ナイト, メディック
                             if (statName === 'hp') {
                                 statSpan.textContent = currentValue;
                                 const hpBarInner = card.querySelector('.hp-bar-inner');
@@ -8363,7 +8506,7 @@
                                 statSpan.textContent = `${currentValue}cm`;
                                 const heightDiffElement = card.querySelector('.stat-height');
                                 if (heightDiffElement) {
-                                    const diff = currentValue - target.initialHeight; // Use currentValue for diff during animation
+                                    const diff = currentValue - target.initialHeight;
                                     heightDiffElement.innerHTML = `身長: <span class="font-semibold">${currentValue}cm</span> (${diff >= 0 ? '+' : ''}${diff})`;
                                 }
                             }
@@ -8371,7 +8514,7 @@
                             if (progress < 1) {
                                 requestAnimationFrame(updateNumber);
                             } else {
-                                // Ensure final value is set after animation
+                                // Ensure final value is set after animation // ファイター, ソーサラー, ナイト, メディック
                                 if (statName === 'hp') {
                                     statSpan.textContent = endValue;
                                     const hpBarInner = card.querySelector('.hp-bar-inner');
@@ -8387,7 +8530,7 @@
                                         const diff = endValue - target.initialHeight;
                                         heightDiffElement.innerHTML = `身長: <span class="font-semibold">${endValue}cm</span> (${diff >= 0 ? '+' : ''}${diff})`;
                                     }
-                                } // アニメーション完了
+                                }
                                 resolveAnimation();
                             }
                         }
@@ -8395,14 +8538,14 @@
                         return animationPromise;
                     }
 
-                    function getStatusAndBuffsHtml(target) {
+                    function getStatusAndBuffsHtml(target) { // ファイター, ソーサラー, ナイト, メディック
                         let html = '<div class="mt-3 pt-3 border-t border-gray-300 space-y-1">';
                         let hasEffect = false;
 
                         const effectMap = {
                             // buffs
                             'atk_up': {
-                                name: '攻撃力アップ',
+                                name: '攻撃力アップ', // ファイター, ソーサラー, ナイト, メディック
                                 color: 'text-red-600'
                             },
                             'tension_up': {
@@ -8411,15 +8554,15 @@
                             },
 
                             'protect': {
-                                name: '防御力アップ',
+                                name: '防御力アップ', // ファイター, ソーサラー, ナイト, メディック
                                 color: 'text-blue-600'
                             },
                             'agi_up': {
-                                name: '素早さアップ',
+                                name: '素早さアップ', // ファイター, ソーサラー, ナイト, メディック
                                 color: 'text-green-600'
                             },
                             'provoke': {
-                                name: '挑発',
+                                name: '挑発', // ファイター, ソーサラー, ナイト, メディック
                                 color: 'text-orange-600'
                             },
                             'cover': {
@@ -8440,12 +8583,12 @@
                             },
                             // statusEffects (good)
                             'regeneration': {
-                                name: 'HP自動回復',
+                                name: 'HP自動回復', // ファイター, ソーサラー, ナイト, メディック
                                 color: 'text-green-700'
                             },
                             // statusEffects (bad)
                             'poison': {
-                                name: '毒',
+                                name: '毒', // ファイター, ソーサラー, ナイト, メディック
                                 color: 'text-purple-600'
                             },
                             'paralysis': {
@@ -8457,7 +8600,7 @@
                                 color: 'text-gray-600'
                             },
                             'stripped': {
-                                name: '脱衣',
+                                name: '脱衣', // ファイター, ソーサラー, ナイト, メディック
                                 color: 'text-pink-600'
                             },
                             'stat_down': {
@@ -8476,7 +8619,7 @@
                                 const effect = effectMap[key];
                                 const turns = (typeof allEffects[key] === 'object' && allEffects[key].turns !== undefined) ? allEffects[key].turns : (typeof allEffects[key] === 'number' && allEffects[key] > 0 ? allEffects[key] : null);
                                 html += `<p class="${effect.color} font-semibold">${effect.name} ${turns !== null ? `(残り ${turns} ターン)` : ''}</p>`;
-                    }
+                            }
                     }
 
                 if (!hasEffect) return ''; // 効果がなければ何も返さない
@@ -8496,7 +8639,7 @@
                     let weakness = '物理・魔法ともに同程度有効。';
                     if (target.pDef < target.mDef * 0.8) {
                         weakness = '<strong class="text-red-600">物理攻撃が有効。</strong> 魔法攻撃は効きにくい。';
-                    } else if (target.mDef < target.pDef * 0.8) {
+                    } else if (target.mDef < target.pDef * 0.8) { // ファイター, ソーサラー, ナイト, メディック
                         weakness = '<strong class="text-blue-600">魔法攻撃が有効。</strong> 物理攻撃は効きにくい。';
                     }
 
@@ -8527,7 +8670,7 @@
 
                     let blessingHtml = '';
                     if (target.blessings && Object.keys(target.blessings).length > 0) {
-                        blessingHtml += '<div class="mt-3 pt-3 border-t border-gray-300 space-y-1">';
+                        blessingHtml += '<div class="mt-3 pt-3 border-t border-gray-300 space-y-1">'; // ファイター, ソーサラー, ナイト, メディック
                         blessingHtml += '<p class="font-bold text-amber-700">授かった祝福</p>'; // ファイター, ソーサラー, ナイト, メディック
                         Object.values(target.blessings).forEach(blessing => {
                             if (blessing && blessing.name && blessing.description) {
@@ -8548,7 +8691,7 @@
                     scanModalTextContainer.classList.replace('w-full', 'md:w-1/2');
 
                     // 立ち絵の表示
-                    scanModalImageContainer.innerHTML = ''; // クリア // ファイター, ソーサラー, ナイト, メディック
+                    scanModalImageContainer.innerHTML = ''; // クリア
                     const imgDiv = document.createElement('div');
                     imgDiv.className = `absolute inset-0 bg-no-repeat opacity-80 ${target.bgClass || blueprint.bgClass}`;
                     imgDiv.style.backgroundSize = 'contain';
@@ -8645,7 +8788,7 @@
                     });
                 }
                 itemModal.classList.remove('hidden');
-            } // ファイター, ソーサラー, ナイト, メディック
+            }
 
             function useItem(character, item) {
                 itemModal.classList.add('hidden');
@@ -8693,7 +8836,7 @@
                         // 全体対象や対象不要のアイテム
                         executePlayerAction();
                     }
-                } // ファイター, ソーサラー, ナイト, メディック
+                }
             }
 
             function startGame(mode = 'normal', selectedMembers = null, fromSave = false) {
@@ -8762,6 +8905,7 @@
                 // サマータイム・スペシャルライブ！モードの初期設定
                 if (mode === 'summer_live') {
                     selectedMembers = ['リリカ', 'ユイ', 'ミコ', 'リリィ'];
+                    dungeonView.style.backgroundImage = "url('https://image.pollinations.ai/prompt/beautiful%20anime%20style%20beach,%20sparkling%20ocean,%20white%20sand,%20blue%20sky,%20summer,%20palm%20trees,%20digital%20painting')";
                     initGame(selectedMembers, fromSave);
 
                     // 立ち絵を水着に変更
