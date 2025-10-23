@@ -4071,45 +4071,6 @@
                     }
 
                     function getRandomEvent() {
-                        // サマータイム・スペシャルライブ！専用イベント
-                        if (gameState.gameMode === 'summer_live') {
-                            let summerEvents;
-                            if (gameState.floor <= 30) {
-                                // ビーチイベント
-                                summerEvents = [{
-                                    name: "スイカ割り",
-                                    func: foundWatermelonSmash,
-                                    weight: 10
-                                }, {
-                                    name: "砂の城作り",
-                                    func: foundSandcastle,
-                                    weight: 10
-                                }, ];
-                            } else {
-                                // 温泉イベント
-                                summerEvents = [{
-                                    name: "温泉卓球",
-                                    func: foundOnsenPingPong,
-                                    weight: 10
-                                }, {
-                                    name: "温泉でリラックス",
-                                    func: foundHotSpringsSoak,
-                                    weight: 10
-                                }, {
-                                    name: "タオルトラブル！",
-                                    func: foundOnsenTowelTrouble,
-                                    weight: 10
-                                }, ];
-                            }
-                            const totalWeight = summerEvents.reduce((sum, event) => sum + event.weight, 0);
-                            let random = Math.random() * totalWeight;
-                            for (const event of summerEvents) {
-                                random -= event.weight;
-                                if (random <= 0) return event;
-                            }
-                            return summerEvents[summerEvents.length - 1];
-                        }
-
                         const isAnyoneStripped = gameState.party.some(p => p.statusEffects.stripped);
                         const restoreClothesEvent = {
                             name: "服を発見",
@@ -4213,15 +4174,47 @@
                             shamePilloryEvent, // ファイター, ソーサラー, ナイト, メディック
                             liberationEvent,
                             highMouseHoleEvent,
-                        ].filter(event => event.weight > 0);
+                        ];
 
-                        const totalWeight = events.reduce((sum, event) => sum + event.weight, 0);
+                        // サマータイム・スペシャルライブ！専用イベントをプールに追加
+                        if (gameState.gameMode === 'summer_live') {
+                            if (gameState.floor <= 30) {
+                                // ビーチイベント
+                                events.push({
+                                    name: "スイカ割り",
+                                    func: foundWatermelonSmash,
+                                    weight: 5
+                                }, {
+                                    name: "砂の城作り",
+                                    func: foundSandcastle,
+                                    weight: 5
+                                });
+                            } else {
+                                // 温泉イベント
+                                events.push({
+                                    name: "温泉卓球",
+                                    func: foundOnsenPingPong,
+                                    weight: 5
+                                }, {
+                                    name: "温泉でリラックス",
+                                    func: foundHotSpringsSoak,
+                                    weight: 5
+                                }, {
+                                    name: "タオルトラブル！",
+                                    func: foundOnsenTowelTrouble,
+                                    weight: 5
+                                });
+                            }
+                        }
+
+                        const filteredEvents = events.filter(event => event.weight > 0);
+                        const totalWeight = filteredEvents.reduce((sum, event) => sum + event.weight, 0);
                         let random = Math.random() * totalWeight;
-                        for (const event of events) {
+                        for (const event of filteredEvents) {
                             random -= event.weight;
                             if (random <= 0) return event;
                         }
-                        return events[events.length - 1]; // フォールバック
+                        return filteredEvents[filteredEvents.length - 1];
                     }
 
                     function foundEquipment() {
@@ -5528,40 +5521,27 @@
                             }
                         }
 
-                        // サマータイム・スペシャルライブ！モードのMP消費無効化
-                        if (currentActor.isTransformed && gameState.gameMode === 'summer_live' && gameState.floor <= 30) {
-                            // 何もしない（MP消費をスキップ）
-                        } else if (currentActor.isTransformed) {
-                            const mpCost = 15;
-                            // フェアリーモードの特殊効果
-                            if (currentActor.role === 'フェアリー') {
-                                if (currentActor.height > 1) {
-                                    const shrinkAmount = Math.floor(Math.random() * 21) + 20; // 20-40cm縮む
-                                    log(`${currentActor.name}の体から魔力が抜け、体が縮んでいく！`);
-                                    await animateStatChange(currentActor, 'height', -shrinkAmount, 'decrease');
-                                }
-                            }
-                            // アルラウネモードの特殊効果
-                            if (currentActor.role === 'アルラウne') {
-                                log(`${currentActor.name}は魔力で養分を生成し、再生能力を高めた！`);
-                                currentActor.statusEffects.regeneration = {
-                                    turns: 2
-                                };
-                            }
+                        // 変身中のMP消費と特殊効果
+                        if (currentActor.isTransformed) {
+                            // サマータイム・スペシャルライブのビーチパートではMP消費なし
+                            const shouldConsumeMp = !(gameState.gameMode === 'summer_live' && gameState.floor <= 30);
 
-                            if (currentActor.currentMp < mpCost) {
-                                log(`${currentActor.name}はMPが尽き、変身が解けてしまった！`);
-                                await handleTransform(currentActor, {
-                                    type: 'transform_revert'
-                                });
-                                // 変身解除後は即座にターン終了
-                                setTimeout(() => {
-                                    gameState.currentTurnIndex = (gameState.currentTurnIndex + 1) % gameState.turnOrder.length;
-                                    nextTurn();
-                                }, 1000);
-                                return;
-                            } else {
-                                animateStatChange(currentActor, 'mp', -mpCost, 'decrease');
+                            if (shouldConsumeMp) {
+                                const mpCost = 15;
+                                if (currentActor.currentMp < mpCost) {
+                                    log(`${currentActor.name}はMPが尽き、変身が解けてしまった！`);
+                                    await handleTransform(currentActor, {
+                                        type: 'transform_revert'
+                                    });
+                                    // 変身解除後は即座にターン終了
+                                    setTimeout(() => {
+                                        gameState.currentTurnIndex = (gameState.currentTurnIndex + 1) % gameState.turnOrder.length;
+                                        nextTurn();
+                                    }, 1000);
+                                    return;
+                                } else {
+                                    animateStatChange(currentActor, 'mp', -mpCost, 'decrease');
+                                }
                             }
                         }
 
@@ -5569,20 +5549,6 @@
                         // nextTurnの最後に移動させるため、ここでは何もしない
 
                         updatePartyStatus(); // ターン開始時に状態表示を更新
-
-                        if (currentActor.currentHp <= 0) {
-                            gameState.currentTurnIndex = (gameState.currentTurnIndex + 1) % gameState.turnOrder.length;
-                            setTimeout(nextTurn, 100);
-                            return;
-                        }
-
-                        if (currentActor.isEnemy) {
-                            enemyTurn(currentActor);
-                        } else {
-                            // ターン開始時にMPを1回復
-                            if (currentActor.currentMp < currentActor.maxMp) animateStatChange(currentActor, 'mp', 1, 'increase');
-                            playerTurn(currentActor);
-                        }
                     }
 
                     function playerTurn(character) {
