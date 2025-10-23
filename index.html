@@ -4994,7 +4994,11 @@
                         updateEnemyStatus();
 
                         const combatants = [...gameState.party.filter(p => p.currentHp > 0), ...gameState.enemies];
-                        gameState.turnOrder = combatants.sort((a, b) => getEffectiveStats(b).agi - getEffectiveStats(a).agi);
+                        gameState.turnOrder = combatants.sort((a, b) => {
+                            const agiA = a.isEnemy ? a.agi : getEffectiveStats(a).agi;
+                            const agiB = b.isEnemy ? b.agi : getEffectiveStats(b).agi;
+                            return agiB - agiA;
+                        });
                         gameState.currentTurnIndex = 0;
 
                         setTimeout(() => {
