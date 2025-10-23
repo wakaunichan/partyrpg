@@ -579,17 +579,17 @@
 
         <div id="scan-modal" class="hidden absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
             <div class="bg-white rounded-lg p-6 shadow-2xl max-w-3xl w-full flex gap-6">
+                <div id="scan-modal-image-container" class="hidden w-1/2 relative rounded-lg overflow-hidden">
+                    <!-- 立ち絵がここに挿入されます -->
+                </div>
                 <div id="scan-modal-text-content" class="w-full md:w-1/2">
                     <h2 id="scan-modal-title" class="text-2xl font-bold mb-4">調査結果</h2>
                     <div id="scan-modal-content" class="space-y-3 text-gray-700 max-h-96 overflow-y-auto pr-2">
                         <!-- 調査結果がここに挿入されます -->
                     </div>
                     <div class="text-right mt-4">
-                        <button id="scan-modal-close" class="action-button bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded-lg shadow-lg z-20 relative">閉じる</button>
+                        <button id="scan-modal-close" class="action-button bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded-lg shadow-lg">閉じる</button>
                     </div>
-                </div>
-                <div id="scan-modal-image-container" class="hidden md:block w-1/2 relative rounded-lg overflow-hidden">
-                    <!-- 立ち絵がここに挿入されます -->
                 </div>
             </div>
         </div>
@@ -836,6 +836,10 @@
                     const blessingCharSelectList = document.getElementById('blessing-char-select-list');
                     const blessingOptionsList = document.getElementById('blessing-options-list');
 
+                    // 背景画像のURLを定数化
+                    const DEFAULT_DUNGEON_BG = "url('https://image.pollinations.ai/prompt/fantasy%20rpg%20dungeon,%20dark,%20mysterious,%20glowing%20runes,%20stone%20columns,%20roots,%20moss,%20pathway,%20digital%20painting')";
+                    const SUMMER_BEACH_BG = "url('https://image.pollinations.ai/prompt/beautiful%20anime%20style%20beach,%20sparkling%20ocean,%20white%20sand,%20blue%20sky,%20summer,%20palm%20trees,%20digital%20painting')";
+                    const SUMMER_ONSEN_BG = "url('https://image.pollinations.ai/prompt/Japanese%20open-air%20onsen,%20steam%20rising%20from%20the%20water,%20bamboo%20fences,%20stone%20lanterns,%20night,%20starry%20sky,%20anime%20style,%20digital%20painting')";
 
                     let gameState = {
                         floor: 0,
@@ -853,6 +857,7 @@
                         isEndlessVersion: false, // 無限版フラグ
                         gameMode: 'normal', // normal, veterans, dwarves, brawl, solo, endgame, endless, indecent, enjoy, saint_march, fixed_path, uninhibited_souls, random_party, divine_trial, treasure_map
                         triggeredSpecialConvos: [],
+                        dungeonBackground: DEFAULT_DUNGEON_BG, // 背景画像をgameStateで管理
                     };
 
                     const allCharacterBlueprints = [{
@@ -3984,7 +3989,8 @@
 
                     async function triggerSummerLivePart2() {
                         log("ビーチでのライブを終えた一行は、打ち上げのために温泉へとやってきた！");
-                        dungeonView.style.backgroundImage = "url('https://image.pollinations.ai/prompt/Japanese%20open-air%20onsen,%20steam%20rising%20from%20the%20water,%20bamboo%20fences,%20stone%20lanterns,%20night,%20starry%20sky,%20anime%20style,%20digital%20painting')";
+                        gameState.dungeonBackground = SUMMER_ONSEN_BG;
+                        dungeonView.style.backgroundImage = gameState.dungeonBackground;
                         await new Promise(resolve => setTimeout(resolve, 2000));
                         log("後半戦は、温泉ステージでスタート！");
                         await new Promise(resolve => setTimeout(resolve, 2000));
@@ -4973,16 +4979,17 @@
 
                     function startBattle(isBoss = false, isEnhancedBoss = false) {
                         log(isBoss ? "ボスの気配がする…！" : "敵が現れた！");
-                        gameState.inBattle = true; // ファイター, ソーサラー, ナイト, メディック
+                        gameState.inBattle = true;
                         dungeonCommands.classList.add('hidden');
                         emergencyButton.classList.add('battle-active'); // 緊急ボタンを有効化
                         floorDisplay.classList.add('hidden');
                         gameState.golem = null; // 戦闘開始時にゴーレムをリセット
                         battleCommands.classList.remove('hidden');
 
-                        // 敵の数を計算
+                        // 敵の数を計算（サマータイム・スペシャルライブ！では最大3体）
+                        let maxEnemyCount = gameState.party.length + 2; // 味方の数 + 2 を上限とする
+                        if (gameState.gameMode === 'summer_live') maxEnemyCount = 3;
                         const baseEnemyCount = Math.floor(Math.random() * 2) + 1 + Math.floor(gameState.floor / 10);
-                        const maxEnemyCount = gameState.party.length + 2; // 味方の数 + 2 を上限とする
                         const enemyCount = isBoss ? 1 : Math.min(baseEnemyCount, maxEnemyCount);
 
                         gameState.enemies = [];
@@ -5007,12 +5014,17 @@
                     }
 
                     function createEnemy(isBoss, isEnhanced = false) {
-                        const floor = gameState.floor;
+                        let floor = gameState.floor;
 
                         // パーティ人数による敵ステータスの補正計算 (1人減るごとに10%低下)
                         const partySize = gameState.party.length;
                         const reductionFactor = Math.max(0, (4 - partySize) * 0.1);
-                        const statMultiplier = 1 - reductionFactor; // ファイター, ソーサラー, ナイト, メディック
+                        let statMultiplier = 1 - reductionFactor;
+
+                        // サマータイム・スペシャルライブ！モードでのフロア補正
+                        if (gameState.gameMode === 'summer_live') {
+                            floor = Math.floor(floor * 0.6); // 敵の強化テーブルを60%に抑える
+                        }
 
                         if (isBoss && isEnhanced === 'phantom_hero') {
                             return {
@@ -6531,13 +6543,13 @@
                                 { // ワンダーカーニバル, ソーンウィップ
                                     if (skill.name === 'ワンダーカーニバル') {
                                         const heightDiff = Math.max(0, caster.initialHeight - caster.height);
-                                        const powerBonus = heightDiff * 0.05;
+                                        const powerBonus = heightDiff * 0.05; // 身長が低いほど威力ボーナス
                                         log(`${caster.name}は${skill.name}を放った！`);
                                         for (const t of target) {
-                                            const damage = calculateDamage(caster, t, { // ファイター, ソーサラー, ナイト, メディック
-                                                ...skill,
-                                                power: skill.power + powerBonus
-                                            });
+                                            const attackerStats = getEffectiveStats(caster);
+                                            const defenderStats = getEffectiveStats(t);
+                                            const baseDamage = attackerStats.atk * (skill.power + powerBonus);
+                                            const damage = Math.max(1, Math.ceil((baseDamage - Math.min(defenderStats.pDef, defenderStats.mDef)) * (Math.random() * 0.2 + 0.9)));
                                             await dealDamage(t, damage);
                                             if (Math.random() < 0.3) {
                                                 t.statusEffects.poison = {
@@ -6721,9 +6733,10 @@
                                         // 防壁を削除
                                         gameState.walls = gameState.walls.filter(w => w.targetId !== casterIndex);
                                     } else {
-                                        const damage = calculateDamage(caster, target, {
-                                            power: caster.height * 0.1
-                                        }); // 身長に応じたダメージ
+                                        // 防壁がない場合、身長に応じてダメージを計算
+                                        const attackerStats = getEffectiveStats(caster);
+                                        // (基本攻撃力 + 身長ボーナス) * 揺らぎ でダメージを計算
+                                        const damage = Math.max(1, Math.ceil((attackerStats.atk + caster.height * 0.5) * (Math.random() * 0.2 + 0.9)));
                                         log(`${caster.name}はその巨体で${skill.name}を放った！`);
                                         await dealDamage(target, damage);
                                     }
@@ -8647,7 +8660,7 @@
                         ${getStatusAndBuffsHtml(target)}
                     `;
                     // 敵の場合は立ち絵を隠し、テキストエリアを全幅にする
-                    scanModalTextContainer.classList.remove('md:w-1/2');
+                    scanModalTextContainer.classList.remove('w-1/2');
                     scanModalTextContainer.classList.add('w-full');
                     scanModalImageContainer.classList.add('hidden');
                 } else { // 味方の場合
@@ -8681,7 +8694,7 @@
                     `;
                     // 味方の場合は立ち絵を表示し、テキストエリアを半分の幅にする
                     scanModalTextContainer.classList.remove('w-full');
-                    scanModalTextContainer.classList.add('md:w-1/2');
+                    scanModalTextContainer.classList.add('w-1/2');
                     scanModalImageContainer.classList.remove('hidden');
 
                     // 立ち絵の表示
@@ -8898,8 +8911,8 @@
 
                 // サマータイム・スペシャルライブ！モードの初期設定
                 if (mode === 'summer_live') {
-                    selectedMembers = ['リリカ', 'ユイ', 'ミコ', 'リリィ'];
-                    dungeonView.style.backgroundImage = "url('https://image.pollinations.ai/prompt/beautiful%20anime%20style%20beach,%20sparkling%20ocean,%20white%20sand,%20blue%20sky,%20summer,%20palm%20trees,%20digital%20painting')";
+                    selectedMembers = ['リリカ', 'ユイ', 'ミコ', 'リリィ']; // ファイター, ソーサラー, ナイト, メディック
+                    gameState.dungeonBackground = SUMMER_BEACH_BG;
                     initGame(selectedMembers, fromSave);
 
                     // 開始レベルを2にする
@@ -8947,6 +8960,11 @@
                         }
                     }
                 }
+                // 通常モードの背景設定
+                else {
+                    gameState.dungeonBackground = DEFAULT_DUNGEON_BG;
+                }
+                dungeonView.style.backgroundImage = gameState.dungeonBackground;
 
                 setupDungeonUI();
                 dungeonCommands.classList.remove('hidden');
@@ -8977,6 +8995,8 @@
                         // セーブデータをgameStateに復元
                         gameState = loadedState;
                         // ゲーム画面を直接セットアップ
+                        // 背景画像を復元
+                        dungeonView.style.backgroundImage = gameState.dungeonBackground || DEFAULT_DUNGEON_BG;
                         titleScreen.classList.add('hidden');
                         dungeonView.classList.remove('hidden');
                         hud.classList.remove('hidden');
@@ -9204,6 +9224,8 @@
                 dungeonView.classList.add('hidden');
                 hud.classList.add('hidden');
                 commandContainer.classList.add('hidden');
+                // 背景をデフォルトに戻す
+                dungeonView.style.backgroundImage = DEFAULT_DUNGEON_BG;
                 checkSaveData(); // タイトルに戻るたびにセーブデータの有無をチェック
             }
 
