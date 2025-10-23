@@ -7467,7 +7467,7 @@
                             skillPowerMultiplier = 3; // ダメージ計算用の倍率を変更 // ファイター, ソーサラー, ナイト, メディック
                         }
 
-                        let baseDamage = skill ? baseAtk * skill.power * skillPowerMultiplier : baseAtk;
+                        let baseDamage = skill ? baseAtk * (skill.power || 1.0) * skillPowerMultiplier : baseAtk;
                         let effectiveDefense = 0;
 
                         // 防御側の防御力を決定
@@ -8643,12 +8643,13 @@
                     scanModalContent.innerHTML = `
                         <p>HP: ${target.currentHp} / ${target.maxHp}</p>
                         <p>弱点: ${weakness}</p>
-                        <p>${skillInfo}</p>
+                        <p>${skillInfo}</p> 
                         ${getStatusAndBuffsHtml(target)}
                     `;
                     // 敵の場合は立ち絵を隠し、テキストエリアを全幅にする
+                    scanModalTextContainer.classList.remove('md:w-1/2');
+                    scanModalTextContainer.classList.add('w-full');
                     scanModalImageContainer.classList.add('hidden');
-                    scanModalTextContainer.classList.replace('md:w-1/2', 'w-full');
                 } else { // 味方の場合
                     scanModalTitle.textContent = `${target.name} の情報`;
                     // 変身状態を考慮してブループリントを一度だけ取得する
@@ -8679,8 +8680,9 @@
                         ${blessingHtml}
                     `;
                     // 味方の場合は立ち絵を表示し、テキストエリアを半分の幅にする
+                    scanModalTextContainer.classList.remove('w-full');
+                    scanModalTextContainer.classList.add('md:w-1/2');
                     scanModalImageContainer.classList.remove('hidden');
-                    scanModalTextContainer.classList.replace('w-full', 'md:w-1/2');
 
                     // 立ち絵の表示
                     scanModalImageContainer.innerHTML = ''; // クリア
