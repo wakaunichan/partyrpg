@@ -365,6 +365,39 @@
         .bg-char-lily-alraune {
             --char-bg-image: url('sgd_18-3.png');
         }
+        /* サマータイム・スペシャルライブ用 */
+        
+        .bg-char-ririka-a {
+            --char-bg-image: url('sgd_6a.png');
+        }
+        
+        .bg-char-yui-a {
+            --char-bg-image: url('sgd_4a.png');
+        }
+        
+        .bg-char-miko-a {
+            --char-bg-image: url('sgd_12a.png');
+        }
+        
+        .bg-char-lily-fairy-a {
+            --char-bg-image: url('sgd_18-2a.png');
+        }
+        
+        .bg-char-ririka-b {
+            --char-bg-image: url('sgd_6b.png');
+        }
+        
+        .bg-char-yui-b {
+            --char-bg-image: url('sgd_4b.png');
+        }
+        
+        .bg-char-miko-b {
+            --char-bg-image: url('sgd_12b.png');
+        }
+        
+        .bg-char-lily-b {
+            --char-bg-image: url('sgd_18b.png');
+        }
         /* 緊急ボタンの表示制御 */
         
         #emergency-button {
@@ -516,6 +549,7 @@
                     <button data-mode="brawl" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-red-700">武闘の宴</strong><span class="block text-sm text-gray-600">2フロアごとに必ず戦闘が発生する。</span></button>
                     <button data-mode="monster_march" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-red-800">魔物の行軍</strong><span class="block text-sm text-gray-600">全てのフロアで戦闘が発生する。勝利する度にレベルアップし、アイテムを獲得する。50階踏破を目指せ。</span></button>
                     <button data-mode="endless" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-slate-700">無限への挑戦</strong><span class="block text-sm text-gray-600">全滅するまでダンジョンを進み続ける。30階ごとにボスが出現し、倒すと試練が訪れる。</span></button>
+                    <button data-mode="summer_live" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-sky-500">サマータイム・スペシャルライブ！</strong><span class="block text-sm text-gray-600">リリカ、ユイ、ミコ、リリィの4人で、ビーチと温泉を巡る特別な冒険に出る。60階踏破を目指せ。</span></button>
                     <button data-mode="uninhibited_souls" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-orange-700">奔放な魂</strong><span class="block text-sm text-gray-600">探索中、コマンドで味方を「脱衣」させたり、身長を自由に操作したりできる。</span></button>
                     <button data-mode="endgame" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-gray-700">おわりから</strong><span class="block text-sm text-gray-600">1フロア目に最終ボスが登場する。</span></button>
                 </div>
@@ -812,7 +846,7 @@
                         inBattle: false,
                         gameOver: false,
                         inventory: [],
-                        golem: null,
+                        golem: null, // ファイター, ソーサラー, ナイト, メディック
                         foundEquipment: [],
                         killCount: 0, // ネクロマンサー用
                         walls: [], // ガーディアン用
@@ -3823,9 +3857,9 @@
                         const mode = gameState.gameMode;
 
                         // --- ボス戦の判定 ---
-                        // 聖女パーティでの29階イベント
+                        // 聖女パーティでの29階イベント (サマーライブ中は発生しない)
                         const hasCelestia = gameState.party.some(p => p.role === '聖女');
-                        if (floor === 29 && hasCelestia && gameState.party.length >= 2) {
+                        if (floor === 29 && hasCelestia && gameState.party.length >= 2 && mode !== 'summer_live') {
                             celestiaEventTitle.textContent = "最後の問い";
                             celestiaEventText.textContent = "セレスティアが、静かにあなたを見つめている。\nその瞳は、これから待ち受ける運命について、覚悟を問うているようだ。\n\n「…この先に待つ元凶は、計り知れないほどの穢れを溜め込んでいます。仲間と共に挑めば、その穢れはさらに増し、想像を絶する脅威となるでしょう。それでも、あなたはこの道を進みますか？」";
                             celestiaEventButtons.innerHTML = `
@@ -3844,6 +3878,12 @@
                             return;
                         }
 
+                        // サマータイム・スペシャルライブ！のボス戦
+                        if (mode === 'summer_live' && (floor === 30 || floor === 60)) {
+                            startBattle(true);
+                            return;
+                        }
+
                         // 通常の30階ボス
                         if (floor === 30 && mode !== 'endless' && mode !== 'monster_march') {
                             startBattle(true);
@@ -3855,6 +3895,12 @@
                             (mode === 'endless' && floor > 0 && floor % 30 === 0)) {
                             startBattle(true);
                             return;
+                        }
+
+                        // サマータイム・スペシャルライブ！の後半パートへの移行
+                        if (mode === 'summer_live' && floor === 31) {
+                            triggerSummerLivePart2();
+                            return; // イベントを発生させてターン終了
                         }
 
                         // --- 通常戦闘の判定 ---
@@ -3873,6 +3919,67 @@
                         }
 
                         updatePartyStatus();
+                    }
+
+                    async function triggerSummerLivePart2() {
+                        log("ビーチでのライブを終えた一行は、打ち上げのために温泉へとやってきた！");
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        log("後半戦は、温泉ステージでスタート！");
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+
+                        // 全員の立ち絵をバスタオルに変更
+                        gameState.party.forEach(char => {
+                            if (char.name === 'リリカ') char.bgClass = 'bg-char-ririka-b';
+                            if (char.name === 'ユイ') char.bgClass = 'bg-char-yui-b';
+                            if (char.name === 'ミコ') char.bgClass = 'bg-char-miko-b';
+                            if (char.name === 'リリィ') char.bgClass = 'bg-char-lily-b';
+                        });
+
+                        // リリィの変身解除とスキル変更
+                        const lily = gameState.party.find(p => p.name === 'リリィ');
+                        if (lily) {
+                            // 変身解除
+                            if (lily.originalState) {
+                                lily.role = lily.originalState.role;
+                                lily.skills = lily.originalState.skills;
+                                delete lily.originalState;
+                                delete lily.isTransformed;
+                            }
+                            // 身長を初期値に戻す
+                            lily.height = lily.initialHeight;
+
+                            // スキルを温泉モード用に変更
+                            lily.skills = [{
+                                name: 'ジュエルショット',
+                                cost: 10,
+                                type: 'treasure_hunter_attack',
+                                targetType: 'enemy',
+                                description: '敵単体にダメージを与え、自身の攻撃力が上がるかMPが大きく回復する。'
+                            }, {
+                                name: 'ホットウェーブ',
+                                cost: 15,
+                                type: 'physical',
+                                targetType: 'enemies',
+                                power: 1.2,
+                                description: '熱波で敵全体に物理ダメージを与える。'
+                            }, {
+                                name: 'リラックスタイム',
+                                cost: 10,
+                                type: 'self_wall',
+                                targetType: 'self',
+                                description: '自身に最大HPの100%の耐久値を持つ防壁を生成する。'
+                            }, {
+                                name: 'マジックオーラ',
+                                cost: 20,
+                                type: 'party_mp_regen_special',
+                                targetType: 'party',
+                                description: '味方全体を2ターンMP自動回復状態にする。ただし、自身は脱衣状態になる(既に脱衣状態なら鈍化)。'
+                            }];
+                        }
+
+                        updatePartyStatus();
+                        // 次のフロアへ進むボタンなどを再表示
+                        dungeonCommands.classList.remove('hidden');
                     }
 
                     function triggerSelectableEvent() {
@@ -4748,6 +4855,12 @@
                                     isEnemy: true,
                                     statusEffects: {},
                                     skills: [{
+                                        name: 'フォーカス',
+                                        func: focusSkill
+                                    }, {
+                                        name: 'チェインロック',
+                                        func: chainLockSkill
+                                    }, {
                                         name: 'カタストロフィ',
                                         func: sweepAttack,
                                         type: 'physical'
@@ -4755,7 +4868,9 @@
                                         name: '縮小ビーム',
                                         func: shrinkBeam,
                                         type: 'utility'
-                                    }, ]
+                                    }, ],
+                                    usedFocus: false, // フォーカス使用フラグ
+                                    usedHeroicEnd: false, // ヒロイックエンド使用フラグ
                                 };
                             }
                             const bossBlueprints = [{
@@ -4945,20 +5060,20 @@
                         // 対象がナイト、サムライ、聖女、または防御中の場合、スキルは失敗
                         const immuneRoles = ['ナイト', 'サムライ', '聖女'];
                         if (immuneRoles.includes(target.role) || target.isDefending || target.isWall || target === gameState.golem) {
-                            log(`${enemy.name}は${target.name}にいたずらを仕掛けたが、効果がなかった！`);
-                            return; // 何もせずターン終了
+                            // log(`${enemy.name}は${target.name}にいたずらを仕掛けたが、効果がなかった！`);
+                            return false; // 行動しなかったことを示す
                         }
 
                         // 成功率の計算 (小さいほど成功しやすい)
                         let successRate = 0.1; // 基本成功率10%
                         const heightDiff = target.initialHeight - target.height;
+                        enemy.mischiefUsed = true; // スキル使用済みフラグを立てる
+
                         if (heightDiff > 0) {
                             // 初期身長からどれだけ小さいかの割合に応じて成功率アップ
                             successRate += (heightDiff / target.initialHeight) * 0.2;
                         }
                         successRate = Math.min(0.3, successRate); // 上限30%
-
-                        enemy.mischiefUsed = true; // スキル使用済みフラグを立てる
 
                         if (Math.random() < successRate) {
                             // 成功
@@ -4974,6 +5089,7 @@
                             log(`${enemy.name}はいたずらを仕掛けたが、${target.name}には通用しなかった！`);
                         }
                         updatePartyStatus();
+                        return true; // 行動したことを示す
                     }
 
                     async function inflictStrippedForArchlich(enemy, target) {
@@ -5190,6 +5306,43 @@
                             }
                             // アルラウネモードの特殊効果
                             if (currentActor.role === 'アルラウネ') {
+                                log(`${currentActor.name}は魔力で養分を生成し、再生能力を高めた！`);
+                                currentActor.statusEffects.regeneration = {
+                                    turns: 2
+                                };
+                            }
+
+                            if (currentActor.currentMp < mpCost) {
+                                log(`${currentActor.name}はMPが尽き、変身が解けてしまった！`);
+                                await handleTransform(currentActor, {
+                                    type: 'transform_revert'
+                                });
+                                // 変身解除後は即座にターン終了
+                                setTimeout(() => {
+                                    gameState.currentTurnIndex = (gameState.currentTurnIndex + 1) % gameState.turnOrder.length;
+                                    nextTurn();
+                                }, 1000);
+                                return;
+                            } else {
+                                animateStatChange(currentActor, 'mp', -mpCost, 'decrease');
+                            }
+                        }
+
+                        // サマータイム・スペシャルライブ！モードのMP消費無効化
+                        if (currentActor.isTransformed && gameState.gameMode === 'summer_live' && gameState.floor <= 30) {
+                            // 何もしない（MP消費をスキップ）
+                        } else if (currentActor.isTransformed) {
+                            const mpCost = 15;
+                            // フェアリーモードの特殊効果
+                            if (currentActor.role === 'フェアリー') {
+                                if (currentActor.height > 1) {
+                                    const shrinkAmount = Math.floor(Math.random() * 21) + 20; // 20-40cm縮む
+                                    log(`${currentActor.name}の体から魔力が抜け、体が縮んでいく！`);
+                                    await animateStatChange(currentActor, 'height', -shrinkAmount, 'decrease');
+                                }
+                            }
+                            // アルラウネモードの特殊効果
+                            if (currentActor.role === 'アルラウne') {
                                 log(`${currentActor.name}は魔力で養分を生成し、再生能力を高めた！`);
                                 currentActor.statusEffects.regeneration = {
                                     turns: 2
@@ -6354,6 +6507,20 @@
                                     flashCard(caster, 'yellow');
                                     break;
                                 }
+                            case 'cure_strip_party':
+                                { // ビーチエール
+                                    log(`${caster.name}は${skill.name}でみんなを元気づけた！`);
+                                    let cured = false;
+                                    gameState.party.forEach(p => {
+                                        if (p.statusEffects.stripped) {
+                                            delete p.statusEffects.stripped;
+                                            cured = true;
+                                        }
+                                    });
+                                    if (cured) log("全員の脱衣状態が治った！");
+                                    else log("しかし、誰も脱衣状態ではなかった。");
+                                    break;
+                                }
                             case 'guardian_stomp':
                                 { // タイタンスタンプ
                                     const casterIndex = gameState.party.indexOf(caster);
@@ -6370,6 +6537,49 @@
                                         }); // 身長に応じたダメージ
                                         log(`${caster.name}はその巨体で${skill.name}を放った！`);
                                         await dealDamage(target, damage);
+                                    }
+                                    break;
+                                }
+                            case 'self_wall':
+                                { // リラックスタイム
+                                    const wallHp = Math.ceil(caster.maxHp * 1.0);
+                                    const casterIndex = gameState.party.indexOf(caster);
+                                    gameState.walls.push({
+                                        targetId: casterIndex,
+                                        hp: wallHp,
+                                        maxHp: wallHp
+                                    });
+                                    log(`${caster.name}は${skill.name}でくつろぎ、強力な防壁を展開した！`);
+                                    break;
+                                }
+                            case 'party_mp_regen_special':
+                                { // マジックオーラ
+                                    log(`${caster.name}は${skill.name}を放ち、味方全体の魔力を活性化させた！`);
+                                    gameState.party.forEach(p => {
+                                        if (p.currentHp > 0) {
+                                            p.buffs.mp_regen_once = 3; // 2ターン後まで効果持続
+                                        }
+                                    });
+
+                                    if (caster.statusEffects.stripped) {
+                                        caster.statusEffects.slow = {
+                                            turns: 2
+                                        };
+                                        log(`しかし、${caster.name}はのぼせてしまい、動きが鈍くなった！`);
+                                    } else {
+                                        caster.statusEffects.stripped = {
+                                            turns: 0
+                                        };
+                                        log(`しかし、${caster.name}は熱気にあてられ、タオルがはだけてしまった！`);
+                                    }
+                                    break;
+                                }
+                            case 'party_heal':
+                                { // パッションハート
+                                    log(`${caster.name}は${skill.name}で味方を癒した！`);
+                                    for (const p of gameState.party.filter(p => p.currentHp > 0)) {
+                                        const healAmount = Math.ceil(p.maxHp * 0.3); // 30%回復
+                                        await animateStatChange(p, 'hp', healAmount, 'increase');
                                     }
                                     break;
                                 }
@@ -6796,26 +7006,49 @@
                             });
                         }
 
-                        // インプの特殊AI
-                        if (enemy.name === 'インプ' && !enemy.mischiefUsed && !isDefensiveTarget && Math.random() < 0.25) { // 25%の確率で「いたずら」を試みる
-                            await inflictStripped(enemy, target);
-                        } else if (enemy.specialAIType === 'phantom_hero' && !isDefensiveTarget && Math.random() < 0.6) {
-                            const skill = enemy.skills[Math.floor(Math.random() * enemy.skills.length)];
-                            await skill.func(enemy, target);
+                        let actionTaken = false;
+
+                        if (enemy.specialAIType === 'phantom_hero') {
+                            if (enemy.turnCount === 1) {
+                                await chainLockSkill(enemy);
+                                actionTaken = true;
+                            } else if (enemy.currentHp / enemy.maxHp < 0.5 && !enemy.usedFocus) {
+                                await focusSkill(enemy);
+                                enemy.usedFocus = true;
+                                actionTaken = true;
+                            } else if (enemy.currentHp / enemy.maxHp < 0.15 && !enemy.usedHeroicEnd) {
+                                await heroicEndSkill(enemy, target);
+                                enemy.usedHeroicEnd = true;
+                                actionTaken = true;
+                            }
+                        } else if (enemy.name === 'インプ' && !enemy.mischiefUsed && !isDefensiveTarget && Math.random() < 0.25) {
+                            actionTaken = await inflictStripped(enemy, target);
+                        } else if (enemy.name === 'アークリッチ' && enemy.turnCount === 1) {
+                            await inflictStrippedForArchlich(enemy, target);
+                            actionTaken = true;
                         } else if (enemy.skills && enemy.skills.length > 0 && !isDefensiveTarget && Math.random() < 0.5) {
                             const skill = enemy.skills[Math.floor(Math.random() * enemy.skills.length)];
-                            // スキル対象が防御的なターゲット（ウォール、ゴーレム）の場合、通常攻撃に切り替える
-                            if (isDefensiveTarget) {
-                                await defaultEnemyAttack(enemy, target);
-                            } else if (skill.name === '状態異常攻撃') {
+                            if (skill.name === '状態異常攻撃') {
                                 inflictStatusEffect(enemy, target);
+                                actionTaken = true;
                             } else if (skill.func) {
                                 await skill.func(enemy, target);
+                                actionTaken = true;
                             }
+                        }
+
+                        // どの特殊行動も実行されなかった場合、通常攻撃を行う
+                        if (!actionTaken) {
+                            await defaultEnemyAttack(enemy, target);
+                        }
+
+                        // 旧ロジックを削除
+                        /*
+                        ...
                         } else {
                             // 通常攻撃
                             await defaultEnemyAttack(enemy, target);
-                        }
+                        }*/
 
                         endEnemyTurn(enemy);
                     }
@@ -7440,6 +7673,10 @@
                                     case 'unstable_bodies':
                                         text = "絶え間なく変化する肉体を乗りこなし、あなたは見事ボスを打ち破りました！その精神力は、もはや何物にも揺るがないでしょう。";
                                         break;
+                                    case 'summer_live':
+                                        // 30階ボス撃破時
+                                        log("ビーチステージのボスを撃破！打ち上げの温泉に向けて、冒険は続く！");
+                                        break;
                                 }
                                 showModal(title, text);
                                 gameState.gameOver = true;
@@ -7527,6 +7764,10 @@
                             // isEndlessフラグも正しく渡す
                             levelUpCharacter(gameState.party[0], true, isEndless);
                             return; // ファイター, ソーサラー, ナイト, メディック
+                        } else if (gameState.gameMode === 'summer_live' && gameState.floor === 60) {
+                            showModal("ライブ大成功！", "おめでとう！あなたはビーチと温泉でのスペシャルライブを大成功させ、ダンジョンを制覇しました！彼女たちの夏の思い出は、最高の形で幕を閉じました。");
+                            gameState.gameOver = true;
+                            return;
                         }
 
 
@@ -8229,9 +8470,11 @@
                     let blessingHtml = '';
                     if (target.blessings && Object.keys(target.blessings).length > 0) {
                         blessingHtml += '<div class="mt-3 pt-3 border-t border-gray-300 space-y-1">';
-                        blessingHtml += '<p class="font-bold text-amber-700">授かった祝福</p>';
+                        blessingHtml += '<p class="font-bold text-amber-700">授かった祝福</p>'; // ファイター, ソーサラー, ナイト, メディック
                         Object.values(target.blessings).forEach(blessing => {
-                            blessingHtml += `<div class="p-2 bg-amber-50 rounded-md"><p class="font-semibold text-amber-800">${blessing.name}</p><p class="text-sm text-amber-700">${blessing.description}</p></div>`;
+                            if (blessing && blessing.name && blessing.description) {
+                                blessingHtml += `<div class="p-2 bg-amber-50 rounded-md"><p class="font-semibold text-amber-800">${blessing.name}</p><p class="text-sm text-amber-700">${blessing.description}</p></div>`;
+                            }
                         });
                         blessingHtml += '</div>';
                     }
@@ -8249,7 +8492,7 @@
                     // 立ち絵の表示
                     scanModalImageContainer.innerHTML = ''; // クリア
                     const imgDiv = document.createElement('div');
-                    imgDiv.className = `absolute inset-0 bg-no-repeat opacity-80 ${target.bgClass}`;
+                    imgDiv.className = `absolute inset-0 bg-no-repeat opacity-80 ${target.bgClass || blueprint.bgClass}`;
                     imgDiv.style.backgroundSize = 'contain';
                     imgDiv.style.backgroundPosition = 'center';
                     scanModalImageContainer.appendChild(imgDiv);
@@ -8658,6 +8901,48 @@
 
                     if (validSolo || validIndecent || validTrial || validTeam) startGame(gameState.gameMode, selectedNames);
                 };
+
+                // サマータイム・スペシャルライブ！モードの初期設定
+                if (mode === 'summer_live') {
+                    selectedMembers = ['リリカ', 'ユイ', 'ミコ', 'リリィ'];
+                    initGame(selectedMembers, fromSave);
+
+                    // 立ち絵を水着に変更
+                    gameState.party.forEach(char => {
+                        if (char.name === 'リリカ') char.bgClass = 'bg-char-ririka-a';
+                        if (char.name === 'ユイ') char.bgClass = 'bg-char-yui-a';
+                        if (char.name === 'ミコ') char.bgClass = 'bg-char-miko-a';
+                    });
+
+                    // リリィをフェアリー化＆スキル変更
+                    const lily = gameState.party.find(p => p.name === 'リリィ');
+                    if (lily) {
+                        const blueprint = allCharacterBlueprints.find(c => c.name === 'リリィ');
+                        const transformData = blueprint.transforms['fairy'];
+                        lily.originalState = { role: lily.role, skills: lily.skills, bgClass: lily.bgClass, height: lily.height };
+                        lily.role = transformData.role;
+                        lily.skills = transformData.skills.map(s => {
+                            if (s.type === 'transform_revert') {
+                                return { name: 'ビーチエール', cost: 10, type: 'cure_strip_party', targetType: 'party', description: '味方全員の脱衣状態を解除する。' };
+                            }
+                            return s;
+                        });
+                        lily.bgClass = 'bg-char-lily-fairy-a'; // 水着フェアリー
+                        lily.isTransformed = true;
+                    }
+
+                    // ユイのスキル変更
+                    const yui = gameState.party.find(p => p.name === 'ユイ');
+                    if (yui) {
+                        const devotionIndex = yui.skills.findIndex(s => s.name === '献身');
+                        if (devotionIndex !== -1) {
+                            yui.skills[devotionIndex] = { name: 'パッションハート', cost: 15, type: 'party_heal', targetType: 'party', description: '味方全体のHPを30%回復する。' };
+                        }
+                    }
+
+                    // 60階クリアを目指す
+                    // advanceFloorのボス戦判定で処理
+                }
 
                 selectTeamModal.classList.remove('hidden');
             }
