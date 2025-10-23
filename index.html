@@ -7480,7 +7480,7 @@
                             skillPowerMultiplier = 3; // ダメージ計算用の倍率を変更 // ファイター, ソーサラー, ナイト, メディック
                         }
 
-                        let baseDamage = skill ? baseAtk * (skill.power || 1.0) * skillPowerMultiplier : baseAtk;
+                        let baseDamage = skill ? baseAtk * ((skill && skill.power) || 1.0) * skillPowerMultiplier : baseAtk;
                         let effectiveDefense = 0;
 
                         // 防御側の防御力を決定
