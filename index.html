@@ -66,12 +66,13 @@
             bottom: 0;
             background-image: var(--char-bg-image);
             /* 画像URL */
+            background-color: white;
             background-size: var(--char-bg-size, cover);
             /* サイズ (JSで変更) */
             background-position: var(--char-bg-position, center bottom);
             /* 位置 (JSで変更) */
             background-repeat: no-repeat;
-            opacity: 0.3;
+            opacity: 1;
             /* 背景画像の透明度を調整 */
             z-index: 0;
             transition: background-size 0.5s ease-in-out, background-position 0.5s ease-in-out;
@@ -2188,6 +2189,134 @@
                             pair_オリビア: ["オリビアさん、その祈り、とっても温かいです。私もそんな風になりたいです。", "疲れたら、いつでも言ってくださいね。私がヒールしますから！"],
                         },
                         // ベアトリス (アルケミスト): 知的、大人、丁寧語。
+                        // サマータイム・スペシャルライブ！専用掛け合い
+                        summer_beach_pair: [{
+                            chars: ['リリカ', 'ユイ'],
+                            lines: ["見てみて、ユイちゃん！この貝殻、すっごく綺麗！", "本当ですね、リリカさん！まるで宝石みたいです！"]
+                        }, {
+                            chars: ['ミコ', 'リリィ'],
+                            lines: ["リリィちゃん、見て！砂でモコ作ったんだ！", "わー、上手だね！じゃあ私は、その隣におっきなゴーレMくんを作ろっかな！"]
+                        }, {
+                            chars: ['リリカ', 'ミコ'],
+                            lines: ["ミコちゃん、あそこのかき氷屋さん、どっちが早く着くか競争だよ！", "わーい！負けないぞー！モコ、応援しててね！"]
+                        }, {
+                            chars: ['ユイ', 'リリィ'],
+                            lines: ["リリィさん、日差しが強いので、これを…。日焼け止めです。", "ありがとう、ユイちゃん！気が利くね！一緒に塗ろっか！"]
+                        }, {
+                            chars: ['リリカ', 'リリィ'],
+                            lines: ["ねえねえリリィちゃん、あっちの岩場、探検してみない？お宝があるかも！", "いいね！冒険の予感！よーし、どっちが先に見つけるか勝負だ！"]
+                        }, {
+                            chars: ['ユイ', 'ミコ'],
+                            lines: ["ミコちゃん、あまり遠くへ行くと危ないですよ。波にさらわれたら大変です。", "はーい！大丈夫だよ、ユイちゃん！モコがちゃんと見ててくれるもん！"]
+                        }, {
+                            chars: ['リリカ', 'ユイ'],
+                            lines: ["砂のお城、どっちが大きいの作れるか勝負だよ、ユイちゃん！", "ふふ、望むところです！私のお城には、教会も作りますから！"]
+                        }, {
+                            chars: ['ミコ', 'リリィ'],
+                            lines: ["リリィちゃん、見て！ヒトデさんがいたよ！お星さまみたい！", "本当だ、かわいいね！でも、ちゃんとお海に帰してあげようね。"]
+                        }, ],
+                        summer_onsen_pair: [{
+                            chars: ['リリカ', 'ユイ'],
+                            lines: ["やっぱりライブの後は温泉だよねー！極楽、極楽！", "ふふ、リリカさん、おじさんみたいですよ。でも、気持ちいいですね。"]
+                        }, {
+                            chars: ['ミコ', 'リリィ'],
+                            lines: ["わーい、広いお風呂！リリィちゃん、向こうまで競争だよ！", "こらこら、ミコちゃん。温泉では静かに入るんだよ。…まあ、私もちょっとだけなら…。"]
+                        }, {
+                            chars: ['リリカ', 'ミコ'],
+                            lines: ["ミコちゃん、見て！お空にお星さまがいっぱいだよ！", "本当だー！キラキラしてて、お砂糖みたいだね！"]
+                        }, {
+                            chars: ['ユイ', 'リリィ'],
+                            lines: ["リリィさん、少しのぼせてしまったかもしれません…。少し休みますね。", "大丈夫？無理しないで。はい、お水。ゆっくり飲んでね。"]
+                        }, {
+                            chars: ['リリカ', 'リリィ'],
+                            lines: ["ふぅ～、極楽極楽…。ねえリリィちゃん、今度みんなで温泉旅行もいいね！", "さんせーい！美味しいものいっぱい食べて、また温泉入って…最高だね！"]
+                        }, {
+                            chars: ['ユイ', 'ミコ'],
+                            lines: ["ミコちゃん、お背中流しましょうか？", "ほんと！？ありがとう、ユイちゃん！じゃあミコも、ユイちゃんの背中ごしごししてあげる！"]
+                        }, ],
+                        summer_beach_stripped_pair: [{
+                            chars: ['リリカ', 'ユイ'],
+                            lines: ["きゃっ！ユイちゃんも！？こ、これは…真夏のセクシーハプニングって感じ！？", "ふぇぇ…！リリカさんまで…！もう、恥ずかしくて砂に埋まりたいですぅ…！"]
+                        }, {
+                            chars: ['ミコ', 'リリィ'],
+                            lines: ["わわっ！リリィちゃんも水着が…！", "ミコちゃんこそ！…まあ、こうなったらビーチのマーメイドってことで、どう？"]
+                        }, {
+                            chars: ['リリカ', 'ミコ'],
+                            lines: ["ミコちゃんも大胆だねー！もう、二人でアイドルユニット組んじゃう？", "ええっ！？恥ずかしいけど…モコが見てるから、頑張る…！"]
+                        }, {
+                            chars: ['ユイ', 'リリィ'],
+                            lines: ["リリィさんまで…！もう、どうしたら…！", "大丈夫だって、ユイちゃん。誰も見てない、見てない！…たぶん。"]
+                        }, ],
+                        summer_onsen_stripped_pair: [{
+                            chars: ['リリカ', 'ユイ'],
+                            lines: ["きゃっ！ユイちゃんも！？こ、これは…禁断のセクシーデュエットって感じ！？", "ふぇぇ…！リリカさんまで…！もう、恥ずかしくてお湯に沈んじゃいそうですぅ…！"]
+                        }, {
+                            chars: ['ミコ', 'リリィ'],
+                            lines: ["わわっ！リリィちゃんもタオルが…！", "ミコちゃんこそ！…まあ、こうなったら温泉の女神様ってことで、どう？"]
+                        }, {
+                            chars: ['リリカ', 'リリィ'],
+                            lines: ["リリィちゃんもやっちゃったんだ！ふふ、私たち、気が合うね！", "もー、リリカちゃんは楽しそうだね！…まあ、私もだけど！"]
+                        }, {
+                            chars: ['ユイ', 'ミコ'],
+                            lines: ["ミコちゃんまで…！だ、だめです！ちゃんと隠さないと…！", "ユイちゃん、顔まっかだよ？温泉のせいかな？"]
+                        }, ],
+                        summer_beach_liberated_pair: [{
+                            chars: ['リリカ', 'ユイ'],
+                            lines: ["ユイちゃん、見てみて！もう何も怖くないよ！これぞ真のアイドルの姿！", "は、はいぃ…！リリカさんがそう言うなら…！私も、覚悟を決めます！"]
+                        }, {
+                            chars: ['ミコ', 'リリィ'],
+                            lines: ["リリィちゃん！ミコね、なんだか無敵な気分だよ！", "ふふ、わかるよミコちゃん！私たち、太陽と友達になったみたいだね！"]
+                        }, {
+                            chars: ['リリカ', 'ミコ'],
+                            lines: ["ミコちゃん、このままステージに立っちゃう！？伝説の始まりだよ！", "うん！モコも賛成してる！伝説のライブ、やっちゃおう！"]
+                        }, {
+                            chars: ['ユイ', 'リリィ'],
+                            lines: ["リリィさん…！もう、怖いものなんてありませんね！", "その意気だよ、ユイちゃん！私たち、生まれ変わったんだ！"]
+                        }, ],
+                        summer_onsen_liberated_pair: [{
+                            chars: ['リリカ', 'ユイ'],
+                            lines: ["ふふーん、ユイちゃん。もうタオルなんて野暮なもの、いらないよね？", "リリカさん…！もう、どこまで大胆なんですか…！でも、なんだかスッキリしますね！"]
+                        }, {
+                            chars: ['ミコ', 'リリィ'],
+                            lines: ["リリィちゃん、お空の星が全部見えるよ！すっごく綺麗！", "本当だね、ミコちゃん。心も体も、ぜーんぶ解き放たれたみたい。"]
+                        }, {
+                            chars: ['リリカ', 'リリィ'],
+                            lines: ["このまま月光浴びてたら、女神様になっちゃうかも！", "いいね！月の女神リリカと星の女神リリィって感じ？最強じゃん！"]
+                        }, ],
+                        summer_beach_all_liberated: [{
+                            chars: ['リリカ', 'ユイ', 'ミコ', 'リリィ'],
+                            lines: ["みんなー！見て！私たち、ビーチの女神になっちゃった！", "め、女神様ですか！？そ、そんな、大げさですよぉ…！", "わーい！女神様ごっこだ！ミコは風の女神！", "じゃあ私は大地の女神かな？ふふ、なんだか楽しくなってきたね！"]
+                        }, {
+                            chars: ['リリィ', 'ミコ', 'ユイ', 'リリカ'],
+                            lines: ["もう何も隠すものなんてないね！これぞ究極の開放感！", "うん！鳥さんになった気分だよ！", "は、恥ずかしいですけど…でも、なんだか清々しいです！", "でしょー！これが本当の私たち！さあ、伝説の始まりだよ！"]
+                        }, ],
+                        summer_onsen_all_liberated: [{
+                            chars: ['リリカ', 'ユイ', 'ミコ', 'リリィ'],
+                            lines: ["見て、みんな！私たち、温泉の妖精さんだよ！", "ふぇぇ…妖精さんですか…？なんだか、恥ずかしいような、でも…！", "ミコは湯気の妖精！ふわふわだよー！", "いいね！じゃあ私は岩の妖精！…って、それじゃ可愛くないか！あはは！"]
+                        }, {
+                            chars: ['ユイ', 'リリィ', 'ミコ', 'リリカ'],
+                            lines: ["皆さん…もう、何も言うことはありません…。", "ふふ、ユイちゃんが一番楽しんでるんじゃない？", "ミコね、今ならお魚さんとお話しできる気がする！", "わかるー！私たち、自然と一体になったんだよ！"]
+                        }, ],
+                        summer_beach_party: [{
+                            chars: ['リリカ', 'ユイ', 'ミコ', 'リリィ'],
+                            lines: ["みんなー！ビーチライブ、最高に盛り上がったね！", "はい！お客さんの笑顔、キラキラしてました！", "ミコもね、モコと一緒にいっぱい応援したんだよ！", "うん、最高のステージだったね！この後の打ち上げも楽しみ！"]
+                        }, {
+                            chars: ['リリィ', 'ミコ', 'ユイ', 'リリカ'],
+                            lines: ["見てみて、すっごく大きなスイカ！みんなでスイカ割りしようよ！", "わーい！ミコ、一番に割るー！", "ふふ、ミコちゃん、棒はそっちじゃありませんよ。", "もー！ユイちゃんが一番上手だったりして！"]
+                        }, {
+                            chars: ['ミコ', 'リリカ', 'ユイ', 'リリィ'],
+                            lines: ["見て！あのおっきな雲、ソフトクリームみたい！", "ほんとだ！あっちのはクジラさんみたいだね！", "ふふ、皆さん、想像力が豊かですね。", "平和だねぇ。こういう時間も、冒険の醍醐味だよね。"]
+                        }, ],
+                        summer_onsen_party: [{
+                            chars: ['リリカ', 'ユイ', 'ミコ', 'リリィ'],
+                            lines: ["温泉、最高ー！ライブの疲れが全部吹っ飛ぶね！", "本当ですね…。お肌もつるつるになる気がします。", "ミコ、もうちょっとで泳いじゃうところだったよ！危ない、危ない！", "ふふ、みんなでのぼせないように気をつけないとね。"]
+                        }, {
+                            chars: ['ユイ', 'リリィ', 'リリカ', 'ミコ'],
+                            lines: ["温泉まんじゅう、買ってきました。皆さんでいただきましょう。", "わーい、ありがとうユイちゃん！美味しそう！", "温泉の後に食べるおまんじゅうは格別だよねー！", "モコにもちょうだい！…って、ミコが言ってるよ！"]
+                        }, {
+                            chars: ['リリィ', 'ユイ', 'リリカ', 'ミコ'],
+                            lines: ["ねえ、みんなで恋バナとかしない？こういう時の定番でしょ！", "こ、恋バナですか！？そ、そんな、私には…！", "いいねー！じゃあまずリリィちゃんから！", "えーっ！？ミコからがいい！"]
+                        }, ],
                         'ベアトリス': {
                             default: ["ふむ、このダンジョンの構造、興味深いですね。", "皆さん、消耗品は足りていますか？私のほうでいくつか合成できますが。", "この空気の淀み…錬金術の素材になりそうな気配がしますわ。", "アカリさん、あまり突っ走ると危険ですよ。", "ヒカリさん、その魔導書、少し見せてもらっても？", "シズカさん、その大盾、素晴らしいですね。どんな金属で？", "ユイさん、いつも助かりますわ。ありがとう。", "リリカさん、その舞、戦場を和ませますわね。", "サクヤさん、その剣筋、見事ですわ。", "シャオメイさん、その拳、岩をも砕きそうですね。"],
                             lowHp: ["あら…少し計算が狂いましたわね。", "大丈夫です。まだ研究の途中ですから。", "この程度の傷、ポーションでどうにでもなりますわ。"],
@@ -3076,28 +3205,108 @@
                     function generateConversation() {
                         if (gameState.inBattle) return;
 
-                        // 「サマータイム・スペシャルライブ！」モード専用会話
+                        // --- 「サマータイム・スペシャルライブ！」モード専用会話 ---
                         if (gameState.gameMode === 'summer_live') {
                             const aliveParty = gameState.party.filter(p => p.currentHp > 0);
-                            if (aliveParty.length < 2) {
+                            if (aliveParty.length < 2) { // 会話相手がいない場合
                                 log("会話できる相手がいない…");
                                 return;
                             }
 
-                            const situation = gameState.floor <= 30 ? 'summer_beach' : 'summer_onsen';
-                            let char1 = getRandomPartyMember();
-                            let otherParty = aliveParty.filter(p => p !== char1);
-                            let char2 = otherParty[Math.floor(Math.random() * otherParty.length)];
-
-                            const line1 = conversations[char1.name][situation][Math.floor(Math.random() * conversations[char1.name][situation].length)];
-                            const line2 = conversations[char2.name][situation][Math.floor(Math.random() * conversations[char2.name][situation].length)];
-
                             dungeonCommands.classList.add('hidden');
-                            log(`${char1.name}「${line1}」`);
-                            setTimeout(() => {
-                                log(`${char2.name}「${line2}」`);
+                            let conversationFound = false;
+
+                            // --- 優先度1: 全員解放状態の4人会話 ---
+                            const liberatedMembers = aliveParty.filter(p => p.isLiberatedStripped);
+                            if (liberatedMembers.length === 4) {
+                                const situation = gameState.floor <= 30 ? 'summer_beach_all_liberated' : 'summer_onsen_all_liberated';
+                                const partyConvos = conversations[situation];
+                                const partyConvo = partyConvos[Math.floor(Math.random() * partyConvos.length)];
+                                let delay = 0;
+                                partyConvo.chars.forEach((charName, index) => {
+                                    setTimeout(() => {
+                                        log(`${charName}「${partyConvo.lines[index]}」`);
+                                    }, delay);
+                                    delay += 2000;
+                                });
+                                setTimeout(() => dungeonCommands.classList.remove('hidden'), delay);
+                                return;
+                            }
+
+                            // --- 優先度2: 通常の4人会話 (20%の確率で試行) ---
+                            if (aliveParty.length === 4 && Math.random() < 0.2) { // ファイター, ソーサラー, ナイト, メディック
+                                const situation = gameState.floor <= 30 ? 'summer_beach_party' : 'summer_onsen_party';
+                                const partyConvos = conversations[situation];
+                                const partyConvo = partyConvos[Math.floor(Math.random() * partyConvos.length)];
+                                if (partyConvo) {
+                                    let delay = 0;
+                                    partyConvo.chars.forEach((charName, index) => { // ファイター, ソーサラー, ナイト, メディック
+                                        setTimeout(() => {
+                                            log(`${charName}「${partyConvo.lines[index]}」`);
+                                        }, delay);
+                                        delay += 2000;
+                                    });
+                                    setTimeout(() => dungeonCommands.classList.remove('hidden'), delay);
+                                    return;
+                                }
+                            }
+
+                            // --- 優先度3: 解放状態の2人会話 (40%の確率で試行) ---
+                            if (liberatedMembers.length >= 2 && Math.random() < 0.4) {
+                                const char1 = liberatedMembers[0];
+                                const char2 = liberatedMembers[1];
+                                const situation = gameState.floor <= 30 ? 'summer_beach_liberated_pair' : 'summer_onsen_liberated_pair';
+                                const possibleConvos = conversations[situation].filter(c => c.chars.includes(char1.name) && c.chars.includes(char2.name));
+                                const pairConvo = possibleConvos.length > 0 ? possibleConvos[Math.floor(Math.random() * possibleConvos.length)] : null;
+                                if (pairConvo) {
+                                    log(`${char1.name}「${pairConvo.lines[0]}」`);
+                                    setTimeout(() => {
+                                        log(`${char2.name}「${pairConvo.lines[1]}」`);
+                                        setTimeout(() => dungeonCommands.classList.remove('hidden'), 2000);
+                                    }, 2000);
+                                    return;
+                                }
+                            }
+
+                            // --- 優先度4: 通常脱衣状態の2人会話 (30%の確率で試行) ---
+                            const strippedMembers = aliveParty.filter(p => p.statusEffects.stripped && !p.isLiberatedStripped);
+                            if (strippedMembers.length >= 2 && Math.random() < 0.3) {
+                                const char1 = strippedMembers[0];
+                                const char2 = strippedMembers[1];
+                                const situation = gameState.floor <= 30 ? 'summer_beach_stripped_pair' : 'summer_onsen_stripped_pair';
+                                const possibleConvos = conversations[situation].filter(c => c.chars.includes(char1.name) && c.chars.includes(char2.name));
+                                const pairConvo = possibleConvos.length > 0 ? possibleConvos[Math.floor(Math.random() * possibleConvos.length)] : null;
+                                if (pairConvo) {
+                                    log(`${char1.name}「${pairConvo.lines[0]}」`);
+                                    setTimeout(() => {
+                                        log(`${char2.name}「${pairConvo.lines[1]}」`);
+                                        setTimeout(() => dungeonCommands.classList.remove('hidden'), 2000);
+                                    }, 2000);
+                                    return;
+                                }
+                            }
+
+                            // --- 優先度5: 通常の2人掛け合い会話 ---
+                            const situation = gameState.floor <= 30 ? 'summer_beach_pair' : 'summer_onsen_pair';
+                            const char1 = getRandomPartyMember();
+                            const otherParty = aliveParty.filter(p => p !== char1);
+                            const char2 = otherParty[Math.floor(Math.random() * otherParty.length)];
+                            const possibleConvos = conversations[situation].filter(c => c.chars.includes(char1.name) && c.chars.includes(char2.name));
+                            const pairConvo = possibleConvos.length > 0 ? possibleConvos[Math.floor(Math.random() * possibleConvos.length)] : null;
+
+                            if (pairConvo) {
+                                log(`${char1.name}「${pairConvo.lines[0]}」`);
+                                setTimeout(() => {
+                                    log(`${char2.name}「${pairConvo.lines[1]}」`);
+                                    setTimeout(() => dungeonCommands.classList.remove('hidden'), 2000);
+                                }, 2000);
+                            } else {
+                                // フォールバック（もし掛け合いが見つからなければ単独のセリフ）
+                                const fallbackSituation = gameState.floor <= 30 ? 'summer_beach' : 'summer_onsen';
+                                const line = conversations[char1.name][fallbackSituation][Math.floor(Math.random() * conversations[char1.name][fallbackSituation].length)];
+                                log(`${char1.name}「${line}」`);
                                 setTimeout(() => dungeonCommands.classList.remove('hidden'), 2000);
-                            }, 2000);
+                            }
                             return; // 専用会話を実行したらここで終了
                         }
 
@@ -4028,7 +4237,7 @@
                                 cost: 15,
                                 type: 'physical',
                                 targetType: 'enemies',
-                                power: 1.2,
+                                power: 2.8,
                                 description: '熱波で敵全体に物理ダメージを与える。'
                             }, {
                                 name: 'リラックスタイム',
@@ -5438,6 +5647,14 @@
 
                     async function nextTurn() {
                         let currentActor = gameState.turnOrder[gameState.currentTurnIndex];
+
+                        // HPが0以下のキャラクターは行動できない
+                        if (currentActor.currentHp <= 0) {
+                            log(`${currentActor.name}は力尽きているため、行動できない。`);
+                            gameState.currentTurnIndex = (gameState.currentTurnIndex + 1) % gameState.turnOrder.length;
+                            nextTurn();
+                            return;
+                        }
                         // テンションアップのダメージ
                         if (currentActor.buffs && currentActor.buffs.tension_up && currentActor.currentHp > 0) {
                             const damage = Math.max(1, Math.floor(currentActor.maxHp * 0.05));
@@ -5923,17 +6140,26 @@
                             case 'magic':
                                 {
                                     if (Array.isArray(target) && target.every(t => t.isEnemy)) { // 敵全体への攻撃の場合
+                                        let modifiedSkill = skill;
                                         log(`${caster.name}は${skill.name}を放った！`);
-                                        const damages = target.map(t => calculateDamage(caster, t, skill));
                                         const damagePromises = [];
                                         for (const t of target) {
                                             // dealDamageを直接awaitせず、Promiseを配列に格納
-                                            damagePromises.push(dealDamage(t, calculateDamage(caster, t, skill)));
+                                            damagePromises.push(dealDamage(t, calculateDamage(caster, t, modifiedSkill)));
                                         }
                                         // 全てのダメージ処理アニメーションを並行して実行
                                         await Promise.all(damagePromises);
                                     } else { // 単体攻撃の場合
-                                        const skillDamage = calculateDamage(caster, target, skill);
+                                        let modifiedSkill = skill;
+                                        // サマータイム・スペシャルライブ！の温泉エリアでのプチサラマンダー強化
+                                        if (skill.name === 'プチサラマンダー' && gameState.gameMode === 'summer_live' && gameState.floor > 30) {
+                                            log("温泉の熱気がサラマンダーの力を増幅させる！");
+                                            await new Promise(resolve => setTimeout(resolve, 500)); // メッセージ表示のための短い待機
+                                            modifiedSkill = {...skill,
+                                                power: skill.power * 2.5
+                                            };
+                                        }
+                                        const skillDamage = calculateDamage(caster, target, modifiedSkill);
                                         await dealDamage(target, skillDamage);
                                         log(`${caster.name}は${skill.name}を放った！ ${target.name}に${skillDamage}のダメージ！`);
                                     }
@@ -7310,11 +7536,11 @@
                         if (damage === 'evaded' && target.role === 'ダンサー' && target.buffs && target.buffs.provoke) {
                             // ダンサーの回避時反撃
                             log(`${target.name}は攻撃を華麗にかわし、反撃の体勢に入った！`);
-                            // 敵の攻撃力を参照して反撃ダメージを計算（身長ペナルティは受けない）
-                            const counterDamage = calculateDamage(enemy, target, null, true); // isCounter=true // ファイター, ソーサラー, ナイト, メディック
+                            // ダンサー(target)が敵(enemy)に反撃する
+                            const counterDamage = calculateDamage(target, enemy, null, true);
                             enemy.counterTarget = {
                                 counterAttacker: target,
-                                damage: counterDamage
+                                damage: counterDamage // isCounter=true
                             };
                         } else if (damage === 'evaded') {
                             log(`${target.name}は攻撃をかわした！`);
@@ -8631,85 +8857,86 @@
                 return html + '</div>';
             }
 
-            function showScanResult(target) {
-                const scanModalTitle = document.getElementById('scan-modal-title');
-                const scanModalContent = document.getElementById('scan-modal-content');
-                const scanModalTextContainer = document.getElementById('scan-modal-text-content');
-                const scanModalImageContainer = document.getElementById('scan-modal-image-container');
-                scanModalContent.innerHTML = ''; // コンテンツをクリア
+             function showScanResult(target) {
+                 const scanModalTitle = document.getElementById('scan-modal-title');
+                 const scanModalContent = document.getElementById('scan-modal-content');
+                 const scanModalTextContainer = document.getElementById('scan-modal-text-content');
+                 const scanModalImageContainer = document.getElementById('scan-modal-image-container');
+                 scanModalContent.innerHTML = ''; // コンテンツをクリア
+                 scanModalImageContainer.innerHTML = ''; // 画像コンテナもクリア
 
-                if (target.isEnemy) {
-                    scanModalTitle.textContent = `${target.name} の調査結果`;
+                 if (target.isEnemy) {
+                     scanModalTitle.textContent = `${target.name} の調査結果`;
 
-                    let weakness = '物理・魔法ともに同程度有効。';
-                    if (target.pDef < target.mDef * 0.8) {
-                        weakness = '<strong class="text-red-600">物理攻撃が有効。</strong> 魔法攻撃は効きにくい。';
-                    } else if (target.mDef < target.pDef * 0.8) { // ファイター, ソーサラー, ナイト, メディック
-                        weakness = '<strong class="text-blue-600">魔法攻撃が有効。</strong> 物理攻撃は効きにくい。';
-                    }
+                     let weakness = '物理・魔法ともに同程度有効。';
+                     if (target.pDef < target.mDef * 0.8) {
+                         weakness = '<strong class="text-red-600">物理攻撃が有効。</strong> 魔法攻撃は効きにくい。';
+                     } else if (target.mDef < target.pDef * 0.8) {
+                         weakness = '<strong class="text-blue-600">魔法攻撃が有効。</strong> 物理攻撃は効きにくい。';
+                     }
 
-                    let skillInfo = '特別なスキルは使用しない。';
-                    if (target.skills && target.skills.length > 0) {
-                        skillInfo = '使用スキル: ' + target.skills.map(s => s.name).join('、');
-                    }
+                     let skillInfo = '特別なスキルは使用しない。';
+                     if (target.skills && target.skills.length > 0) {
+                         skillInfo = '使用スキル: ' + target.skills.map(s => s.name).join('、');
+                     }
 
-                    scanModalContent.innerHTML = `
+                     scanModalContent.innerHTML = `
                         <p>HP: ${target.currentHp} / ${target.maxHp}</p>
                         <p>弱点: ${weakness}</p>
                         <p>${skillInfo}</p> 
                         ${getStatusAndBuffsHtml(target)}
                     `;
-                    // 敵の場合は立ち絵を隠し、テキストエリアを全幅にする
-                    scanModalTextContainer.classList.remove('w-1/2');
-                    scanModalTextContainer.classList.add('w-full');
-                    scanModalImageContainer.classList.add('hidden');
-                } else { // 味方の場合
-                    scanModalTitle.textContent = `${target.name} の情報`;
-                    // 変身状態を考慮してブループリントを一度だけ取得する
-                    const blueprint = allCharacterBlueprints.find(c => c.name === (target.isTransformed ? 'リリィ' : target.name));
-                    let skillHtml = target.skills.map(skill => {
-                        return `<div class="p-2 bg-gray-100 rounded-md">
+                     // 敵の場合は立ち絵を隠し、テキストエリアを全幅にする
+                     scanModalImageContainer.classList.add('hidden');
+                     scanModalTextContainer.classList.remove('md:w-1/2');
+                     scanModalTextContainer.classList.add('w-full');
+
+                 } else { // 味方の場合
+                     scanModalTitle.textContent = `${target.name} の情報`;
+                     // 変身状態を考慮してブループリントを一度だけ取得する
+                     const blueprint = allCharacterBlueprints.find(c => c.name === (target.isTransformed ? 'リリィ' : target.name));
+                     let skillHtml = target.skills.map(skill => {
+                         return `<div class="p-2 bg-gray-100 rounded-md">
                                     <p class="font-bold">${skill.name} <span class="text-sm font-normal text-gray-600">(${skill.type && skill.type.includes('hp_cost') ? 'HP' : 'MP'}:${skill.cost})</span></p>
                                     <p class="text-sm">${skill.description}</p>
                                 </div>`;
-                    }).join('');
+                     }).join('');
 
-                    let blessingHtml = '';
-                    if (target.blessings && Object.keys(target.blessings).length > 0) {
-                        blessingHtml += '<div class="mt-3 pt-3 border-t border-gray-300 space-y-1">'; // ファイター, ソーサラー, ナイト, メディック
-                        blessingHtml += '<p class="font-bold text-amber-700">授かった祝福</p>'; // ファイター, ソーサラー, ナイト, メディック
-                        Object.values(target.blessings).forEach(blessing => {
-                            if (blessing && blessing.name && blessing.description) {
-                                blessingHtml += `<div class="p-2 bg-amber-50 rounded-md"><p class="font-semibold text-amber-800">${blessing.name}</p><p class="text-sm text-amber-700">${blessing.description}</p></div>`;
-                            }
-                        });
-                        blessingHtml += '</div>';
-                    }
+                     let blessingHtml = '';
+                     if (target.blessings && Object.keys(target.blessings).length > 0) {
+                         blessingHtml += '<div class="mt-3 pt-3 border-t border-gray-300 space-y-1">';
+                         blessingHtml += '<p class="font-bold text-amber-700">授かった祝福</p>';
+                         Object.values(target.blessings).forEach(blessing => {
+                             if (blessing && blessing.name && blessing.description) {
+                                 blessingHtml += `<div class="p-2 bg-amber-50 rounded-md"><p class="font-semibold text-amber-800">${blessing.name}</p><p class="text-sm text-amber-700">${blessing.description}</p></div>`;
+                             }
+                         });
+                         blessingHtml += '</div>';
+                     }
 
-                    scanModalContent.innerHTML = `
+                     scanModalContent.innerHTML = `
                         <p class="italic">"${blueprint.description}"</p>
                         <div class="space-y-2 mt-2">${skillHtml}</div>
                         ${getStatusAndBuffsHtml(target)}
                         ${blessingHtml}
                     `;
-                    // 味方の場合は立ち絵を表示し、テキストエリアを半分の幅にする
-                    scanModalTextContainer.classList.remove('w-full');
-                    scanModalTextContainer.classList.add('w-1/2');
-                    scanModalImageContainer.classList.remove('hidden');
+                     // 味方の場合は立ち絵を表示し、テキストエリアを半分の幅にする
+                     scanModalImageContainer.classList.remove('hidden');
+                     scanModalTextContainer.remove('w-full');
+                     scanModalTextContainer.classList.add('md:w-1/2');
 
-                    // 立ち絵の表示
-                    scanModalImageContainer.innerHTML = ''; // クリア
-                    const imgDiv = document.createElement('div');
-                    imgDiv.className = `absolute inset-0 bg-no-repeat opacity-80 ${target.bgClass || blueprint.bgClass}`;
-                    imgDiv.style.backgroundSize = 'contain';
-                    imgDiv.style.backgroundPosition = 'center';
-                    scanModalImageContainer.appendChild(imgDiv);
-                }
+                     // 立ち絵の表示
+                     const imgDiv = document.createElement('div');
+                     imgDiv.className = `absolute inset-0 bg-no-repeat opacity-80 ${target.bgClass || blueprint.bgClass}`;
+                     imgDiv.style.backgroundSize = 'contain';
+                     imgDiv.style.backgroundPosition = 'center';
+                     scanModalImageContainer.appendChild(imgDiv);
+                 }
 
-                scanModal.classList.remove('hidden');
-                pendingAction = null; // アクションをクリア
-                document.querySelectorAll('.enemy-card, .character-card').forEach(c => c.classList.remove('targeted'));
-            }
+                 scanModal.classList.remove('hidden');
+                 pendingAction = null; // アクションをクリア
+                 document.querySelectorAll('.enemy-card, .character-card').forEach(c => c.classList.remove('targeted'));
+             }
 
             function showAmountChoiceModal(title, text, choices, callback) {
                 amountChoiceTitle.textContent = title;
