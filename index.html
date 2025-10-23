@@ -5130,7 +5130,41 @@
                             boss.atk = Math.ceil((boss.atk + Math.ceil(floor * 1.2)) * statMultiplier);
                             boss.pDef = Math.ceil((boss.pDef + Math.ceil(floor * 0.8)) * statMultiplier);
                             boss.mDef = Math.ceil((boss.mDef + Math.ceil(floor * 0.8)) * statMultiplier);
+
+                            // サマータイム・スペシャルライブ！モードでのボス弱体化
+                            if (gameState.gameMode === 'summer_live') {
+                                boss.maxHp = Math.ceil(boss.maxHp * 0.8); // HPを20%削減
+                                boss.currentHp = boss.maxHp;
+                                boss.atk = Math.ceil(boss.atk * 0.85); // 攻撃力を15%削減
+                            }
                             // agiは補正対象外
+
+                            // サマータイム・スペシャルライブ！の専用ボス
+                            if (gameState.gameMode === 'summer_live') {
+                                if (floor === 30) {
+                                    boss.name = 'ビーチシャーク';
+                                    boss.maxHp = Math.ceil(800 * statMultiplier);
+                                    boss.currentHp = boss.maxHp;
+                                    boss.atk = Math.ceil(32 * statMultiplier);
+                                    boss.pDef = Math.ceil((25 + floor * 0.8) * 3.0 * statMultiplier); // 物理防御が極端に高い
+                                    boss.mDef = Math.ceil(Math.max(1, (15 + floor * 0.8) * 0.1) * statMultiplier); // 魔法防御が非常に低い
+                                    boss.agi = 18;
+                                    boss.skills = []; // スキルなし
+                                } else if (floor === 60) {
+                                    boss.name = 'アクアドラゴン';
+                                    boss.maxHp = Math.ceil(1500 * statMultiplier);
+                                    boss.currentHp = boss.maxHp;
+                                    boss.atk = Math.ceil(45 * statMultiplier);
+                                    boss.pDef = Math.ceil((30 + floor * 1.0) * 0.5 * statMultiplier); // 物理防御が低い
+                                    boss.mDef = Math.ceil((20 + floor * 1.0) * 1.0 * statMultiplier);
+                                    boss.agi = 22;
+                                    boss.skills = [{
+                                        name: 'ミニマムシャワー',
+                                        func: minimumShower
+                                    }];
+                                    boss.specialAIType = 'aqua_dragon'; // 特殊AIタイプを設定
+                                }
+                            }
 
                             return boss;
                         }
@@ -5320,6 +5354,18 @@
                         updatePartyStatus();
                     }
 
+                    async function minimumShower(enemy) {
+                        log(`${enemy.name}はミニマムシャワーを放った！パーティ全員の体が縮んでしまった！`);
+                        const shrinkAmount = 50;
+                        for (const p of gameState.party.filter(p => p.currentHp > 0)) {
+                            if (p.heightLocked) {
+                                log(`${p.name}は不思議な力で守られ、体の変化を防いだ！`);
+                                continue;
+                            }
+                            await animateStatChange(p, 'height', -shrinkAmount, 'decrease');
+                        }
+                    }
+
                     function inflictStatusEffect(enemy, target) {
                         const effect = ['poison', 'paralysis', 'slow'][Math.floor(Math.random() * 3)];
                         let effectName = '',
@@ -5490,45 +5536,10 @@
                             return;
                         }
 
-                        // 変身中のMP消費
-                        if (currentActor.isTransformed) {
-                            const mpCost = 15;
-                            // フェアリーモードの特殊効果
-                            if (currentActor.role === 'フェアリー') {
-                                if (currentActor.height > 1) {
-                                    const shrinkAmount = Math.floor(Math.random() * 21) + 20; // 20-40cm縮む
-                                    log(`${currentActor.name}の体から魔力が抜け、体が縮んでいく！`);
-                                    await animateStatChange(currentActor, 'height', -shrinkAmount, 'decrease');
-                                }
-                            }
-                            // アルラウネモードの特殊効果
-                            if (currentActor.role === 'アルラウネ') {
-                                log(`${currentActor.name}は魔力で養分を生成し、再生能力を高めた！`);
-                                currentActor.statusEffects.regeneration = {
-                                    turns: 2
-                                };
-                            }
-
-                            if (currentActor.currentMp < mpCost) {
-                                log(`${currentActor.name}はMPが尽き、変身が解けてしまった！`);
-                                await handleTransform(currentActor, {
-                                    type: 'transform_revert'
-                                });
-                                // 変身解除後は即座にターン終了
-                                setTimeout(() => {
-                                    gameState.currentTurnIndex = (gameState.currentTurnIndex + 1) % gameState.turnOrder.length;
-                                    nextTurn();
-                                }, 1000);
-                                return;
-                            } else {
-                                animateStatChange(currentActor, 'mp', -mpCost, 'decrease');
-                            }
-                        }
-
                         // 変身中のMP消費と特殊効果
                         if (currentActor.isTransformed) {
-                            // サマータイム・スペシャルライブのビーチパートではMP消費なし
-                            const shouldConsumeMp = !(gameState.gameMode === 'summer_live' && gameState.floor <= 30);
+                            // サマータイム・スペシャルライブ！モードではMP消費なし
+                            const shouldConsumeMp = gameState.gameMode !== 'summer_live';
 
                             if (shouldConsumeMp) {
                                 const mpCost = 15;
@@ -5551,6 +5562,14 @@
 
                         // 毒ダメージ処理 (ターン終了時)
                         // nextTurnの最後に移動させるため、ここでは何もしない
+
+                        // ターン実行
+                        if (actor.isEnemy) {
+                            // 敵の思考時間として少し待機
+                            setTimeout(() => enemyTurn(actor), 1000);
+                        } else {
+                            playerTurn(actor);
+                        }
 
                         updatePartyStatus(); // ターン開始時に状態表示を更新
                     }
@@ -7190,6 +7209,12 @@
                                 await heroicEndSkill(enemy, target);
                                 enemy.usedHeroicEnd = true;
                                 actionTaken = true;
+                            } else if (enemy.specialAIType === 'aqua_dragon' && enemy.turnCount === 1) {
+                                // アクアドラゴンの初手行動
+                                const skill = enemy.skills.find(s => s.name === 'ミニマムシャワー');
+                                if (skill && skill.func) {
+                                    await skill.func(enemy);
+                                }
                             }
                         } else if (enemy.name === 'インプ' && !enemy.mischiefUsed && !isDefensiveTarget && Math.random() < 0.25) {
                             actionTaken = await inflictStripped(enemy, target);
@@ -7762,29 +7787,30 @@
                                     gameState.gameOver = true;
                                     return; // ファイター, ソーサラー, ナイト, メディック
                                 }
-
                                 log('敵を倒した！パーティ全員がレベルアップ！');
                                 gameState.party.forEach(char => {
                                     if (char.currentHp > 0) levelUpCharacter(char, false); // UIは表示しない
                                 });
 
-                                const foundItems = []; // ファイター, ソーサラー, ナイト, メディック
+                                const foundItems = [];
                                 const itemIds = Object.keys(itemBlueprints).filter(id => !itemBlueprints[id].battleOnly && !itemBlueprints[id].rare);
-                                for (let i = 0; i < 3; i++) { // ファイター, ソーサラー, ナイト, メディック
+                                for (let i = 0; i < 3; i++) {
                                     const foundItemId = itemIds[Math.floor(Math.random() * itemIds.length)];
                                     addItemToInventory(foundItemId);
                                     foundItems.push(itemBlueprints[foundItemId].name);
                                 }
                                 log(`さらに、 ${foundItems.join('、')} を手に入れた！`);
-                            }
-                            // 無限モードのボス撃破後
-                            else if (gameState.gameMode === 'endless') {
+                            } else if (gameState.gameMode === 'endless') {
+                                // 無限モードのボス撃破後
                                 const isBossFloor = gameState.floor > 0 && gameState.floor % 30 === 0;
                                 if (isBossFloor) {
                                     showEndlessCurseModal(); // 呪い選択モーダルを表示
                                 } else {
                                     showLevelUpModal(true); // 通常のボーナス選択モーダルを表示
                                 }
+                            } else if (gameState.gameMode === 'summer_live' && gameState.floor === 30) {
+                                log("ビーチステージのボスを撃破！打ち上げの温泉に向けて、冒険は続く！");
+                                showLevelUpModal(false); // レベルアップ選択画面へ
                             } else if (gameState.gameMode === 'endgame' && gameState.floor === 1) {
                                 showModal("ゲームクリア？", "あなたはダンジョンの入り口で待ち構えていたボスを打ち破りました！…これでよかったのでしょうか？");
                                 gameState.gameOver = true;
@@ -7793,7 +7819,7 @@
                                 let text = "おめでとう！あなたはダンジョンの最深部に到達し、ボスを打ち破りました！";
                                 switch (gameState.gameMode) {
                                     case 'normal':
-                                    case 'trial': // ファイター, ソーサラー, ナイト, メディック
+                                    case 'trial':
                                         text += "\nもしもの物語では、異なる結末があなたを待っているかもしれません。";
                                         break;
                                     case 'veterans':
@@ -7809,7 +7835,7 @@
                                         text = "戦い、戦い、そしてまた戦い…。武闘の宴の果てに、彼女たちは最強の称号を手にしました。その拳に宿るは、数多の強敵との記憶。";
                                         break;
                                     case 'solo':
-                                        title = "孤独な覇者"; // ファイター, ソーサラー, ナイト, メディック
+                                        title = "孤独な覇者";
                                         text = `たった一人で、${gameState.party[0].name}はダンジョンを制覇しました。その強さは伝説となり、後世まで語り継がれるでしょう。`;
                                         break;
                                     case 'saint_march':
@@ -7842,10 +7868,6 @@
                                         break;
                                     case 'unstable_bodies':
                                         text = "絶え間なく変化する肉体を乗りこなし、あなたは見事ボスを打ち破りました！その精神力は、もはや何物にも揺るがないでしょう。";
-                                        break;
-                                    case 'summer_live':
-                                        // 30階ボス撃破時
-                                        log("ビーチステージのボスを撃破！打ち上げの温泉に向けて、冒険は続く！");
                                         break;
                                 }
                                 showModal(title, text);
@@ -8878,6 +8900,16 @@
                     dungeonView.style.backgroundImage = "url('https://image.pollinations.ai/prompt/beautiful%20anime%20style%20beach,%20sparkling%20ocean,%20white%20sand,%20blue%20sky,%20summer,%20palm%20trees,%20digital%20painting')";
                     initGame(selectedMembers, fromSave);
 
+                    // 開始レベルを2にする
+                    if (!fromSave) {
+                        gameState.party.forEach(char => {
+                            applyLevelUp(char, 1); // Lv1 -> Lv2
+                            // レベルアップ後にHP/MPを全快させる
+                            char.currentHp = char.maxHp;
+                            char.currentMp = char.maxMp;
+                        });
+                    }
+
                     // 立ち絵を水着に変更
                     gameState.party.forEach(char => {
                         if (char.name === 'リリカ') char.bgClass = 'bg-char-ririka-a';
@@ -8891,6 +8923,8 @@
                         const blueprint = allCharacterBlueprints.find(c => c.name === 'リリィ');
                         const transformData = blueprint.transforms['fairy'];
                         lily.originalState = { role: lily.role, skills: lily.skills, bgClass: lily.bgClass, height: lily.height };
+                        // 開始時の身長を30cmにする
+                        lily.height = 30;
                         lily.role = transformData.role;
                         lily.skills = transformData.skills.map(s => {
                             if (s.type === 'transform_revert') {
