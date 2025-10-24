@@ -366,6 +366,24 @@
         .bg-char-lily-alraune {
             --char-bg-image: url('sgd_18-3.png');
         }
+        /* 闘争令嬢用 */
+        
+        .bg-char-noel {
+            --char-bg-image: url('sgd_19.png');
+        }
+        
+        .bg-char-flora {
+            --char-bg-image: url('sgd_20.png');
+        }
+        /* 闘争令嬢プライベート衣装用 */
+        
+        .bg-char-noel-a {
+            --char-bg-image: url('sgd_19a.png');
+        }
+        
+        .bg-char-flora-a {
+            --char-bg-image: url('sgd_20a.png');
+        }
         /* サマータイム・スペシャルライブ用 */
         
         .bg-char-ririka-a {
@@ -434,6 +452,7 @@
                 <button id="debug-saint-button" class="text-white p-1 rounded"></button>
                 <button id="debug-treasure-button" class="text-white p-1 rounded"></button>
                 <button id="debug-summer-button" class="text-white p-1 rounded"></button>
+                <button id="debug-belles-button" class="text-white p-1 rounded"></button>
             </div>
         </div>
 
@@ -555,6 +574,7 @@
                     <button data-mode="brawl" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-red-700">武闘の宴</strong><span class="block text-sm text-gray-600">2フロアごとに必ず戦闘が発生する。</span></button>
                     <button data-mode="monster_march" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-red-800">魔物の行軍</strong><span class="block text-sm text-gray-600">全てのフロアで戦闘が発生する。勝利する度にレベルアップし、アイテムを獲得する。50階踏破を目指せ。</span></button>
                     <button data-mode="endless" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-slate-700">無限への挑戦</strong><span class="block text-sm text-gray-600">全滅するまでダンジョンを進み続ける。30階ごとにボスが出現し、倒すと試練が訪れる。</span></button>
+                    <button data-mode="brawling_belles" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-rose-500">闘争令嬢</strong><span class="block text-sm text-gray-600">特別なジョブ「アンドロイド」と「メイド」の2人で30階の踏破を目指す。クリアすると選抜チームに2人が追加される。</span></button>
                     <button data-mode="summer_live" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-sky-500">サマータイム・スペシャルライブ！</strong><span class="block text-sm text-gray-600">リリカ、ユイ、ミコ、リリィの4人で、ビーチと温泉を巡る特別な冒険に出る。60階踏破を目指せ。</span></button>
                     <button data-mode="uninhibited_souls" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-orange-700">奔放な魂</strong><span class="block text-sm text-gray-600">探索中、コマンドで味方を「脱衣」させたり、身長を自由に操作したりできる。</span></button>
                     <button data-mode="endgame" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-gray-700">おわりから</strong><span class="block text-sm text-gray-600">1フロア目に最終ボスが登場する。</span></button>
@@ -860,10 +880,11 @@
                         foundEquipment: [],
                         killCount: 0, // ネクロマンサー用
                         walls: [], // ガーディアン用
-                        isEndlessVersion: false, // 無限版フラグ
+                        isEndlessVersion: false, // 無限版フラグ // ファイター, ソーサラー, ナイト, メディック
                         gameMode: 'normal', // normal, veterans, dwarves, brawl, solo, endgame, endless, indecent, enjoy, saint_march, fixed_path, uninhibited_souls, random_party, divine_trial, treasure_map
                         triggeredSpecialConvos: [],
                         dungeonBackground: DEFAULT_DUNGEON_BG, // 背景画像をgameStateで管理
+                        bellesPrivateCostumeEventTriggered: false, // 闘争令嬢プライベート衣装イベント用フラグ
                     };
 
                     const allCharacterBlueprints = [{
@@ -1700,6 +1721,83 @@
                                     }, ]
                                 }
                             }
+                        }, {
+                            name: 'ノエル',
+                            role: 'アンドロイド',
+                            hp: 130,
+                            mp: 20,
+                            atk: 52,
+                            def: 18,
+                            agi: 10,
+                            height: 170,
+                            description: 'おしとやかなお嬢様のように見えるが、その正体は怪力のアンドロイド。斧を使った物理攻撃に特化している。',
+                            skills: [{
+                                name: 'スマッシュ',
+                                cost: 20, // HP cost
+                                power: 2.8,
+                                type: 'hp_cost_physical',
+                                targetType: 'enemy',
+                                description: 'HPを消費し、敵単体に斧による強力な一撃を見舞う。'
+                            }, {
+                                name: 'メンテナンス',
+                                cost: 0,
+                                type: 'self_heal_and_paralyze',
+                                targetType: 'self',
+                                description: '自身のHPを全回復するが、1ターン麻痺状態になる。'
+                            }, {
+                                name: 'バンプアップ',
+                                cost: 50, // HP cost
+                                power: 100, // growth amount
+                                type: 'hp_cost_growth',
+                                targetType: 'self',
+                                description: 'HPを大きく消費し、自身の身長を爆発的に伸ばす。'
+                            }, {
+                                name: 'オーバーブースト',
+                                cost: 10, // MP cost
+                                power: 2.0,
+                                type: 'mp_burst_height_scaling',
+                                targetType: 'enemies',
+                                description: '敵全体に大ダメージを与える。身長が高いほど威力に特大ボーナス。MPを全て消費する。'
+                            }],
+                            bgClass: 'bg-char-noel',
+                            themeColor: 'rose',
+                        }, {
+                            name: 'フローラ',
+                            role: 'メイド',
+                            hp: 110,
+                            mp: 50,
+                            atk: 60, // 基本攻撃力が高い
+                            def: 12,
+                            agi: 15,
+                            height: 80,
+                            description: 'お花好きの小人族のメイド。非力そうな外見に反して拳から繰り出される力は圧倒的。',
+                            skills: [{
+                                name: 'フラワーアレンジ',
+                                cost: 15,
+                                type: 'party_buff_and_heal',
+                                targetType: 'party',
+                                description: '味方全体の攻撃力を上げ、HPを少量回復する。'
+                            }, {
+                                name: 'ロイヤルティ',
+                                cost: 20,
+                                type: 'height_transfer',
+                                targetType: 'ally',
+                                description: '味方ひとりに、それ以外の味方全員の身長を移動させる。'
+                            }, {
+                                name: 'ティータイム',
+                                cost: 10,
+                                type: 'party_cure_all',
+                                targetType: 'party',
+                                description: '味方全体の毒、麻痺、鈍化、脱衣を解除する。'
+                            }, {
+                                name: 'マジカルエナジー',
+                                cost: 30,
+                                type: 'maid_special_buff',
+                                targetType: 'self',
+                                description: '自身に複数の強化効果を付与し、身長が初期値より低い場合は元に戻す。'
+                            }],
+                            bgClass: 'bg-char-flora',
+                            themeColor: 'emerald',
                         },
 
                     ];
@@ -2197,6 +2295,18 @@
                             pair_イオリ: ["イオリ先輩、小さくてもとっても頼りになります！尊敬します！", "先輩のこと、私がしっかりお守りしますね！"],
                             pair_コハル: ["コハルちゃん、大丈夫ですか！？転んだりしてませんか？", "見ててハラハラしますけど…なんだか楽しいです！"],
                             pair_オリビア: ["オリビアさん、その祈り、とっても温かいです。私もそんな風になりたいです。", "疲れたら、いつでも言ってくださいね。私がヒールしますから！"],
+                            // 特別衣装時のセリフ
+                            summer_beach_costume: ["この水着、どうですか？えへへ、ちょっと恥ずかしいですけど、動きやすいです！", "なんだか、海に来たみたいでわくわくしますね！", "この格好だと、ヒールする時にちょっと気合が入ります！"],
+                            summer_beach_costume_lowHp: ["ひゃっ…！水着だと、ちょっとした傷も目立ちますね…。", "だ、大丈夫です！これくらいなら、まだヒールできますから！"],
+                            summer_beach_costume_shrunk: ["わわっ、水着のまま小さくなっちゃいました…！なんだか、お人形さんみたいです…！", "この格好で小さいと、波にさらわれちゃいそうですぅ…！"],
+                            summer_beach_costume_stripped: ["ひゃあああっ！？水着まで取られちゃうなんて…！もう、何もありません…！", "ふぇぇ…！だ、誰かタオルを…！うぅ、恥ずかしいですぅ…！"],
+                            summer_beach_costume_grown: ["わわっ、水着のまま大きくなっちゃいました！なんだか、モデルさんみたいで恥ずかしいです…！", "この格好で大きいと、なんだかすごく目立ちますね…！"],
+
+                            summer_onsen_costume: ["この格好、温泉みたいで落ち着きますね…。いつでもお背中、流しますよ！", "ふふっ、なんだかみんなで温泉旅行に来たみたいで楽しいです！", "タオル一枚だと、ちょっと動きにくいですけど…頑張ります！"],
+                            summer_onsen_costume_lowHp: ["きゃっ…！タオルがはだけちゃいそうです…！", "だ、大丈夫です！これくらい、平気ですから…！"],
+                            summer_onsen_costume_shrunk: ["わわっ、タオルのまま小さくなっちゃいました…！これじゃあ、タオルに埋もれちゃいますぅ…！", "この格好で小さいと、湯船で溺れちゃいそうです…！"],
+                            summer_onsen_costume_stripped: ["ひゃあああっ！？タオルまで取られちゃうなんて…！もう、隠すものが何も…！", "ふぇぇ…！み、見ないでくださいぃ…！うぅ…！"],
+                            summer_onsen_costume_grown: ["わわっ、タオルのまま大きくなっちゃいました！なんだか、お相撲さんみたいです…！", "この格好で大きいと、タオルがはだけちゃいそうで、すごく心配です…！"],
                         },
                         // ベアトリス (アルケミスト): 知的、大人、丁寧語。
                         // サマータイム・スペシャルライブ！専用掛け合い
@@ -2435,13 +2545,25 @@
                                 "ユイちゃん、日焼け止めちゃんと塗った？リリカが塗ってあげようか？"
                             ],
                             onsen_towel_trouble: ["きゃー！ちょっと、タオルが…！で、でも、これもファンサービスってことで許して！"],
-                            summer_onsen: ["温泉、気持ちい～！ライブの疲れが吹っ飛ぶね！", "このタオル、ちょっと危なくない！？でも、これもファンサービスってことで！", "温泉といえば卓球だよね！負けないよー！", "ミコちゃん、温泉でゴーレム召喚したらお湯が溢れちゃうよ！"],
+                            summer_onsen: ["温泉、気持ちい～！ライブの疲れが吹飛ぶね！", "このタオル、ちょっと危なくない！？でも、これもファンサービスってことで！", "温泉といえば卓球だよね！負けないよー！", "ミコちゃん、温泉でゴーレム召喚したらお湯が溢れちゃうよ！"],
                             giant_among_tinies: ["みんな、ちっちゃくて可愛い！リリカがおっきく守ってあげるね！", "ミニミニ軍団を引き連れる巨大アイドル、リリカだよー！みんな、ちゃんとついてきてね！"],
                             pair_レンカ: ["レンカさん、大人っぽくてセクシーだね！リリカも見習わなきゃ！", "その魔法、ステージ演出に使えそう！"],
                             pair_セレスティア: ["セレスティアちゃん、ミステリアスで素敵！新しいアイドルのコンセプトになりそう！", "リリカの歌で、セレスティアちゃんを応援しちゃうからね！"],
                             pair_イオリ: ["イオリ先輩！小さくても頼りになるなんて、ギャップが素敵です！", "先輩のことも、リリカが応援しちゃいます！"],
                             pair_コハル: ["コハルちゃん、見ててハラハラするけど、そこがまた可愛い！", "失敗しても、リリカがアンコールで盛り上げるから大丈夫だよ！"],
                             pair_オリビア: ["オリビアちゃん、その清楚な感じ、王道アイドルって感じだね！", "その祈りのポーズ、リリカも今度取り入れてみようかな！"],
+                            // 特別衣装時のセリフ
+                            summer_beach_costume: ["この水着、どう？似合ってる？ダンジョンの中でも、リリカはいつでもアイドルだからね！", "ビーチ気分でテンション上がっちゃう！このままライブ始めちゃおうかな！", "水着だと、ダンスもいつもよりキレッキレになっちゃうかも！"],
+                            summer_beach_costume_lowHp: ["きゃっ！ちょっとはしゃぎすぎちゃった！でも、これくらいじゃリリカのステージは終わらないよ！", "水着だと、ちょっとした傷も目立っちゃうな…。でも、ファンのみんなには笑顔を見せないと！"],
+                            summer_beach_costume_shrunk: ["あれれ？水着のままちっちゃくなっちゃった！ミニミニアイドル・リリカだよ！", "このサイズなら、砂のお城に住めちゃうかも！"],
+                            summer_beach_costume_stripped: ["きゃー！水着まで取られちゃうなんて！これはさすがに放送事故だよぉ！", "こ、これじゃあ、ただの恥ずかしい子だよぉ…！でも、これも新しいコンセプトってことにすれば…アリかも？"],
+                            summer_beach_costume_grown: ["わーい、水着のままおっきくなったよ！これなら、ステージのどこからでもリリカのこと、見えるでしょ？", "この格好で大きいと、なんだかセクシーダイナマイトって感じ！？"],
+
+                            summer_onsen_costume: ["タオル一枚でのステージなんて、斬新じゃない？リリカ、いつでも新しいことに挑戦しちゃうよ！", "この格好、なんだかドキドキしちゃうね！でも、これもファンサービスってことで！", "温泉気分で、しっとりしたバラードでも歌っちゃおうかな。"],
+                            summer_onsen_costume_lowHp: ["きゃっ！のぼせちゃったかも…。でも、リリカのステージはまだまだ続くよ！", "タオルがはだけそうで、ちょっとヒヤヒヤする！でも、それがまたスリリングでいいよね！"],
+                            summer_onsen_costume_shrunk: ["あれれ？タオルのままちっちゃくなっちゃった！これじゃあ、タオルに埋もれちゃうよぉ！", "ミニミニ温泉アイドルだよ！みんな、ちゃんと見えてるー？"],
+                            summer_onsen_costume_stripped: ["きゃー！タオルまで取られちゃうなんて！これはもう、R-18指定だよぉ！", "こ、これじゃあ、ファンのみんなに合わせる顔がないよぉ…！"],
+                            summer_onsen_costume_grown: ["わーい、タオルのままおっきくなったよ！これなら、どんな温泉も貸し切り状態だね！", "この格好で大きいと、なんだかセクシーすぎて、みんながのぼせちゃうかも！"],
                         },
                         // サクヤ (サムライ): 寡黙、求道的、武士。
                         'サクヤ': {
@@ -2730,6 +2852,18 @@
                             summer_onsen: ["わーい、温泉だ！モコ、泳いでもいい？…え、だめなの？", "このお湯、なんだか体に良さそう！ゴーレムくんも元気になったりして！", "ユイちゃん、おまんじゅうありがとう！モコと半分こするね！", "リリィちゃん、背中流してあげようか？モコが！"],
                             onsen_towel_trouble: ["わわっ！タオルが取れちゃった！モコ、隠してー！"],
                             pair_オリビア: ["オリビアさん、優しい匂いがするね！モコがすりすりしたがってる！", "その祈り、モンスターにも効くのかな？"],
+                            // 特別衣装時のセリフ
+                            summer_beach_costume: ["わーい、水着だ！海に来たみたいで楽しいね！モコも嬉しそう！", "この格好だと、召喚獣たちもなんだか楽しそうにしてる気がする！", "砂浜でゴーレムくん作ったら、砂のゴーレムくんになるのかな？"],
+                            summer_beach_costume_lowHp: ["うぅ…転んで膝すりむいちゃった…。砂がしみるよぉ…。", "モコ、大丈夫だよ！ミコはまだ戦えるから！"],
+                            summer_beach_costume_shrunk: ["わわっ、水着のままちっちゃくなっちゃった！ヤドカリさんとおんなじサイズだ！", "モコ、ミコのこと見失わないでねー！"],
+                            summer_beach_costume_stripped: ["ひゃっ！？水着取られちゃった！だめだよぉ、モコ、見ちゃだめ！", "うぅ…こんな格好、召喚の儀式に集中できないよ…！"],
+                            summer_beach_costume_grown: ["わー！水着のままおっきくなった！これなら、どんなモンスターよりも大きいかも！", "モコ、見て見て！ミコ、おっきいよー！"],
+
+                            summer_onsen_costume: ["この格好、温泉みたいでぽかぽかするね！モコも気持ちよさそう！", "タオル一枚だと、召喚の時にちょっと動きにくいかも…？", "みんなで温泉卓球したいなー！"],
+                            summer_onsen_costume_lowHp: ["わわっ、のぼせちゃったかも…。ちょっとふらふらする…。", "タオルがはだけそうだよぉ…！"],
+                            summer_onsen_costume_shrunk: ["わわっ、タオルのままちっちゃくなっちゃった！おちょこのお風呂に入れそうだね！", "モコ、ミコのこと、タオルと間違えて持って行かないでね！"],
+                            summer_onsen_costume_stripped: ["ひゃっ！？タオル取られちゃった！だめだよぉ、ゴーレムくん、隠してー！", "うぅ…こんな格好、恥ずかしいよぉ…！"],
+                            summer_onsen_costume_grown: ["わー！タオルのままおっきくなった！これなら、露天風呂も小さく見えるかも！", "モコ、見て！ミコ、おっきいよー！タオル、足りるかな？"],
                         },
                         // レンカ (ネクロマンサー): ミステリアス、お姉さん、死者と対話。
                         'レンカ': {
@@ -2908,7 +3042,7 @@
                             pair_ミコ: ["ミコさん、言葉の通じぬ者と心を通わせる…素晴らしい力ですね。", "神は、全ての生き物を愛しておられますから。"],
                             pair_セレスティア: ["セレスティア様…あなたこそ、まさに神の御使いなのですね。", "私も、あなたのように、多くの人を救えるようになりたいです。"],
                         },
-                        // セレスティア (聖女): 無口、聖なる力、使命感。
+                        // リリィ (トレジャーハンター): 好奇心旺盛、冒険好き、陽気。
                         'リリィ': {
                             default: ["このダンジョン、お宝の匂いがするね！", "みんな、怪我はない？無理しないでね！", "次のフロアには何があるかな？わくわくする！", "昔探検したダンジョンに似てるかも…？", "よし、この調子でサクッとクリアしちゃおう！", "お腹すいたなー。終わったら美味しいもの食べに行こうね！", "足元に気をつけてね。変な罠があるかもしれないから！", "困ったことがあったら、私に言ってね！なんでもお見通しだから！"],
                             lowHp: ["ちょっと油断したかな。でも、これくらい平気！", "うーん、今の攻撃はちょっと痛かったかも。でも、まだまだいけるよ！", "大丈夫、大丈夫！これくらいかすり傷だって！"],
@@ -2961,8 +3095,6 @@
                             beach_liberation_stop: ["えー、せっかく盛り上がってきたのに。まあ、いっか！"],
                             onsen_liberation_prompt: ["ふぅ～、極楽極楽…。もう何もかもどうでもよくなっちゃいそう。"],
                             onsen_liberation_stop: ["はいはい、わかったって。もうちょっとだけ、このままでいさせてよ。"],
-
-                            // サマータイム・スペシャルライブ！
                             summer_beach: [
                                 "ビーチでの冒険も、たまにはいいね！何か珍しい貝殻とか落ちてないかな？",
                                 "みんな、ちゃんと水分補給してる？倒れられたら大変だからね！",
@@ -2972,9 +3104,21 @@
                             summer_onsen: ["やっぱり冒険の後は温泉だよねー！極楽、極楽！", "タオル一枚って、結構スリリングだよね。まあ、私は慣れてるけど！", "ユイちゃん、のぼせてない？顔が真っ赤だよ？", "リリカちゃん、温泉で歌うのはいいけど、響きすぎるよ！"],
                             onsen_towel_trouble: ["おっと、タオルが…。ふーん、面白いことするじゃない。まあ、見たいなら見れば？"],
                             pair_セレスティア: ["セレスティアちゃん、すごい力だね！私も負けてられないな！", "なんだか、見てるだけで心が洗われるみたい…不思議な感じ！お宝とは違うキラキラだね！"],
+                            // 特別衣装時のセリフ
+                            summer_beach_costume: ["水着での冒険も、たまにはいいスパイスになるね！", "この格好だと、いつもより身軽で動きやすいかも！お宝探しが捗りそう！", "変身する時、ちょっと恥ずかしいけど…まあ、いっか！"],
+                            summer_beach_costume_lowHp: ["おっと、ちょっとはしゃぎすぎたかな。でも、これくらい平気！", "砂浜で転ぶと、意外と痛いんだね…！"],
+                            summer_beach_costume_shrunk: ["わ、水着のままちっちゃくなっちゃった！これなら、貝殻の影にも隠れられるね！", "ミニサイズのリリィだよ！お宝探しには、むしろ好都合かも！"],
+                            summer_beach_costume_stripped: ["おっと、これは想定外！まあ、これも冒険の醍醐味ってことで！", "ふーん、面白いことするじゃない。でも、こんなので私の集中力は乱れないよ？"],
+                            summer_beach_costume_grown: ["わーい、水着のまま大きくなった！これなら、どんなお宝も楽々ゲットだね！", "この格好で大きいと、なんだかビーチの女王様みたい！"],
+
+                            summer_onsen_costume: ["タオル一枚での冒険なんて、スリリングで最高！", "この格好、変身する時ちょっと大変かも…。でも、なんとかなるよね！", "温泉の匂いがすると、ついつい長湯したくなっちゃうな。"],
+                            summer_onsen_costume_lowHp: ["おっと、のぼせちゃったかな？でも、これくらい平気！", "タオルがはだけそうで、ちょっとヒヤヒヤするね！"],
+                            summer_onsen_costume_shrunk: ["わ、タオルのままちっちゃくなっちゃった！お猪口のお風呂に入れそうだね！", "ミニサイズのリリィだよ！タオルに埋もれちゃいそう！"],
+                            summer_onsen_costume_stripped: ["おっと、タオルまで取られちゃった！ふーん、面白いことするじゃない。まあ、見たいなら見れば？", "これも経験のうちかな。さて、さっさと終わらせちゃおう！"],
+                            summer_onsen_costume_grown: ["わーい、タオルのまま大きくなった！これなら、どんな温泉も貸し切り状態だね！", "この格好で大きいと、タオルがただのハンカチみたいに見えちゃうかも！"],
                         },
+                        // セレスティア (聖女): 無口、聖なる力、使命感。
                         'セレスティア': {
-                            // サマータイム・スペシャルライブ！用
                             default: ["（静かに前を見つめている）", "（ダンジョンの穢れた空気に、少しだけ眉をひそめた）", "（仲間たちのほうを見て、こくりと頷いた）"],
                             lowHp: ["（…少し、光が揺らいだ）", "（胸に手を当て、静かに呼吸を整えている）", "（大丈夫、というように仲間へ微笑んだ）"],
                             allyLowHp: ["（傷ついた{name}を、心配そうに見つめている）", "（{name}の前に立ち、守るように両手を広げた）"],
@@ -2991,6 +3135,88 @@
                             pair_シズカ: ["（シズカの言葉に、少しだけ安堵したような表情を見せた）", "（シズカの盾を、尊敬の眼差しで見つめている）"],
                             pair_ユイ: ["（ユイの優しさに、慈愛に満ちた微笑みで応えた）", "（ユイの頭を、優しく撫でた）"],
                             // 他のキャラクターへの応答も同様に追加可能
+                        },
+                        'ノエル': {
+                            default: ["システムオールグリーン。いつでも戦闘可能です。", "このダンジョンの構造データを記録しています。", "フローラ、足元は大丈夫ですか？お怪我のないように。", "マスター、次の指示を。", "周囲に敵性反応はありません。警戒レベルを維持します。"],
+                            lowHp: ["ボディに軽微な損傷を確認。戦闘継続に支障ありません。", "警告。耐久値が低下しています。ですが、問題ありません。", "この程度のダメージ、想定の範囲内です。"],
+                            allyLowHp: ["{name}のバイタルが低下しています。回復を推奨します。", "マスター、{name}が危険です。私が前線に出ます。", "フローラ、{name}の治癒をお願いできますか？"],
+                            shrunk: ["ボディが縮小しました。興味深い現象です。運動性能が向上する可能性があります。", "このサイズですと、敵のセンサーに探知されにくいかもしれません。戦術的優位性を確保します。", "視界が低くなりました。データ収集に若干の支障がでます。"],
+                            grown: ["ボディが巨大化しました。出力が上昇しています。", "このサイズであれば、より広範囲の敵を殲滅可能です。", "天井までの距離を再計算。衝突しないよう注意します。"],
+                            stripped: ["外部装甲のパージを確認。しかし、戦闘機能に影響はありません。", "不要な装飾が取り除かれました。より効率的な戦闘が可能です。", "この状態に、特に感情はありません。"],
+                            allyShrunk: ["{name}のサイズが縮小しました。保護対象として、優先度を上げます。", "{name}、私の足元にいてください。その方が安全です。"],
+                            allyGrown: ["{name}のサイズが拡大しました。脅威度が上昇しています。頼もしいですね。", "{name}、その巨体、障害物に注意してください。"],
+                            allyNew: ["新しいユニットが編入されましたね。{name}、ようこそ。私の名前はノエルです。", "{name}、あなたの戦闘データを分析させていただきます。よろしくお願いします。"],
+                            stripped_shrunk: ["ボディが縮小、かつ外部装甲がありません。防御力が著しく低下しています。注意が必要です。", "この状態は、戦術的に不利です。早急に改善を求めます。"],
+                            solo_stripped_tiny: ["警告。最小サイズ、かつ非武装状態。生存確率が著しく低下しています。", "（岩陰に隠れ、自己修復シークエンスを実行しようと試みている）", "（敵性反応を探知。完全に気配を消します）"],
+                            dollhouse_explore: ["ミニチュアハウスの内部構造をスキャンします。何か有用な情報があるかもしれません。", "侵入します。トラップの可能性を警戒してください。", "興味深い設計です。データとして記録します。"],
+                            cracked_rock_break: ["この岩の構造的弱点を特定。最小限の力で破壊します。", "道を開きます。下がっていてください。", "計算通りです。これで進めますね。"],
+                            fairy_shrunk: ["ボディが最小サイズに固定されました。エネルギー効率は向上しているようです。", "この状態での戦闘データは貴重です。収集を続行します。", "フローラ、私を踏まないように注意してくださいね。"],
+                            allyStripped_shrunk: ["{name}が危険な状態です。私が保護します。", "敵の非人道的な攻撃を確認。優先的に排除します。"],
+                            stripped_pair: ["{name}も同じ状態ですか。特に問題はありません。戦闘を続行しましょう。", "二人とも同じ状態ですね。合理的に考えれば、気にする必要はありません。"],
+                            allyStripped: ["{name}の外部装甲がありません。防御力が低下しています。カバーします。", "敵の攻撃パターンを記録。非効率的かつ、悪趣味です。"],
+                            high_mouse_hole_giant: ["私の肩をお使いください。安定性は保証します。", "リフトします。しっかりと掴まってください。"],
+                            high_mouse_hole_tiny: ["了解しました。内部の偵察、および情報収集を行います。", "行ってきます。すぐに結果を報告します。"],
+                            shame_pillory: ["未確認の粘着物質に拘束されました。成分を分析します。", "この拘束、物理的に解除可能です。少々お待ちください。", "（特に表情を変えず、拘束具の構造を分析している）"],
+                            shrunk_pair: ["{name}も縮小したのですね。連携行動のパターンを再計算します。", "二人でいれば、敵の死角を突くのは容易ですね。"],
+                            pair_フローラ: ["フローラ、お疲れではありませんか？いつでもお声がけください。", "フローラ、あなたの淹れる紅茶は、私の機能維持に良い影響を与えます。またお願いしますね。", "フローラ、危険な時は私の後ろに。あなたをお守りするのが、私の最優先事項です。", "そのお花、綺麗ですね。データベースに登録しておきます。", "フローラ、あなたの笑顔は、私の感情ユニットにポジティブな影響を与えます。"],
+                            pair_アカリ: ["アカリさん、そのエネルギー出力、素晴らしいですね。参考にさせていただきます。", "あまり前に出過ぎると危険です。バックアップは私に任せてください。"],
+                            pair_ヒカリ: ["ヒカリさん、あなたの魔法の詠唱パターン、非常に効率的です。記録させていただきます。", "静かな方ですね。私も、不要な会話は好みません。"],
+                            pair_シズカ: ["シズカさん、その盾の防御性能、素晴らしいです。私も見習わなければなりません。", "あなたと連携すれば、鉄壁の防御陣を構築できますね。"],
+                            pair_ユイ: ["ユイさん、いつもありがとうございます。あなたの回復機能は、パーティの生命線です。", "あなたの優しさは、非論理的ですが…心地よいものです。"],
+                            pair_ベアトリス: ["ベアトリスさん、あなたの知識、私のデータベースにもいくつか無いものがありますね。興味深いです。", "その薬、成分をスキャンさせていただいても？"],
+                            pair_リリカ: ["リリカさん、あなたのパフォーマンスは、味方の士気を高める効果がありますね。データとして有用です。", "その歌の周波数、私の聴覚センサーに心地よいです。"],
+                            pair_サクヤ: ["サクヤさん、その剣技、無駄のない動きです。戦闘データとして非常に参考になります。", "あなたの集中力、私も見習うべき点です。"],
+                            pair_シャオメイ: ["シャオメイさん、その小さな体から、驚異的なパワーが出力されていますね。構造を解析したいです。", "エネルギー消費が激しいようですね。補給は計画的に。"],
+                            pair_エリザ: ["エリザさん、あなたの医学知識、私のメンテナンスに応用できるかもしれません。情報交換をしませんか。", "私を検体として見るのはやめていただきたい。私は自律したアンドロイドです。"],
+                            pair_ルナ: ["ルナさん、あなたの言う『運』という要素は、私の計算にはありません。ですが、興味深い現象です。", "その勝負、確率論的にはあなたが不利ですが。"],
+                            pair_クロエ: ["クロエさん、あなたの気配は非常に希薄ですね。ステルス機能の参考にさせていただきます。", "『魂』という概念、私のデータベースにはありません。定義を教えていただけますか。"],
+                            pair_ミコ: ["ミコさん、その生物とのコミュニケーション方法、解析させていただけますか。", "モコ、という生命体、非常に興味深いです。スキャンしても？"],
+                            pair_レンカ: ["レンカさん、死霊術…生命のサイクルを逸脱した技術ですね。危険ですが、興味深いです。", "その魂は、どのようなエネルギーで稼働しているのですか？"],
+                            pair_イオリ: ["イオリ先輩、あなたのガーディアンとしての性能、素晴らしいです。尊敬します。", "その小さな体でパーティを守る姿、私も見習います。"],
+                            pair_コハル: ["コハルさん、あなたの行動は予測不可能です。常にバックアップの準備をしておきます。", "ハプニング、ですか。私の予測モデルを更新する必要がありそうですね。"],
+                            pair_オリビア: ["オリビアさん、あなたの祈りには、特殊なエネルギーを観測します。解析の価値があります。", "その力、味方の精神状態を安定させる効果があるようです。"],
+                            pair_セレスティア: ["セレスティアさん、あなたから発せられるエネルギー、聖属性として分類しました。非常に高レベルです。", "あなたの使命、私にも手伝わせてください。"],
+                        },
+                        'フローラ': {
+                            default: ["皆様、ごきげんよう。わたくしが誠心誠意お仕えいたしますわ。", "まあ、このような場所にも可憐なお花が咲いているのですね。", "皆様、お茶の時間はいかがかしら？わたくしがお淹れしますわ。", "ノエル様、お怪我はございませんか？いつでもお申し付けくださいませ。", "あらあら、少し空気が淀んでいますわね。ハンカチはいかが？"],
+                            lowHp: ["きゃっ…！少しドレスが汚れてしまいましたわ…。", "ふぅ…少し、息が上がってしまいましたわ。お見苦しいところを…。", "大丈夫ですわ。この程度、お嬢様としての嗜みのうちですもの。"],
+                            allyLowHp: ["まあ、{name}様！お下がりください、危険ですわ！", "なんてことを…！{name}様を傷つけるなど、万死に値しますわ！", "ノエル様！{name}様をお守りください！"],
+                            shrunk: ["まあ、小さくなってしまいましたわ。まるで妖精のようですわね。", "このお洋服が、少し大きくなってしまいましたわ。歩きづらいですわね。", "ふふ、この視点ですと、お花畑にいるようで素敵ですわ。"],
+                            grown: ["まあ、大きくなってしまいましたわ。これではドレスの裾が短くなってしまいますわね。", "見晴らしがよろしいですわね。皆様、わたくしにお任せください。", "天井にお花を飾るのも、容易ですわね。"],
+                            stripped: ["きゃあああっ！み、見ないでくださいまし！は、はしたないですわ！", "こ、このような姿…！お父様になんて言えば…！", "ふぇぇ…どなたか、ショールをお貸しいただけませんこと…？"],
+                            allyShrunk: ["まあ、{name}様、可愛らしいお姿に。まるで豆人形のようですわね。", "{name}様、わたくしの影にお隠れなさい。"],
+                            allyGrown: ["まあ、{name}様、大きくなられて。とても頼もしいですわ。", "{name}様、そのお姿、まるで物語の巨人さんのようですわね。"],
+                            allyNew: ["ごきげんよう、{name}様。わたくしはフローラと申します。以後、お見知りおきを。", "新しいお客様ですわね。{name}様、どうぞよろしくお願いいたしますわ。"],
+                            stripped_shrunk: ["ひゃっ！小さくて、このような格好だなんて…！もう、お嫁にいけませんわ…！", "（お花の影に隠れて、膝を抱えて震えている）", "だ、誰か助けてくださいまし…！"],
+                            solo_stripped_tiny: ["（しくしく…）こんな姿、誰にも見せられませんわ…。", "（葉っぱをドレスのように体に巻きつけている）", "お父様、お母様…フローラはもう…"],
+                            dollhouse_explore: ["まあ、なんて可愛らしいお家！わたくしのお部屋にしたいくらいですわ。", "ごきげんよう、お邪魔いたしますわね。どなたかいらっしゃいますか？", "ティーパーティを開くのに、ちょうどよさそうですわね。"],
+                            cracked_rock_break: ["このような岩、わたくしの力をもってすれば…！ふんっ！", "皆様、お下がりになって。わたくしが道を切り開きますわ。", "ごきげんよう、岩さん。少しだけ、そこをどいていただけますかしら？"],
+                            fairy_shrunk: ["まあ、まるで花の精霊になったようですわ。ふふ、素敵ですわね。", "この姿なら、蝶々さんとお話しできるかもしれませんわ。", "皆様、わたくしのこと、お花と間違えて摘んでしまわないでくださいね？"],
+                            allyStripped_shrunk: ["まあ、{name}様！なんておいたわしいお姿に…！わたくしのハンカチをお使いください！", "許しませんわ！{name}様にこのような無礼を働くなんて！"],
+                            stripped_pair: ["{name}様もですの！？もう…二人でいれば、恥ずかしさも半分…にはなりませんわね…！", "こうなったら、どちらがより気高く振る舞えるか、勝負ですわ！"],
+                            allyStripped: ["{name}様、大変ですわ！わたくしのショールをお使いください！", "なんて無作法な敵なのでしょう。わたくしが躾をし直して差し上げますわ。"],
+                            high_mouse_hole_giant: ["さあ、わたくしの肩に。お姫様抱っこより安定いたしますわよ。", "ふふ、わたくしを踏み台にするなんて、良い度胸ですわね。"],
+                            high_mouse_hole_tiny: ["はい、お任せくださいまし。きっと素敵なお宝を見つけてまいりますわ。", "行ってまいりますわ。皆様、わたくしの帰りを待っていてくださいね。"],
+                            shame_pillory: ["きゃっ！な、なんですのこれは！離してくださいまし！", "こ、このようなもので、わたくしの心を折れるとでも思って…！うぅ…！", "（涙目になりながらも、気丈に振る舞おうとしている）"],
+                            shrunk_pair: ["まあ、{name}様も小さいのですね。ふふ、二人で『親指姫』ごっこができますわね。", "手をお取りくださいな。はぐれてしまったら大変ですもの。"],
+                            pair_ノエル: ["ノエル様、お疲れではございませんか？紅茶でもお淹れしましょうか？", "ノエル様、いつもわたくしをお守りくださり、ありがとうございます。本当に頼もしいですわ。", "まあ、ノエル様。その斧は重くないのですか？わたくしがお持ちしますわ。", "ノエル様といると、とても安心いたします。ふふっ。", "ノエル様、またわたくしに稽古をつけてくださいましね。"],
+                            pair_アカリ: ["アカリ様、いつもお元気ですわね。見ているこちらも楽しくなりますわ。", "あまり無茶をなさると、お洋服が汚れてしまいますわよ？"],
+                            pair_ヒカリ: ["ヒカリ様、いつも静かですけれど、本当は優しい方なのですよね。わたくし、存じておりますわ。", "その魔導書、わたくしにも読めるかしら…？"],
+                            pair_シズカ: ["シズカ様、その盾、本当に頼もしいですわ。わたくしたちの守護神ですわね。", "シズカ様がいらっしゃれば、どんな敵も怖くありませんわ。"],
+                            pair_ユイ: ["ユイ様、いつも皆様を癒してくださり、ありがとうございます。わたくしも見習わなければなりませんわね。", "まあ、ユイ様。あなた自身もお怪我には気をつけてくださいましね。"],
+                            pair_ベアトリス: ["ベアトリス様、その探究心、素晴らしいですわ。ですが、あまり根を詰めすぎませんように。", "その薬瓶、とても綺麗ですわね。お花を飾るのに良さそうですわ。"],
+                            pair_リリカ: ["リリカ様、あなたの歌声は、まるで天使のようですわ。わたくし、ファンになってしまいましたわ。", "そのダンス、わたくしにも教えていただけますこと？"],
+                            pair_サクヤ: ["サクヤ様、その剣の道、とても気高いものですわね。わたくし、尊敬いたします。", "たまには、お茶でも飲んで一息つきませんか？"],
+                            pair_シャオメイ: ["シャオメイ様、いつもお元気ですわね。お腹が空きましたら、わたくしがお菓子をお作りしますわ。", "その拳、とても力強いですわね。わたくしも負けていられませんわ。"],
+                            pair_エリザ: ["エリザ様、その知性、素晴らしいですわ。ですが、わたくしを実験対象として見るのはおやめくださいまし。", "その注射器…お花にお水をあげるのにも使えそうですわね。"],
+                            pair_ルナ: ["ルナ様、勝負事もよろしいですが、あまり無茶はなさらないでくださいましね。心配ですわ。", "わたくしに賭けてくださるの？ふふ、期待に応えてみせますわ。"],
+                            pair_クロエ: ["クロエ様、いつも静かですわね。何か悩み事でもおありでしたら、わたくしにお話しくださいな。", "その大鎌、お庭のお手入れにも役立ちそうですわね。"],
+                            pair_ミコ: ["ミコ様、そのモコちゃんという子、とても可愛らしいですわね。撫でてもよろしいかしら？", "召喚術…わたくしも、お花の精霊を呼び出せたりしないかしら。"],
+                            pair_レンカ: ["レンカ様、その魔法、少し怖いですけれど…あなた様が味方で心強いですわ。", "死者の魂…安らかに眠れるよう、わたくしがお祈りいたしますわ。"],
+                            pair_イオリ: ["イオリ先輩、その小さな体で皆様を守るお姿、とても立派ですわ。", "先輩、わたくしがしっかりお守りいたしますから、ご安心くださいまし。"],
+                            pair_コハル: ["コハル様、見ていて飽きませんわ。ふふ、次はどんな素敵なことを見せてくださるのかしら。", "お怪我はありませんこと？わたくしが手当ていたしますわ。"],
+                            pair_オリビア: ["オリビア様、あなたの祈りはとても温かいですわね。わたくしの心まで洗われるようです。", "わたくしも、あなた様のように清らかな心を持ちたいものです。"],
+                            pair_セレスティア: ["セレスティア様、そのお姿、まるで絵画のようですわ。とてもお美しい…。", "わたくしに、何かできることはございませんか？何なりとお申し付けください。"],
                         },
                     };
 
@@ -3483,6 +3709,15 @@
 
                         // キャラクターの状況を判断するヘルパー関数
                         const getCharacterSituation = (char) => {
+                            // 特別衣装の状態を最優先でチェック
+                            if (char.costume && gameState.gameMode !== 'summer_live') {
+                                const situationKey = `${char.costume}_costume`;
+                                if (char.currentHp / char.maxHp < 0.4) return `${situationKey}_lowHp`;
+                                if (char.statusEffects.stripped) return `${situationKey}_stripped`;
+                                if (char.height > char.initialHeight * 1.15) return `${situationKey}_grown`;
+                                if (char.height < char.initialHeight * 0.7) return `${situationKey}_shrunk`;
+                                return situationKey;
+                            }
                             // 最優先でフェアリーシロップの状態をチェック
                             if (char.heightLocked && char.height === 1) return 'fairy_shrunk';
 
@@ -3588,6 +3823,8 @@
 
                             // allyShrunk_100 のようなキーが存在しない場合、allyShrunk -> shrunk -> default の順にフォールバック
                             let lines = charConvos[sit] ||
+                                (sit.startsWith('summer_beach_costume') && charConvos['summer_beach_costume']) ||
+                                (sit.startsWith('summer_onsen_costume') && charConvos['summer_onsen_costume']) ||
                                 (sit === 'fairy_shrunk' && charConvos['fairy_shrunk']) ||
                                 (sit === 'stripped_shrunk' && charConvos['stripped_shrunk']) ||
                                 (sit === 'cracked_rock_break' && charConvos['cracked_rock_break']) ||
@@ -3634,6 +3871,7 @@
                         gameState.floor = 0;
                         gameState.gameOver = false; // ゲームオーバーフラグをリセット
                         gameState.triggeredSpecialConvos = []; // 発生済み会話をリセット
+                        gameState.bellesPrivateCostumeEventTriggered = false; // イベントフラグをリセット
                         const blueprintsToUse = selectedMembers ?
                             selectedMembers.map(name => allCharacterBlueprints.find(c => c.name === name)) :
                             characterBlueprints;
@@ -3645,6 +3883,7 @@
                             maxMp: c.mp,
                             currentMp: c.mp,
                             initialHeight: c.height,
+                            costume: null, // 衣装フラグを追加
                             buffs: {}, // ファイター, ソーサラー, ナイト, メディック
                             heightLocked: false, // 追加
                             blessings: {}, // 祝福用
@@ -3763,7 +4002,7 @@
                             stripButton.textContent = '脱ぐ';
                             stripButton.onclick = () => {
                                 showOneMemberSelectionModal(char => {
-                                    const immuneRoles = ['ナイト', 'サムライ', '聖女'];
+                                    const immuneRoles = ['ナイト', 'サムライ', '聖女', 'アンドロイド'];
                                     if (immuneRoles.includes(char.role)) {
                                         log(`${char.name}は恥じらいを覚えず、何も起こらなかった。`);
                                     } else {
@@ -4160,6 +4399,16 @@
                         gameState.floor++;
                         updateFloorDisplay();
 
+                        // --- ノエルとフローラのプライベート衣装イベント ---
+                        const hasNoel = gameState.party.some(p => p.name === 'ノエル');
+                        const hasFlora = gameState.party.some(p => p.name === 'フローラ');
+                        if (gameState.floor === 1 && hasNoel && hasFlora && gameState.gameMode !== 'brawling_belles' && !gameState.bellesPrivateCostumeEventTriggered) {
+                            gameState.bellesPrivateCostumeEventTriggered = true; // イベントを一度だけ発生させる
+                            triggerBellesPrivateCostumeEvent();
+                            return; // 専用イベントを発生させたら、以降の処理は行わない
+                        }
+
+
                         const floor = gameState.floor;
                         const mode = gameState.gameMode;
 
@@ -4344,6 +4593,7 @@
                         gameState.party.forEach(char => {
                             if (selectedCostumes[char.name]) {
                                 char.bgClass = selectedCostumes[char.name];
+                                char.costume = type; // 衣装フラグを設定
                             }
                             // リリィの変身形態にも適用
                             if (char.name === 'リリィ' && char.transforms) {
@@ -4380,12 +4630,46 @@
                         document.getElementById('costume-cancel').onclick = () => {
                             celestiaEventModal.classList.add('hidden');
                             log("一行は思い出を胸に、冒険を続ける。");
+                            gameState.party.forEach(p => p.costume = null); // 衣装フラグをリセット
                             // 通常のイベントフローを再開
                             if (gameState.gameMode === 'fixed_path') {
                                 triggerSelectableEvent();
                             } else {
                                 triggerRandomEvent();
                             }
+                        };
+                    }
+
+                    function triggerBellesPrivateCostumeEvent() {
+                        celestiaEventTitle.textContent = "束の間の休息";
+                        celestiaEventText.textContent = "フローラ「皆様、少し休憩にいたしませんこと？せっかくですもの、少し楽な格好に着替えたいですわ」\nノエル「賛成です。現在の服装は戦闘用であり、リラックスするには不向きです」\n\n二人はプライベートな服装に着替えたがっているようだ…";
+                        celestiaEventButtons.innerHTML = `
+                            <button id="belles-costume-change" class="action-button bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-4 rounded-lg shadow-lg">着替える</button>
+                            <button id="belles-costume-cancel" class="action-button bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg shadow-lg">やめておく</button>
+                        `;
+                        celestiaEventModal.classList.remove('hidden');
+
+                        document.getElementById('belles-costume-change').onclick = () => {
+                            const noel = gameState.party.find(p => p.name === 'ノエル');
+                            const flora = gameState.party.find(p => p.name === 'フローラ');
+                            if (noel) {
+                                noel.bgClass = 'bg-char-noel-a';
+                                noel.costume = 'private'; // 会話用のフラグ
+                            }
+                            if (flora) {
+                                flora.bgClass = 'bg-char-flora-a';
+                                flora.costume = 'private'; // 会話用のフラグ
+                            }
+                            log("二人は普段着に着替えた！少しだけ、戦士の顔つきが和らいだように見える。");
+                            updatePartyStatus();
+                            celestiaEventModal.classList.add('hidden');
+                            triggerRandomEvent(); // 通常のイベントフローを再開
+                        };
+
+                        document.getElementById('belles-costume-cancel').onclick = () => {
+                            celestiaEventModal.classList.add('hidden');
+                            log("一行は休憩を終え、気を引き締めて冒険を続ける。");
+                            triggerRandomEvent(); // 通常のイベントフローを再開
                         };
                     }
 
@@ -4894,7 +5178,7 @@
                         log("温泉の熱気にあてられて、少しのぼせてしまったようだ…");
                         await new Promise(resolve => setTimeout(resolve, 2000));
 
-                        const immuneRoles = ['ナイト', 'サムライ', '聖女'];
+                        const immuneRoles = ['ナイト', 'サムライ', '聖女', 'アンドロイド'];
                         const potentialVictims = gameState.party.filter(p => p.currentHp > 0 && !immuneRoles.includes(p.role) && !p.statusEffects.stripped);
 
                         if (potentialVictims.length === 0) {
@@ -5718,7 +6002,7 @@
 
                     async function inflictStripped(enemy, target) {
                         // 対象がナイト、サムライ、聖女、または防御中の場合、スキルは失敗
-                        const immuneRoles = ['ナイト', 'サムライ', '聖女'];
+                        const immuneRoles = ['ナイト', 'サムライ', '聖女', 'アンドロイド'];
                         if (immuneRoles.includes(target.role) || target.isDefending || target.isWall || target === gameState.golem) {
                             // log(`${enemy.name}は${target.name}にいたずらを仕掛けたが、効果がなかった！`);
                             return false; // 行動しなかったことを示す
@@ -5754,7 +6038,7 @@
 
                     async function inflictStrippedForArchlich(enemy, target) {
                         // 対象がナイト、サムライ、聖女、または防御中の場合、スキルは失敗
-                        const immuneRoles = ['ナイト', 'サムライ', '聖女'];
+                        const immuneRoles = ['ナイト', 'サムライ', '聖女', 'アンドロイド'];
                         if (immuneRoles.includes(target.role) || target.isDefending || target.isWall || target === gameState.golem) {
                             log(`${enemy.name}は${target.name}にいたずらを仕掛けたが、効果がなかった！`);
                             return; // 何もせずターン終了
@@ -6004,7 +6288,7 @@
                             // 敵の思考時間として少し待機
                             setTimeout(() => enemyTurn(actor), 1000);
                         } else {
-                            playerTurn(actor);
+                            playerTurn(actor); // ファイター, ソーサラー, ナイト, メディック
                         }
 
                         updatePartyStatus(); // ターン開始時に状態表示を更新
@@ -6239,6 +6523,11 @@
                                             damage = Math.ceil(damage * (character.blessings && character.blessings.critical_master ? 2.0 : 1.5));
                                             logMessageText = `会心の一撃！ ${target.name}に${damage}の大ダメージ！`;
                                         }
+                                        // アンドロイドの通常攻撃クリティカル
+                                        if (character.role === 'アンドロイド' && Math.random() < 0.25) { // 25%の確率でクリティカル
+                                            damage = Math.ceil(damage * (character.blessings && character.blessings.critical_master ? 2.0 : 1.5));
+                                            logMessageText = `会心の一撃！ ${target.name}に${damage}の大ダメージ！`;
+                                        }
                                     }
                                     // 祝福: 双撃
                                     if (character.blessings && character.blessings.double_attack && Math.random() < 0.75) {
@@ -6250,6 +6539,13 @@
                                         await dealDamage(target, secondDamage);
                                         log(`${target.name}に${secondDamage}のダメージ！`);
                                     }
+                                    // メイドのHP吸収
+                                    if (character.buffs && character.buffs.hp_absorb) {
+                                        const absorbAmount = Math.ceil(damage * 0.2); // 与えたダメージの20%を吸収
+                                        await animateStatChange(character, 'hp', absorbAmount, 'increase');
+                                        log(`${character.name}は攻撃から生命力を吸収した！(HP+${absorbAmount})`);
+                                    }
+
                                     await dealDamage(target, damage); // Await the damage animation
                                     log(logMessageText); // Log after animation
                                 } // ファイター, ソーサラー, ナイト, メディック
@@ -6324,7 +6620,7 @@
                                     // 聖女の行進モードでは回復量が2倍
                                     if (gameState.gameMode === 'saint_march') {
                                         healAmount *= 2;
-                                    }
+                                    } // ファイター, ソーサラー, ナイト, メディック
                                     if (character.statusEffects.regeneration) {
                                         log(`${character.name}は傷が自然に回復していく！`);
                                         animateStatChange(character, 'hp', healAmount, 'increase');
@@ -6482,7 +6778,7 @@
                                             // 連続攻撃なので、一体ずつ待機してダメージを与える
                                             await dealDamage(randomTarget, damage);
                                         }
-                                    }
+                                    } // ファイター, ソーサラー, ナイト, メディック
                                     break;
                                 }
                             case 'mp_burst_magic':
@@ -7223,6 +7519,70 @@
                                     }
                                     break;
                                 }
+                            case 'self_heal_and_paralyze':
+                                { // メンテナンス
+                                    log(`${caster.name}は${skill.name}を開始した！`);
+                                    await animateStatChange(caster, 'hp', caster.maxHp, 'increase');
+                                    caster.statusEffects.paralysis = true; // 1ターン麻痺
+                                    log(`${caster.name}のHPが全回復したが、システムがオーバーヒートし麻痺してしまった！`);
+                                    break;
+                                }
+                            case 'hp_cost_growth':
+                                { // バンプアップ
+                                    if (caster.heightLocked) {
+                                        log(`${caster.name}は${skill.name}を使おうとしたが、体が変化を拒んだ！`);
+                                        caster.currentHp += skill.cost; // HPを消費しない
+                                        break;
+                                    }
+                                    log(`${caster.name}は${skill.name}で自らのボディを強化！`);
+                                    await animateStatChange(caster, 'height', skill.power, 'increase');
+                                    log(`${caster.name}の身長が${skill.power}cm伸びた！`);
+                                    break;
+                                }
+                            case 'mp_burst_height_scaling':
+                                { // オーバーブースト
+                                    if (caster.currentMp < skill.cost) {
+                                        log("MPが足りない！");
+                                        break;
+                                    }
+                                    const heightBonus = Math.max(0, (caster.height - caster.initialHeight) * 0.1);
+                                    const boostSkill = {...skill,
+                                        power: skill.power + heightBonus
+                                    };
+                                    log(`${caster.name}は${skill.name}を放った！`);
+                                    const damagePromises = [];
+                                    for (const t of target) {
+                                        damagePromises.push(dealDamage(t, calculateDamage(caster, t, boostSkill)));
+                                    }
+                                    await Promise.all(damagePromises);
+                                    await animateStatChange(caster, 'mp', -caster.currentMp, 'decrease');
+                                    break;
+                                }
+                            case 'party_buff_and_heal':
+                                { // フラワーアレンジ
+                                    log(`${caster.name}は${skill.name}で場を和ませた！`);
+                                    for (const p of gameState.party.filter(p => p.currentHp > 0)) {
+                                        p.buffs.atk_up = 3;
+                                        await animateStatChange(p, 'hp', 20, 'increase');
+                                    }
+                                    log("味方全体の攻撃力が上がり、HPが少し回復した！");
+                                    break;
+                                }
+                            case 'height_transfer':
+                                { // ロイヤルティ
+                                    await handleRoyaltySkill(caster, target);
+                                    break;
+                                }
+                            case 'party_cure_all':
+                                { // ティータイム
+                                    await handleTeaTimeSkill(caster);
+                                    break;
+                                }
+                            case 'maid_special_buff':
+                                { // マジカルエナジー
+                                    await handleMagicalEnergySkill(caster);
+                                    break;
+                                }
                         }
                     }
 
@@ -7482,6 +7842,69 @@
                             playerTurn(character);
                         }
                     }
+                    async function handleRoyaltySkill(caster, target) {
+                        log(`${caster.name}は${target.name}に${caster.skills.find(s => s.type === 'height_transfer').name}を発動！`);
+                        if (target.heightLocked) {
+                            log(`しかし、${target.name}の体は不思議な力で守られており、変化しなかった！`);
+                            caster.currentMp += 20; // MP消費をキャンセル
+                            return;
+                        }
+
+                        let totalHeightToTransfer = 0;
+                        const otherMembers = gameState.party.filter(p => p !== target && p.currentHp > 0);
+
+                        for (const member of otherMembers) {
+                            if (member.heightLocked) {
+                                log(`${member.name}の体は変化を拒んだ！`);
+                                continue;
+                            }
+                            const heightToGive = member.height - 1;
+                            if (heightToGive > 0) {
+                                totalHeightToTransfer += heightToGive;
+                                await animateStatChange(member, 'height', -heightToGive, 'decrease');
+                            }
+                        }
+
+                        if (totalHeightToTransfer > 0) {
+                            await animateStatChange(target, 'height', totalHeightToTransfer, 'increase');
+                            log(`${target.name}に仲間たちの身長が集約され、他のメンバーは1cmになった！`);
+                        } else {
+                            log("しかし、誰も身長を分け与えることができなかった…。");
+                        }
+                    }
+
+                    async function handleTeaTimeSkill(caster) {
+                        log(`${caster.name}は優雅に${caster.skills.find(s => s.type === 'party_cure_all').name}の準備をした！`);
+                        let curedAny = false;
+                        gameState.party.forEach(p => {
+                            if (p.currentHp > 0) {
+                                const effects = Object.keys(p.statusEffects);
+                                if (effects.length > 0) {
+                                    curedAny = true;
+                                    p.statusEffects = {};
+                                    log(`${p.name}の状態異常がすべて治った！`);
+                                    flashCard(p, 'green');
+                                }
+                            }
+                        });
+                        if (!curedAny) {
+                            log("…が、誰も状態異常ではなかったようだ。");
+                        }
+                    }
+
+                    async function handleMagicalEnergySkill(caster) {
+                        log(`${caster.name}は${caster.skills.find(s => s.type === 'maid_special_buff').name}を発動！`);
+                        caster.buffs.provoke = 3;
+                        caster.buffs.atk_up = 3;
+                        caster.buffs.protect = 3;
+                        caster.buffs.hp_absorb = true; // 永続
+                        caster.buffs.heal_spread = true; // 永続
+                        if (caster.height < caster.initialHeight) {
+                            await animateStatChange(caster, 'height', caster.initialHeight - caster.height, 'increase');
+                        }
+                        log(`${caster.name}は不思議な力に包まれ、大幅に強化された！`);
+                        flashCard(caster, 'yellow');
+                    }
 
 
                     async function handleTroubleMakerBox(caster) {
@@ -7574,7 +7997,7 @@
                                 name: "strip_all",
                                 func: () => {
                                     log("箱から妖しい光が！ なんと味方全員が脱衣状態になってしまった！");
-                                    gameState.party.forEach(p => {
+                                    gameState.party.forEach(p => { // ファイター, ソーサラー, ナイト, メディック
                                         if (p.currentHp > 0 && p.role !== 'ナイト' && p.role !== 'サムライ' && p.role !== '聖女') {
                                             p.statusEffects.stripped = {
                                                 turns: 0
@@ -7780,6 +8203,13 @@
                                     counterAttacker: target,
                                     damage: getEffectiveStats(target).atk
                                 };
+                            }
+                            // メイドのHP吸収
+                            if (target.buffs && target.buffs.hp_absorb) {
+                                enemy.counterTarget = {
+                                    counterAttacker: target,
+                                    damage: getEffectiveStats(target).atk
+                                }; // ファイター, ソーサラー, ナイト, メディック
                             }
 
                             // 通常のダメージ処理
@@ -8106,6 +8536,12 @@
                         // 祝福: 過剰治癒 // ファイター, ソーサラー, ナイト, メディック
                         if (target && !target.isEnemy && target.blessings && target.blessings.over_heal && isHeal && target.currentHp === target.maxHp) {
                             const overHealAmount = (target.currentHp + amount) - target.maxHp;
+                            if (target.buffs && target.buffs.heal_spread) {
+                                const spreadHeal = Math.ceil(amount / (gameState.party.filter(p => p.currentHp > 0).length - 1));
+                                gameState.party.forEach(p => {
+                                    if (p !== target && p.currentHp > 0) animateStatChange(p, 'hp', spreadHeal, 'increase');
+                                });
+                            }
                             if (overHealAmount > 0) {
                                 const wallHp = Math.ceil(overHealAmount);
                                 gameState.walls.push({
@@ -8116,6 +8552,16 @@
                                 log(`${target.name}の超過した回復力が、耐久値${wallHp}の防壁に変換された！`);
                             }
                         }
+                        // メイドの回復拡散
+                        if (target && !target.isEnemy && target.buffs && target.buffs.heal_spread && isHeal) {
+                            const aliveAllies = gameState.party.filter(p => p !== target && p.currentHp > 0);
+                            if (aliveAllies.length > 0) {
+                                const spreadHeal = Math.ceil(amount / aliveAllies.length);
+                                log(`${target.name}から癒しの力が拡散し、仲間たちのHPが${spreadHeal}回復した！`);
+                                aliveAllies.forEach(p => animateStatChange(p, 'hp', spreadHeal, 'increase'));
+                            }
+                        }
+
                     } // ファイター, ソーサラー, ナイト, メディック
 
                     function triggerLiberationEvent() {
@@ -8316,6 +8762,13 @@
                                     case 'enjoy':
                                         title = "楽しい冒険の終わり";
                                         text = "どんな困難も笑顔で乗り越え、パーティはついにダンジョンを制覇しました！最高の冒険でしたね！";
+                                        break;
+                                    case 'brawling_belles':
+                                        title = "闘争の果てに";
+                                        text = "ノエルとフローラは、数々の強敵を打ち破り、ついにダンジョンを踏破しました。彼女たちの絆は、誰にも壊せないでしょう。";
+                                        const bellesFlags = JSON.parse(localStorage.getItem('sizeDungeonClearFlags') || '{}');
+                                        bellesFlags.brawlingBellesCleared = true;
+                                        localStorage.setItem('sizeDungeonClearFlags', JSON.stringify(bellesFlags));
                                         break;
                                     case 'unstable_bodies':
                                         text = "絶え間なく変化する肉体を乗りこなし、あなたは見事ボスを打ち破りました！その精神力は、もはや何物にも揺るがないでしょう。";
@@ -8586,7 +9039,7 @@
                                     case 'strip':
                                         const immuneRoles = ['ナイト', 'サムライ', '聖女']; // ファイター, ソーサラー, ナイト, メディック
                                         if (immuneRoles.includes(target.role)) {
-                                            log(`…しかし、${target.name}は恥じらいを覚えず、何も起こらなかった。`);
+                                            log(`…しかし、${target.name}は恥じらいを覚えず、何も起こらなかった。`); // ファイター, ソーサラー, ナイト, メディック
                                         } else {
                                             target.statusEffects.stripped = {
                                                 turns: 0
@@ -9322,6 +9775,10 @@
                 if (mode === 'treasure_map') {
                     selectedMembers = ['リリィ'];
                 }
+                if (mode === 'brawling_belles') {
+                    selectedMembers = ['ノエル', 'フローラ'];
+                }
+
 
 
 
@@ -9344,6 +9801,11 @@
 
                 if (mode === 'saint_march') {
                     selectedMembers = ['セレスティア'];
+                }
+
+                if (mode === 'brawling_belles') {
+                    selectedMembers = ['ノエル', 'フローラ'];
+                    initGame(selectedMembers, fromSave);
                 }
 
                 if (mode === 'treasure_map') {
@@ -9548,14 +10010,29 @@
                 let availableBlueprints = allCharacterBlueprints.filter(char => {
                     if (char.role === '聖女' && !clearFlags.saintMarchCleared) return false;
                     if (char.role === 'トレジャーハンター' && !clearFlags.treasureMapCleared) return false;
-                    return true;
-                });
+                    if (char.role === 'アンドロイド' && !clearFlags.brawlingBellesCleared) return false;
+                    if (char.role === 'メイド' && !clearFlags.brawlingBellesCleared) return false;
+                    return true; // ファイター, ソーサラー, ナイト, メディック
+                }); // ファイター, ソーサラー, ナイト, メディック
+
+                // 闘争令嬢クリア済みなら2人を追加
+                if (clearFlags.brawlingBellesCleared) {
+                    // このブロックは不要でした
+                }
 
                 // 聖女クリア済みなら聖女を追加（重複を避ける）
                 if (clearFlags.saintMarchCleared) {
                     const saint = allCharacterBlueprints.find(char => char.role === '聖女');
                     if (saint && !availableBlueprints.some(c => c.name === saint.name)) {
                         availableBlueprints.push(saint);
+                    }
+                    const noel = allCharacterBlueprints.find(char => char.role === 'アンドロイド');
+                    const flora = allCharacterBlueprints.find(char => char.role === 'メイド');
+                    if (noel && !availableBlueprints.some(c => c.name === noel.name)) {
+                        availableBlueprints.push(noel);
+                    }
+                    if (flora && !availableBlueprints.some(c => c.name === flora.name)) {
+                        availableBlueprints.push(flora);
                     }
                 }
 
@@ -9565,7 +10042,7 @@
                     }
 
                     const card = document.createElement('div');
-                    card.className = `p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 transition ${char.role === '聖女' ? 'border-yellow-300 bg-yellow-50' : ''}`;
+                    card.className = `p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 transition ${char.role === '聖女' ? 'border-yellow-300 bg-yellow-50' : ''} ${char.role === 'アンドロイド' || char.role === 'メイド' ? 'border-rose-300 bg-rose-50' : ''}`;
                     card.dataset.name = char.name;
                     card.innerHTML = `
                         <p class="font-bold text-lg text-${char.themeColor}-700">${char.name}</p>
@@ -9685,6 +10162,7 @@
             const debugSaintButton = document.getElementById('debug-saint-button');
             const debugTreasureButton = document.getElementById('debug-treasure-button');
             const debugSummerButton = document.getElementById('debug-summer-button');
+            const debugBellesButton = document.getElementById('debug-belles-button');
 
             function updateDebugButtons() {
                 const clearFlags = JSON.parse(localStorage.getItem('sizeDungeonClearFlags') || '{}');
@@ -9715,6 +10193,15 @@
                     debugSummerButton.textContent = 'サマー未クリア';
                     debugSummerButton.className = 'text-white p-1 rounded bg-red-600 hover:bg-red-700';
                 }
+
+                // 闘争令嬢
+                if (clearFlags.brawlingBellesCleared) {
+                    debugBellesButton.textContent = '令嬢クリア済';
+                    debugBellesButton.className = 'text-white p-1 rounded bg-green-600 hover:bg-green-700';
+                } else {
+                    debugBellesButton.textContent = '令嬢未クリア';
+                    debugBellesButton.className = 'text-white p-1 rounded bg-red-600 hover:bg-red-700';
+                }
             }
 
             function toggleClearFlag(flagName) {
@@ -9728,6 +10215,7 @@
             debugSaintButton.addEventListener('click', () => toggleClearFlag('saintMarchCleared'));
             debugTreasureButton.addEventListener('click', () => toggleClearFlag('treasureMapCleared'));
             debugSummerButton.addEventListener('click', () => toggleClearFlag('summerLiveCleared'));
+            debugBellesButton.addEventListener('click', () => toggleClearFlag('brawlingBellesCleared'));
 
             updateDebugButtons(); // 初期表示
         });
