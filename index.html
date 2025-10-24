@@ -355,8 +355,8 @@
             --char-bg-image: url('sgd_2a.png');
         }
         
-        .bg-char-eriza-a {
-            --char-bg-image: url('sgd_9a.png');
+        .bg-char-beatrice-a {
+            --char-bg-image: url('sgd_5a.png');
         }
         
         .bg-char-koharu-a {
@@ -616,7 +616,7 @@
                     <button data-mode="brawl" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-red-700">武闘の宴</strong><span class="block text-sm text-gray-600">2フロアごとに必ず戦闘が発生する。</span></button>
                     <button data-mode="monster_march" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-red-800">魔物の行軍</strong><span class="block text-sm text-gray-600">全てのフロアで戦闘が発生する。勝利する度にレベルアップし、アイテムを獲得する。50階踏破を目指せ。</span></button>
                     <button data-mode="endless" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-slate-700">無限への挑戦</strong><span class="block text-sm text-gray-600">全滅するまでダンジョンを進み続ける。30階ごとにボスが出現し、倒すと試練が訪れる。</span></button>
-                    <button data-mode="little_panic" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-yellow-600">リトルパニック！</strong><span class="block text-sm text-gray-600">ソーサラー、ドクター、トラブルメーカーが幼い姿に！彼女たちを守るため、シスターが本気を出す。</span></button>
+                    <button data-mode="little_panic" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-yellow-600">リトルパニック！</strong><span class="block text-sm text-gray-600">ソーサラー、アルケミスト、トラブルメーカーが幼い姿に！彼女たちを守るため、シスターが本気を出す。</span></button>
                     <button data-mode="brawling_belles" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-rose-500">闘争令嬢</strong><span class="block text-sm text-gray-600">特別なジョブ「アンドロイド」と「メイド」の2人で30階の踏破を目指す。クリアすると選抜チームに2人が追加される。</span></button>
                     <button data-mode="summer_live" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-sky-500">サマータイム・スペシャルライブ！</strong><span class="block text-sm text-gray-600">リリカ、ユイ、ミコ、リリィの4人で、ビーチと温泉を巡る特別な冒険に出る。60階踏破を目指せ。</span></button>
                     <button data-mode="uninhibited_souls" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-orange-700">奔放な魂</strong><span class="block text-sm text-gray-600">探索中、コマンドで味方を「脱衣」させたり、身長を自由に操作したりできる。</span></button>
@@ -3400,9 +3400,9 @@
                         floor1: [{
                             char: 'ヒカリ',
                             line: '…体が、縮んだ…？'
-                        }, {
-                            char: 'エリザ',
-                            line: 'なんですのこれは！？私の完璧なボディバランスが…子供のようですわ！'
+                        }, { // アルケミストに変更
+                            char: 'ベアトリス',
+                            line: 'あら…？この現象、非常に興味深いですわね。まるで若返りの薬のようですわ。'
                         }, {
                             char: 'コハル',
                             line: 'わーい！ちっちゃくなっちゃいました！なんだか楽しいです！'
@@ -3410,15 +3410,44 @@
                             char: 'オリビア',
                             line: '皆さん…！なんておいたわしい姿に…。大丈夫です、このオリビアが、必ず皆さんを守り抜いてみせます！'
                         }],
+                        floor12: [{
+                            char: 'オリビア',
+                            line: 'コハルさん、転ばないように気をつけて。はい、私の手をどうぞ。'
+                        }, {
+                            char: 'コハル',
+                            line: 'わーい！オリビアさん、ありがとうございます！なんだか、お母さんみたいです！'
+                        }, {
+                            char: 'オリビア',
+                            line: 'まあ…！ふふ、しっかり捕まっていてくださいね。'
+                        }, {
+                            char: 'ヒカリ',
+                            line: '…（じーっとオリビアの服の裾を掴んでいる）'
+                        }, {
+                            char: 'オリビア',
+                            line: 'あらあら、ヒカリさんは甘えん坊さんですね。大丈夫ですよ、ここにいますからね。'
+                        }],
+                        floor24: [{
+                            char: 'ベアトリス',
+                            line: 'オリビアさん、その祈りの力、非常に興味深いですわ。少しだけ、成分を調査させていただけませんこと？'
+                        }, {
+                            char: 'オリビア',
+                            line: 'えっ！？せ、成分と言われましても…これは信仰の力ですから…！'
+                        }, {
+                            char: 'コハル',
+                            line: 'オリビアさん、オリビアさん！あの敵、ハプニングボックスでびっくりさせてもいいですか！？'
+                        }, {
+                            char: 'オリビア',
+                            line: 'まあ、コハルさん！危ないですから、私の後ろに…！もう、皆さん、少しは落ち着いてください！'
+                        }],
                         floor6: [{
                             char: 'オリビア',
                             line: '皆さん、お怪我はありませんか？疲れていませんか？'
                         }, {
                             char: 'ヒカリ',
                             line: '…問題ない。このサイズ、むしろ敵の死角に入りやすい。'
-                        }, {
-                            char: 'エリザ',
-                            line: 'ふふん、わたくしを誰だとお思いですの？この程度の状況、研究対象として興味深いくらいですわ。'
+                        }, { // アルケミストに変更
+                            char: 'ベアトリス',
+                            line: 'ふふ、この視点ですと、世界の構成要素が違って見えますわ。素晴らしい研究材料ですわね。'
                         }, {
                             char: 'コハル',
                             line: 'はい！元気いっぱいです！なんだか冒険がもっと楽しくなりました！'
@@ -3432,9 +3461,9 @@
                         }, {
                             char: 'ヒカリ',
                             line: '…ええ。ここまで来たら、やるしかない。'
-                        }, {
-                            char: 'エリザ',
-                            line: '当然ですわ。わたくしの貴重な研究データを元に戻してもらいませんと。'
+                        }, { // アルケミストに変更
+                            char: 'ベアトリス',
+                            line: 'ええ、もちろんですわ。この貴重な体験のデータ、最後までしっかり収集しませんと。'
                         }, {
                             char: 'コハル',
                             line: 'はい！みんなで力を合わせれば、絶対勝てます！'
@@ -3444,6 +3473,78 @@
                         }]
                     };
 
+                    const saintMarchConversations = {
+                        floor1: [{
+                            char: 'セレスティア',
+                            line: '（…このダンジョンの最深部から、禍々しい気配が溢れ出している…）'
+                        }, {
+                            char: 'セレスティア',
+                            line: '（多くの人々がこの穢れに苦しめられている。私が、止めなければ…）'
+                        }, {
+                            char: 'セレスティア',
+                            line: '（神よ、我が身に宿りし聖なる力で、この地を浄化する使命をお与えください…）'
+                        }, {
+                            char: 'セレスティア',
+                            line: '（たとえこの身が朽ち果てようとも…必ず…！）'
+                        }]
+                    };
+
+                    const treasureMapConversations = {
+                        floor1: [{
+                            char: 'リリィ',
+                            line: 'この地図、絶対にお宝のありかを示してると思ったんだけどな…。'
+                        }, {
+                            char: 'リリィ',
+                            line: 'まさか、こんなに危険なダンジョンだったなんて…。でも、ここまで来たら引き返せないよね！'
+                        }, {
+                            char: 'リリィ',
+                            line: '伝説の秘宝…！待っててね、私が必ず見つけ出してあげるんだから！'
+                        }],
+                        floor6_normal: [{
+                            char: 'リリィ',
+                            line: 'ふぅ、ちょっと疲れてきたかな…。でも、私にはとっておきの力があるんだよね！'
+                        }, {
+                            char: 'リリィ',
+                            line: 'このダンジョンで手に入れた魔物の力…そろそろ使ってみようかな？'
+                        }],
+                        floor6_succubus: [{
+                            char: 'リリィ',
+                            line: 'ふふっ、この姿、力がみなぎってくるわ…。もっと奥まで、私を満足させてくれるお宝はあるのかしら？'
+                        }, {
+                            char: 'リリィ',
+                            line: 'この体、魔力がどんどん湧いてくる…。敵が来ても、魅了してあげるだけよ。'
+                        }],
+                        floor6_fairy: [{
+                            char: 'リリィ',
+                            line: 'この姿、身軽でいいなー！ひらひら飛んで、敵の攻撃なんて当たらないよ！'
+                        }, {
+                            char: 'リリィ',
+                            line: 'ちっちゃいからって、なめないでよね！素早い攻撃で、あっという間に倒しちゃうんだから！'
+                        }],
+                        floor6_alraune: [{
+                            char: 'リリィ',
+                            line: 'この姿は落ち着くなぁ…。自然の力が、私を癒してくれるみたい。'
+                        }, {
+                            char: 'リリィ',
+                            line: '見て、足元からお花が咲いたよ。このダンジョンも、私の力で綺麗にしちゃおうかな。'
+                        }]
+                    };
+
+                    const normalModeConversations = {
+                        floor1: [{
+                            char: 'アカリ',
+                            line: 'よーっし、いよいよダンジョン探検だね！どんなお宝が待ってるか、わくわくする！'
+                        }, {
+                            char: 'ヒカリ',
+                            line: '…アカリ、はしゃぎすぎ。罠があるかもしれない。'
+                        }, {
+                            char: 'シズカ',
+                            line: 'はは、ヒカリの言う通りだよ。でも、アカリの元気も大事だけどね。さあ、気を引き締めていこうか。'
+                        }, {
+                            char: 'ユイ',
+                            line: 'は、はいっ！皆さん、ケガをしないように、私がしっかり見てますから！'
+                        }]
+                    };
 
 
 
@@ -4557,8 +4658,31 @@
                             if (gameState.floor === 0) { // 1階に到達した直後
                                 playConversation(littlePanicConversations.floor1);
                                 // この会話の後、通常のフロア進行処理に進む
-                            } else if (gameState.floor === 5) { // 6階に到達する前
-                                playConversation(littlePanicConversations.floor6);
+                            } else if (gameState.gameMode === 'saint_march') {
+                                if (gameState.floor === 0) {
+                                    playConversation(saintMarchConversations.floor1);
+                                }
+                            } else if (gameState.gameMode === 'treasure_map') {
+                                if (gameState.floor === 0) {
+                                    playConversation(treasureMapConversations.floor1);
+                                }
+                            }
+                            if (gameState.floor === 5) { // 6階に到達する前
+                                if (gameState.gameMode === 'little_panic') {
+                                    playConversation(littlePanicConversations.floor6);
+                                } else if (gameState.gameMode === 'treasure_map') {
+                                    const lily = gameState.party[0]; // リリィは常にパーティの0番目
+                                    const conversationKey = lily.isTransformed ?
+                                        `floor6_${lily.role.toLowerCase()}` :
+                                        'floor6_normal';
+                                    if (treasureMapConversations[conversationKey]) {
+                                        playConversation(treasureMapConversations[conversationKey]);
+                                    }
+                                }
+                            } else if (gameState.floor === 11) { // 12階に到達する前
+                                playConversation(littlePanicConversations.floor12);
+                            } else if (gameState.floor === 23) { // 24階に到達する前
+                                playConversation(littlePanicConversations.floor24);
                             } else if (gameState.floor === 28) { // 29階に到達する前
                                 playConversation(littlePanicConversations.floor29);
                             }
@@ -4568,15 +4692,21 @@
                         gameState.floor++;
                         updateFloorDisplay();
 
-
-
-                        // --- ノエルとフローラのプライベート衣装イベント ---
-                        const hasNoel = gameState.party.some(p => p.name === 'ノエル');
-                        const hasFlora = gameState.party.some(p => p.name === 'フローラ');
-                        if (gameState.floor === 1 && hasNoel && hasFlora && gameState.gameMode !== 'brawling_belles' && !gameState.bellesPrivateCostumeEventTriggered) {
-                            gameState.bellesPrivateCostumeEventTriggered = true; // イベントを一度だけ発生させる
-                            triggerBellesPrivateCostumeEvent();
-                            return; // 専用イベントを発生させたら、以降の処理は行わない
+                        // --- 1階の導入イベント ---
+                        if (gameState.floor === 1) {
+                            // 「はじめから」モードの場合のみ導入会話を再生
+                            if (gameState.gameMode === 'normal') {
+                                playConversation(normalModeConversations.floor1);
+                                return;
+                            }
+                            // 他のモードの1階イベントもここに追加可能
+                            const hasNoel = gameState.party.some(p => p.name === 'ノエル');
+                            const hasFlora = gameState.party.some(p => p.name === 'フローラ');
+                            if (hasNoel && hasFlora && gameState.gameMode !== 'brawling_belles' && !gameState.bellesPrivateCostumeEventTriggered) {
+                                gameState.bellesPrivateCostumeEventTriggered = true;
+                                triggerBellesPrivateCostumeEvent();
+                                return;
+                            }
                         }
 
                         // --- 闘争令嬢 復活イベント ---
@@ -5043,7 +5173,18 @@
                         const shamePilloryEvent = {
                             name: "羞恥の張り付け",
                             func: foundShamePillory,
-                            weight: isAnyoneStripped && gameState.gameMode !== 'summer_live' ? 3 : 0 // サマーライブ中は発生しない
+                            weight: isAnyoneStripped && gameState.gameMode !== 'summer_live' ? 3 : 0, // サマーライブ中は発生しない
+                            // 新しいイベントの定義
+                            liberatedMonsterAttackEvent: {
+                                name: "魔物の奇襲",
+                                func: foundLiberatedMonsterAttack,
+                                weight: 0
+                            },
+                            liberatedTeaseEvent: {
+                                name: "仲間との会話",
+                                func: foundLiberatedTease,
+                                weight: 0
+                            }
                         };
                         const shrineOfPrayerEvent = {
                             name: "祈りのほこら",
@@ -5159,6 +5300,18 @@
                                     weight: 5
                                 });
                             }
+                            // 新しいイベントの定義
+                            events.push({
+                                name: "解放のじゃれあい",
+                                func: foundLiberatedPlay,
+                                weight: 0
+                            });
+                            // 解放状態のキャラがいる場合、特別イベントの発生確率を設定
+                            const isLiberated = gameState.party.some(p => p.isLiberatedStripped);
+                            events.find(e => e.name === "魔物の奇襲").weight = isLiberated ? 5 : 0;
+                            events.find(e => e.name === "仲間との会話").weight = isLiberated ? 5 : 0;
+                            // 「解放のじゃれあい」は解放状態のキャラが2人以上いる場合に発生
+                            events.find(e => e.name === "解放のじゃれあい").weight = gameState.party.filter(p => p.isLiberatedStripped && p.currentHp > 0).length >= 2 ? 5 : 0;
                         }
 
                         const filteredEvents = events.filter(event => event.weight > 0);
@@ -5210,6 +5363,123 @@
                         updatePartyStatus();
                     }
 
+                    async function foundLiberatedMonsterAttack() {
+                        const liberatedMembers = gameState.party.filter(p => p.currentHp > 0 && p.isLiberatedStripped);
+                        if (liberatedMembers.length === 0) {
+                            nothingHappened();
+                            return;
+                        }
+
+                        const victim = liberatedMembers[Math.floor(Math.random() * liberatedMembers.length)];
+                        log(`その無防備な姿に惹かれたのか、物陰から魔物が${victim.name}に襲いかかった！`);
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+
+                        const debuffType = ['atk_down', 'def_down', 'slow'][Math.floor(Math.random() * 3)];
+                        let debuffMessage = '';
+                        if (debuffType === 'atk_down') {
+                            victim.buffs.atk_down = 3;
+                            debuffMessage = '攻撃力が下がってしまった！';
+                        } else if (debuffType === 'def_down') {
+                            victim.buffs.def_down = 3;
+                            debuffMessage = '防御力が下がってしまった！';
+                        } else {
+                            victim.statusEffects.slow = {
+                                turns: 3
+                            };
+                            debuffMessage = '動きが鈍くなってしまった！';
+                        }
+
+                        flashCard(victim, 'red');
+                        log(`${victim.name}はなんとか魔物を追い払ったが、${debuffMessage}`);
+                        updatePartyStatus();
+                    }
+
+                    async function foundLiberatedTease() {
+                        const liberatedMembers = gameState.party.filter(p => p.currentHp > 0 && p.isLiberatedStripped);
+                        const normalMembers = gameState.party.filter(p => p.currentHp > 0 && !p.isLiberatedStripped);
+
+                        if (liberatedMembers.length === 0 || normalMembers.length === 0) {
+                            nothingHappened();
+                            return;
+                        }
+
+                        const victim = liberatedMembers[Math.floor(Math.random() * liberatedMembers.length)];
+                        const teaser = normalMembers[Math.floor(Math.random() * normalMembers.length)];
+
+                        const teaseLines = {
+                            'リリカ': [`あら、${victim.name}ちゃん、大胆だねー！ファンサービス？`, `その格好、ステージ衣装より目立ってるんじゃない？`],
+                            'ユイ': [`きゃっ！${victim.name}さん、そのお姿は…！か、風邪をひいてしまいます！`, `だ、だめです！ちゃんと隠さないと…！`],
+                            'ミコ': [`わー、${victim.name}ちゃん、すごい格好だね！モコがびっくりしてるよ！`, `${victim.name}ちゃん、寒くないの？ミコのマント貸してあげようか？`],
+                            'リリィ': [`へぇ、${victim.name}ちゃん、やるじゃん。冒険にそのくらいの気合は必要だよね！`, `いいよー、その調子！隠すより、見せつけちゃいなよ！`]
+                        };
+
+                        const victimLines = {
+                            'リリカ': [`ち、違うの！これはアクシデントで…！`, `もー、${teaser.name}ちゃんのいじわる！`],
+                            'ユイ': [`ふぇぇ…！${teaser.name}さん、そんなに見ないでくださいぃ…！`, `うぅ…恥ずかしいですぅ…`],
+                            'ミコ': [`わわっ、これはその…！事故なの！`, `モコちゃんまでそんな目で見ないでー！`],
+                            'リリィ': [`こ、これは…！戦術的な判断だから！`, `べ、別に好きでやってるわけじゃないんだからね！`]
+                        };
+
+                        log(`${teaser.name}「${teaseLines[teaser.name][Math.floor(Math.random() * teaseLines[teaser.name].length)]}」`);
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        log(`${victim.name}「${victimLines[victim.name][Math.floor(Math.random() * victimLines[victim.name].length)]}」`);
+                    }
+
+                    async function foundLiberatedPlay() {
+                        const liberatedMembers = gameState.party.filter(p => p.currentHp > 0 && p.isLiberatedStripped);
+                        if (liberatedMembers.length < 2) {
+                            nothingHappened();
+                            return;
+                        }
+
+                        // 2人を選ぶ
+                        const char1 = liberatedMembers[Math.floor(Math.random() * liberatedMembers.length)];
+                        const otherLiberated = liberatedMembers.filter(p => p !== char1);
+                        const char2 = otherLiberated[Math.floor(Math.random() * otherLiberated.length)];
+
+                        const playLines = {
+                            'リリカ': [
+                                `ねえ、${char2.name}ちゃん…。なんだか、体が火照っちゃって…。ちょっとだけ、触ってもいい…？`,
+                                `ふふっ、${char2.name}ちゃんのここ、すっごく敏感なんだね。かわいい…。もっと、いじめてあげたくなっちゃうな…。`
+                            ],
+                            'ユイ': [
+                                `はぅぅ…${char2.name}さん…。なんだか、変な気分ですぅ…。こ、この気持ち、確かめたくて…！`,
+                                `ひゃっ…！そ、そこは…！だめぇ…！でも、${char2.name}さんがしてくれるなら…もっと…。`
+                            ],
+                            'ミコ': [
+                                `わわっ、${char2.name}ちゃん、あったかいね…。モコみたいに、すりすりしたくなっちゃう…。`,
+                                `んんっ…！${char2.name}ちゃん、そこはミコの弱点なんだよぉ…。でも、なんだか気持ちいいかも…。`
+                            ],
+                            'リリィ': [
+                                `へぇ、${char2.name}ちゃん、いい体してんじゃん。ちょっと、冒険の成果、確かめさせてよ。`,
+                                `くっ…！やるじゃない、${char2.name}ちゃん…！でも、私だって負けないんだから…！ほら、こっちも…！`
+                            ]
+                        };
+
+                        const playLinesAll = {
+                            'リリカ': `ふふっ、みんな、とっても大胆…。最高のステージになりそうね…！`,
+                            'ユイ': `はぅぅ…！皆さん、こんな…こんなことになっちゃって…！でも、なんだかドキドキします…！`,
+                            'ミコ': `わーい！みんなおんなじだね！なんだか、秘密のパーティみたいで楽しい！`,
+                            'リリィ': `いいね、いいね！全員でさらけ出してこそ、最高のライブでしょ！さあ、もっとアツくなろうよ！`
+                        };
+
+                        // 4人全員が解放状態の場合、30%の確率で4人イベントに分岐
+                        if (liberatedMembers.length === 4 && Math.random() < 0.3) {
+                            log("解放された4人の衝動が共鳴し、互いを求め合う…！");
+                            await new Promise(resolve => setTimeout(resolve, 2500));
+                            for (const char of liberatedMembers) {
+                                log(`${char.name}「${playLinesAll[char.name]}」`);
+                                await new Promise(resolve => setTimeout(resolve, 2500));
+                            }
+                            return;
+                        }
+
+                        log(`${char1.name}は解放された衝動のまま、${char2.name}の体にそっと触れた…。`);
+                        await new Promise(resolve => setTimeout(resolve, 2500));
+                        log(`${char1.name}「${playLines[char1.name][0]}」`);
+                        await new Promise(resolve => setTimeout(resolve, 2500));
+                        log(`${char2.name}「${playLines[char2.name][1]}」`);
+                    }
 
 
                     function foundTreasure() {
@@ -5287,10 +5557,20 @@
                     function triggerDamageTrap() {
                         const target = getRandomPartyMember();
                         const damage = Math.ceil(target.maxHp * 0.1); // 最大HPの10%ダメージ
-                        const messages = [
-                            `${target.name}は足をもつらせて転んでしまった！`,
-                            `${target.name}は隠された罠を踏んでしまった！`,
-                        ];
+                        let messages;
+
+                        if (target.height <= 10) {
+                            messages = [
+                                `${target.name}は小さすぎて、仲間に気づかれず踏まれてしまった！`,
+                                `${target.name}は小さな水たまりで溺れかけてしまった！`,
+                                `${target.name}は強風に煽られて壁にぶつかってしまった！`,
+                            ];
+                        } else {
+                            messages = [
+                                `${target.name}は足をもつらせて転んでしまった！`,
+                                `${target.name}は隠された罠を踏んでしまった！`,
+                            ];
+                        }
                         log(messages[Math.floor(Math.random() * messages.length)]);
                         dealDamage(target, damage);
                     }
@@ -5342,14 +5622,27 @@
                     function foundClothes() {
                         const strippedMembers = gameState.party.filter(p => p.statusEffects.stripped);
                         if (strippedMembers.length > 0) {
-                            log("一行はきれいな服が落ちているのを見つけた！");
+                            // 衣装状態に応じてメッセージを変更
+                            const firstStrippedMember = strippedMembers[0];
+                            let foundMessage = "一行はきれいな服が落ちているのを見つけた！";
+                            let dressedMessage = "は服を着て、元の状態に戻った！";
+
+                            if (firstStrippedMember.costume === 'beach') {
+                                foundMessage = "一行は替えの水着が落ちているのを見つけた！";
+                                dressedMessage = "は新しい水着に着替えて、元の状態に戻った！";
+                            } else if (firstStrippedMember.costume === 'onsen') {
+                                foundMessage = "一行は替えのタオルが落ちているのを見つけた！";
+                                dressedMessage = "は新しいタオルを巻いて、元の状態に戻った！";
+                            }
+
+                            log(foundMessage);
                             strippedMembers.forEach(member => {
                                 delete member.statusEffects.stripped;
                                 // 解放状態も同時に解除
                                 if (member.isLiberatedStripped) {
                                     delete member.isLiberatedStripped;
                                 }
-                                log(`${member.name}は服を着て、元の状態に戻った！`);
+                                log(`${member.name}${dressedMessage}`);
                                 flashCard(member, 'yellow');
                             });
                         }
@@ -5415,6 +5708,46 @@
                     }
 
                     async function foundBeachLiberation() {
+                        // 10%の確率で全員解放イベントに分岐
+                        if (Math.random() < 0.1) {
+                            celestiaEventTitle.textContent = "ビーチの熱狂";
+                            celestiaEventText.textContent = "ライブの熱気は最高潮に達し、パーティ全体を巻き込もうとしている…！\n\n全員で、全てを解き放ちますか？";
+                            celestiaEventButtons.innerHTML = `
+                                <button id="liberation-all-accept" class="action-button bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg">全員解放する</button>
+                                <button id="liberation-all-decline" class="action-button bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg">理性を保つ</button>
+                            `;
+                            celestiaEventModal.classList.remove('hidden');
+
+                            document.getElementById('liberation-all-accept').onclick = async() => {
+                                celestiaEventModal.classList.add('hidden');
+                                log("パーティ全員がビーチの熱気に身を任せ、解放状態になった！");
+                                await new Promise(resolve => setTimeout(resolve, 2500));
+
+                                // 追加の会話を再生
+                                const partyConvos = conversations['summer_beach_all_liberated'];
+                                const partyConvo = partyConvos[Math.floor(Math.random() * partyConvos.length)];
+                                for (let i = 0; i < partyConvo.chars.length; i++) {
+                                    log(`${partyConvo.chars[i]}「${partyConvo.lines[i]}」`);
+                                    await new Promise(resolve => setTimeout(resolve, 2500));
+                                }
+
+                                gameState.party.forEach(p => { // ファイター, ソーサラー, ナイト, メディック
+                                    if (p.currentHp > 0 && !p.statusEffects.stripped && !p.isLiberatedStripped) {
+                                        p.statusEffects.stripped = {
+                                            turns: 0
+                                        };
+                                        p.isLiberatedStripped = true;
+                                    }
+                                });
+                                updatePartyStatus();
+                            };
+                            document.getElementById('liberation-all-decline').onclick = () => {
+                                celestiaEventModal.classList.add('hidden');
+                                log("一行はなんとか理性を保ち、熱狂を抑え込んだ。");
+                            };
+                            return; // 全員解放イベントを実行したらここで終了
+                        }
+
                         const potentialTargets = gameState.party.filter(p => p.currentHp > 0 && !p.statusEffects.stripped && !p.isLiberatedStripped);
                         if (potentialTargets.length === 0) {
                             nothingHappened();
@@ -5448,6 +5781,46 @@
                     }
 
                     async function foundOnsenLiberation() {
+                        // 10%の確率で全員解放イベントに分岐
+                        if (Math.random() < 0.1) {
+                            celestiaEventTitle.textContent = "温泉の狂騒";
+                            celestiaEventText.textContent = "温泉の心地よさが極限に達し、パーティ全体に伝播していく…！\n\n全員で、身も心も解き放ちますか？";
+                            celestiaEventButtons.innerHTML = `
+                                <button id="liberation-all-accept" class="action-button bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg">全員解放する</button>
+                                <button id="liberation-all-decline" class="action-button bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg">自制心を保つ</button>
+                            `;
+                            celestiaEventModal.classList.remove('hidden');
+
+                            document.getElementById('liberation-all-accept').onclick = async() => {
+                                celestiaEventModal.classList.add('hidden');
+                                log("パーティ全員が温泉の心地よさに身を委ね、解放状態になった！");
+                                await new Promise(resolve => setTimeout(resolve, 2500));
+
+                                // 追加の会話を再生
+                                const partyConvos = conversations['summer_onsen_all_liberated'];
+                                const partyConvo = partyConvos[Math.floor(Math.random() * partyConvos.length)];
+                                for (let i = 0; i < partyConvo.chars.length; i++) {
+                                    log(`${partyConvo.chars[i]}「${partyConvo.lines[i]}」`);
+                                    await new Promise(resolve => setTimeout(resolve, 2500));
+                                }
+
+                                gameState.party.forEach(p => { // ファイター, ソーサラー, ナイト, メディック
+                                    if (p.currentHp > 0 && !p.statusEffects.stripped && !p.isLiberatedStripped) {
+                                        p.statusEffects.stripped = {
+                                            turns: 0
+                                        };
+                                        p.isLiberatedStripped = true;
+                                    }
+                                });
+                                updatePartyStatus();
+                            };
+                            document.getElementById('liberation-all-decline').onclick = () => {
+                                celestiaEventModal.classList.add('hidden');
+                                log("一行はなんとか自制心を保ち、のぼせるのを防いだ。");
+                            };
+                            return; // 全員解放イベントを実行したらここで終了
+                        }
+
                         const potentialTargets = gameState.party.filter(p => p.currentHp > 0 && !p.statusEffects.stripped && !p.isLiberatedStripped);
                         if (potentialTargets.length === 0) {
                             nothingHappened();
@@ -10198,9 +10571,9 @@
 
                 // サマータイム・スペシャルライブ！モードの初期設定
                 if (mode === 'summer_live') {
-                    selectedMembers = ['リリカ', 'ユイ', 'ミコ', 'リリィ']; // ファイター, ソーサラー, ナイト, メディック
+                    selectedMembers = ['リリカ', 'ユイ', 'ミコ', 'リリィ'];
                 } else if (mode === 'little_panic') {
-                    selectedMembers = ['ヒカリ', 'エリザ', 'コハル', 'オリビア'];
+                    selectedMembers = ['ヒカリ', 'ベアトリス', 'コハル', 'オリビア'];
                 }
 
                 initGame(selectedMembers, fromSave);
@@ -10227,15 +10600,15 @@
                                     // 立ち絵変更
                                     char.bgClass = 'bg-char-olivia-a';
                                     break;
-                                case 'ソーサラー':
-                                case 'ドクター':
+                                case 'ソーサラー': // ドクターからアルケミストに変更
+                                case 'アルケミスト':
                                 case 'トラブルメーカー':
                                     // 身長と初期身長を-30
                                     char.height -= 30;
                                     char.initialHeight -= 30;
                                     // 立ち絵変更
                                     if (char.role === 'ソーサラー') char.bgClass = 'bg-char-hikari-a';
-                                    if (char.role === 'ドクター') char.bgClass = 'bg-char-eriza-a';
+                                    if (char.role === 'アルケミスト') char.bgClass = 'bg-char-beatrice-a';
                                     if (char.role === 'トラブルメーカー') char.bgClass = 'bg-char-koharu-a';
                                     break;
                             }
@@ -10361,12 +10734,12 @@
             // リトルパニックモードのスキル定義
             const littlePanicSkills = {
                 holySphere: {
-                    name: 'ホーリースフィア',
-                    cost: 40,
-                    power: 2.5,
+                    name: 'ホーリースフィア', // ファイター, ソーサラー, ナイト, メディック
+                    cost: 30,
+                    power: 3.5,
                     type: 'magic',
                     targetType: 'enemies',
-                    description: '敵全体に超高威力の聖なる魔法ダメージを与える。'
+                    description: '敵全体に高威力の聖なる魔法ダメージを与える。'
                 },
                 heavensJudgment: {
                     name: '天の裁き',
