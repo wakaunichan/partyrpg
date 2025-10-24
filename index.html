@@ -430,6 +430,11 @@
                     <button id="rule-button" class="action-button bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg text-lg">ルール説明</button>
                 </div>
             </div>
+            <div id="debug-controls" class="absolute bottom-4 right-4 bg-black/50 p-2 rounded-lg flex flex-col gap-2 text-xs">
+                <button id="debug-saint-button" class="text-white p-1 rounded"></button>
+                <button id="debug-treasure-button" class="text-white p-1 rounded"></button>
+                <button id="debug-summer-button" class="text-white p-1 rounded"></button>
+            </div>
         </div>
 
         <!-- ゲーム画面 -->
@@ -4158,6 +4163,20 @@
                         const floor = gameState.floor;
                         const mode = gameState.gameMode;
 
+                        // 特別な衣装変更イベントのチェック
+                        if (floor === 1) {
+                            const clearFlags = JSON.parse(localStorage.getItem('sizeDungeonClearFlags') || '{}');
+                            const partyNames = gameState.party.map(p => p.name).sort();
+                            const requiredNames = ['リリカ', 'ユイ', 'ミコ', 'リリィ'].sort();
+                            const isSpecialParty = JSON.stringify(partyNames) === JSON.stringify(requiredNames);
+
+                            if (clearFlags.summerLiveCleared && isSpecialParty && mode !== 'summer_live') {
+                                triggerSpecialCostumeEvent();
+                                return; // 専用イベントを発生させたら、以降の処理は行わない
+                            }
+                        }
+
+
                         // --- ボス戦の判定 ---
                         // 聖女パーティでの29階イベント (サマーライブ中は発生しない)
                         const hasCelestia = gameState.party.some(p => p.role === '聖女');
@@ -4295,6 +4314,79 @@
                         updatePartyStatus();
                         // 次のフロアへ進むボタンなどを再表示
                         dungeonCommands.classList.remove('hidden');
+                    }
+
+                    function changeCostume(type) {
+                        const costumeMap = {
+                            'beach': {
+                                'リリカ': 'bg-char-ririka-a',
+                                'ユイ': 'bg-char-yui-a',
+                                'ミコ': 'bg-char-miko-a',
+                                'リリィ': 'bg-char-lily-a', // 通常リリィの水着
+                                'サキュバス': 'bg-char-lily-succubus-a',
+                                'フェアリー': 'bg-char-lily-fairy-a',
+                                'アルラウネ': 'bg-char-lily-alraune-a'
+                            },
+                            'onsen': {
+                                'リリカ': 'bg-char-ririka-b',
+                                'ユイ': 'bg-char-yui-b',
+                                'ミコ': 'bg-char-miko-b',
+                                'リリィ': 'bg-char-lily-b', // 通常リリィの温泉
+                                'サキュバス': 'bg-char-lily-succubus-b',
+                                'フェアリー': 'bg-char-lily-fairy-b',
+                                'アルラウネ': 'bg-char-lily-alraune-b'
+                            }
+                        };
+
+                        const selectedCostumes = costumeMap[type];
+                        if (!selectedCostumes) return;
+
+                        gameState.party.forEach(char => {
+                            if (selectedCostumes[char.name]) {
+                                char.bgClass = selectedCostumes[char.name];
+                            }
+                            // リリィの変身形態にも適用
+                            if (char.name === 'リリィ' && char.transforms) {
+                                if (selectedCostumes['サキュバス']) char.transforms.succubus.bgClass = selectedCostumes['サキュバス'];
+                                if (selectedCostumes['フェアリー']) char.transforms.fairy.bgClass = selectedCostumes['フェアリー'];
+                                if (selectedCostumes['アルラウネ']) char.transforms.alraune.bgClass = selectedCostumes['アルラウネ'];
+                            }
+                        });
+
+                        log(`パーティは思い出の${type === 'beach' ? '水着' : '温泉スタイル'}に着替えた！`);
+                        updatePartyStatus();
+                        celestiaEventModal.classList.add('hidden');
+
+                        // 通常のイベントフローを再開
+                        if (gameState.gameMode === 'fixed_path') {
+                            triggerSelectableEvent();
+                        } else {
+                            triggerRandomEvent();
+                        }
+                    }
+
+                    function triggerSpecialCostumeEvent() {
+                        celestiaEventTitle.textContent = "特別な絆";
+                        celestiaEventText.textContent = "この4人でいると、あの夏の特別な冒険を思い出す…\n\n彼女たちの絆が共鳴し、思い出の姿に変わることができるようだ。";
+                        celestiaEventButtons.innerHTML = `
+                            <button id="costume-beach" class="action-button bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg shadow-lg">水着になる</button>
+                            <button id="costume-onsen" class="action-button bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-lg shadow-lg">温泉スタイルになる</button>
+                            <button id="costume-cancel" class="action-button bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg shadow-lg">何もしない</button>
+                        `;
+                        celestiaEventModal.classList.remove('hidden');
+
+                        document.getElementById('costume-beach').onclick = () => changeCostume('beach');
+                        document.getElementById('costume-onsen').onclick = () => changeCostume('onsen');
+                        document.getElementById('costume-cancel').onclick = () => {
+                            celestiaEventModal.classList.add('hidden');
+                            log("一行は思い出を胸に、冒険を続ける。");
+                            // 通常のイベントフローを再開
+                            if (gameState.gameMode === 'fixed_path') {
+                                triggerSelectableEvent();
+                            } else {
+                                triggerRandomEvent();
+                            }
+                        };
                     }
 
                     function triggerSelectableEvent() {
@@ -5766,7 +5858,6 @@
 
                         // HPが0以下のキャラクターは行動できない
                         if (currentActor.currentHp <= 0) {
-                            log(`${currentActor.name}は力尽きているため、行動できない。`);
                             gameState.currentTurnIndex = (gameState.currentTurnIndex + 1) % gameState.turnOrder.length;
                             nextTurn();
                             return;
@@ -8318,6 +8409,10 @@
                             return; // ファイター, ソーサラー, ナイト, メディック
                         } else if (gameState.gameMode === 'summer_live' && gameState.floor === 60) {
                             showModal("ライブ大成功！", "おめでとう！あなたはビーチと温泉でのスペシャルライブを大成功させ、ダンジョンを制覇しました！彼女たちの夏の思い出は、最高の形で幕を閉じました。");
+                            // クリアフラグを保存
+                            const clearFlags = JSON.parse(localStorage.getItem('sizeDungeonClearFlags') || '{}');
+                            clearFlags.summerLiveCleared = true;
+                            localStorage.setItem('sizeDungeonClearFlags', JSON.stringify(clearFlags));
                             gameState.gameOver = true;
                             return;
                         }
@@ -9585,6 +9680,56 @@
                 }
             }
             checkSaveData(); // 初期ロード時にセーブデータを確認
+
+            // --- デバッグ用クリアフラグ操作 ---
+            const debugSaintButton = document.getElementById('debug-saint-button');
+            const debugTreasureButton = document.getElementById('debug-treasure-button');
+            const debugSummerButton = document.getElementById('debug-summer-button');
+
+            function updateDebugButtons() {
+                const clearFlags = JSON.parse(localStorage.getItem('sizeDungeonClearFlags') || '{}');
+
+                // 聖女
+                if (clearFlags.saintMarchCleared) {
+                    debugSaintButton.textContent = '聖女クリア済';
+                    debugSaintButton.className = 'text-white p-1 rounded bg-green-600 hover:bg-green-700';
+                } else {
+                    debugSaintButton.textContent = '聖女未クリア';
+                    debugSaintButton.className = 'text-white p-1 rounded bg-red-600 hover:bg-red-700';
+                }
+
+                // 秘宝
+                if (clearFlags.treasureMapCleared) {
+                    debugTreasureButton.textContent = '秘宝クリア済';
+                    debugTreasureButton.className = 'text-white p-1 rounded bg-green-600 hover:bg-green-700';
+                } else {
+                    debugTreasureButton.textContent = '秘宝未クリア';
+                    debugTreasureButton.className = 'text-white p-1 rounded bg-red-600 hover:bg-red-700';
+                }
+
+                // サマー
+                if (clearFlags.summerLiveCleared) {
+                    debugSummerButton.textContent = 'サマークリア済';
+                    debugSummerButton.className = 'text-white p-1 rounded bg-green-600 hover:bg-green-700';
+                } else {
+                    debugSummerButton.textContent = 'サマー未クリア';
+                    debugSummerButton.className = 'text-white p-1 rounded bg-red-600 hover:bg-red-700';
+                }
+            }
+
+            function toggleClearFlag(flagName) {
+                const clearFlags = JSON.parse(localStorage.getItem('sizeDungeonClearFlags') || '{}');
+                clearFlags[flagName] = !clearFlags[flagName];
+                localStorage.setItem('sizeDungeonClearFlags', JSON.stringify(clearFlags));
+                updateDebugButtons();
+                showSelectTeamModal(gameState.gameMode); // 変更を反映させるためにキャラクター選択モーダルを再描画
+            }
+
+            debugSaintButton.addEventListener('click', () => toggleClearFlag('saintMarchCleared'));
+            debugTreasureButton.addEventListener('click', () => toggleClearFlag('treasureMapCleared'));
+            debugSummerButton.addEventListener('click', () => toggleClearFlag('summerLiveCleared'));
+
+            updateDebugButtons(); // 初期表示
         });
     </script>
 </body>
