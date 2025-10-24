@@ -2051,6 +2051,27 @@
                             value: 15,
                             description: 'サクヤの最大HPが15上がった！'
                         },
+                        'noel_axe_parts': {
+                            name: '斧の強化パーツ',
+                            targetRole: 'アンドロイド',
+                            stat: 'atk',
+                            value: 5,
+                            description: 'ノエルの攻撃力が5上がった！'
+                        },
+                        'noel_self_repair': {
+                            name: '自己修復ユニット',
+                            targetRole: 'アンドロイド',
+                            stat: 'maxHp',
+                            value: 20,
+                            description: 'ノエルの最大HPが20上がった！'
+                        },
+                        'flora_knuckles': {
+                            name: '刺繍入りのナックル',
+                            targetRole: 'メイド',
+                            stat: 'atk',
+                            value: 6,
+                            description: 'フローラの攻撃力が6上がった！'
+                        },
 
                     };
 
@@ -3176,6 +3197,12 @@
                             pair_コハル: ["コハルさん、あなたの行動は予測不可能です。常にバックアップの準備をしておきます。", "ハプニング、ですか。私の予測モデルを更新する必要がありそうですね。"],
                             pair_オリビア: ["オリビアさん、あなたの祈りには、特殊なエネルギーを観測します。解析の価値があります。", "その力、味方の精神状態を安定させる効果があるようです。"],
                             pair_セレスティア: ["セレスティアさん、あなたから発せられるエネルギー、聖属性として分類しました。非常に高レベルです。", "あなたの使命、私にも手伝わせてください。"],
+                            // プライベート衣装時のセリフ
+                            private_costume: ["この服装はリラックスできますね。戦闘には不向きですが、問題ありません。", "フローラが選んでくれた服です。どうでしょうか、似合っていますか？", "たまには、こうして戦いを忘れる時間も必要だと、マスターから教わりました。"],
+                            private_costume_lowHp: ["警告。普段着での被弾は、ボディへのダメージが大きくなります。", "この服が汚れてしまうのは、少しだけ…残念です。", "問題ありません。自己修復機能は正常に作動しています。"],
+                            private_costume_shrunk: ["この服のまま縮小しましたか。布の量が多くて動きにくいですね。", "フローラに見られたら、可愛いと言ってくれるでしょうか。", "このサイズですと、服に埋もれてしまいそうです。"],
+                            private_costume_grown: ["この服のまま巨大化しました。少し、窮屈ですね。", "フローラ、見てください。この服が、まるで子供服のようです。", "このサイズですと、少し動くだけで服が破れてしまいそうです。"],
+                            private_costume_stripped: ["外部装甲のパージを確認。…いえ、これは服でしたか。問題ありません。", "布がなくなりました。より動きやすくなりましたね。", "フローラに、新しい服を選んでもらわなければなりませんね。"],
                         },
                         'フローラ': {
                             default: ["皆様、ごきげんよう。わたくしが誠心誠意お仕えいたしますわ。", "まあ、このような場所にも可憐なお花が咲いているのですね。", "皆様、お茶の時間はいかがかしら？わたくしがお淹れしますわ。", "ノエル様、お怪我はございませんか？いつでもお申し付けくださいませ。", "あらあら、少し空気が淀んでいますわね。ハンカチはいかが？"],
@@ -3217,6 +3244,12 @@
                             pair_コハル: ["コハル様、見ていて飽きませんわ。ふふ、次はどんな素敵なことを見せてくださるのかしら。", "お怪我はありませんこと？わたくしが手当ていたしますわ。"],
                             pair_オリビア: ["オリビア様、あなたの祈りはとても温かいですわね。わたくしの心まで洗われるようです。", "わたくしも、あなた様のように清らかな心を持ちたいものです。"],
                             pair_セレスティア: ["セレスティア様、そのお姿、まるで絵画のようですわ。とてもお美しい…。", "わたくしに、何かできることはございませんか？何なりとお申し付けください。"],
+                            // プライベート衣装時のセリフ
+                            private_costume: ["このお洋服、いかがかしら？ノエル様とお揃いで選んだものですの。", "たまにはこうして羽を伸ばすのも、悪くありませんわね。ふふっ。", "この格好ですと、少しだけおしとやかになれる気がいたしますわ。"],
+                            private_costume_lowHp: ["きゃっ！お気に入りのドレスが汚れてしまいましたわ…！", "ふぅ…この格好ですと、少し動きづらいですわね…。", "大丈夫ですわ。これくらい、はしたなくなんてありませんもの。"],
+                            private_costume_shrunk: ["まあ、このお洋服のまま小さくなってしまいましたわ。まるでお人形さんのお洋服ですわね。", "ふふ、この姿でノエル様とお茶会をしたら、きっと楽しいですわ。", "ドレスの裾が長すぎて、歩くたびに踏んでしまいますわ。"],
+                            private_costume_grown: ["まあ！こんなに大きくなっては、この可愛らしいドレスが台無しですわ！", "は、はしたないですわ…！スカートが短すぎます…！", "このお姿、ノエル様には見せられませんわ…！"],
+                            private_costume_stripped: ["きゃあああっ！こ、このお洋服まで…！もう、何もありませんわ！", "ひどいですわ！ノエル様とお揃いのお洋服でしたのに…！", "ふぇぇ…！み、見ないでくださいまし…！お嫁にいけませんわ…！"],
                         },
                     };
 
@@ -3824,6 +3857,7 @@
                             // allyShrunk_100 のようなキーが存在しない場合、allyShrunk -> shrunk -> default の順にフォールバック
                             let lines = charConvos[sit] ||
                                 (sit.startsWith('summer_beach_costume') && charConvos['summer_beach_costume']) ||
+                                (sit.startsWith('private_costume') && charConvos['private_costume']) ||
                                 (sit.startsWith('summer_onsen_costume') && charConvos['summer_onsen_costume']) ||
                                 (sit === 'fairy_shrunk' && charConvos['fairy_shrunk']) ||
                                 (sit === 'stripped_shrunk' && charConvos['stripped_shrunk']) ||
@@ -5665,6 +5699,22 @@
                                 }
                                 addItemToInventory(foundItemIdForHunter);
                                 message += ` (${itemBlueprints[foundItemIdForHunter].name} を手に入れた)`;
+                                break;
+                            case 'アンドロイド':
+                                message = "アンドロイドの祈りが、ほこらのシステムに共鳴する！";
+                                await new Promise(resolve => setTimeout(resolve, 1500));
+                                message += " システムが最適化され、全員のMPが少し回復した！";
+                                for (const p of gameState.party) {
+                                    if (p.currentHp > 0) await animateStatChange(p, 'mp', Math.ceil(p.maxMp * 0.3), 'increase');
+                                }
+                                break;
+                            case 'メイド':
+                                message = "フローラの清らかな祈りに応え、ほこらの周りに可憐な花が咲き乱れた！";
+                                await new Promise(resolve => setTimeout(resolve, 1500));
+                                message += " 花々の癒やしの香りで、全員のHPが少し回復した！";
+                                for (const p of gameState.party) {
+                                    if (p.currentHp > 0) await animateStatChange(p, 'hp', Math.ceil(p.maxHp * 0.3), 'increase');
+                                }
                                 break;
                         }
                         log(message);
