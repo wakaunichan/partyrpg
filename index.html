@@ -885,6 +885,7 @@
                         triggeredSpecialConvos: [],
                         dungeonBackground: DEFAULT_DUNGEON_BG, // 背景画像をgameStateで管理
                         bellesPrivateCostumeEventTriggered: false, // 闘争令嬢プライベート衣装イベント用フラグ
+                        bellesReviveEventTriggered: false, // 闘争令嬢復活イベント用フラグ
                     };
 
                     const allCharacterBlueprints = [{
@@ -3190,6 +3191,7 @@
                             pair_ユイ: ["ユイさん、いつもありがとうございます。あなたの回復機能は、パーティの生命線です。", "あなたの優しさは、非論理的ですが…心地よいものです。"],
                             pair_ベアトリス: ["ベアトリスさん、あなたの知識、私のデータベースにもいくつか無いものがありますね。興味深いです。", "その薬、成分をスキャンさせていただいても？"],
                             pair_リリカ: ["リリカさん、あなたのパフォーマンスは、味方の士気を高める効果がありますね。データとして有用です。", "その歌の周波数、私の聴覚センサーに心地よいです。"],
+                            pair_フローラ: ["フローラ、このダンジョンの空気は汚染されています。あなたの健康が心配です。", "フローラ、戦闘終了後、新しいお花の種を探しに行きましょう。", "フローラ、疲れたらすぐに言ってください。私が代わりますから。", "フローラ、あなたの作るお菓子は、私のエネルギー効率を向上させます。"],
                             pair_サクヤ: ["サクヤさん、その剣技、無駄のない動きです。戦闘データとして非常に参考になります。", "あなたの集中力、私も見習うべき点です。"],
                             pair_シャオメイ: ["シャオメイさん、その小さな体から、驚異的なパワーが出力されていますね。構造を解析したいです。", "エネルギー消費が激しいようですね。補給は計画的に。"],
                             pair_エリザ: ["エリザさん、あなたの医学知識、私のメンテナンスに応用できるかもしれません。情報交換をしませんか。", "私を検体として見るのはやめていただきたい。私は自律したアンドロイドです。"],
@@ -3910,6 +3912,7 @@
                         gameState.gameOver = false; // ゲームオーバーフラグをリセット
                         gameState.triggeredSpecialConvos = []; // 発生済み会話をリセット
                         gameState.bellesPrivateCostumeEventTriggered = false; // イベントフラグをリセット
+                        gameState.bellesReviveEventTriggered = false; // 復活イベントフラグをリセット
                         const blueprintsToUse = selectedMembers ?
                             selectedMembers.map(name => allCharacterBlueprints.find(c => c.name === name)) :
                             characterBlueprints;
@@ -4446,6 +4449,38 @@
                             return; // 専用イベントを発生させたら、以降の処理は行わない
                         }
 
+                        // --- 闘争令嬢 復活イベント ---
+                        if (gameState.gameMode === 'brawling_belles' && !gameState.bellesReviveEventTriggered) {
+                            const noel = gameState.party.find(p => p.name === 'ノエル');
+                            const flora = gameState.party.find(p => p.name === 'フローラ');
+                            if (noel && flora) {
+                                if ((noel.currentHp <= 0 && flora.currentHp > 0) || (flora.currentHp <= 0 && noel.currentHp > 0)) {
+                                    triggerBellesReviveEvent(noel, flora);
+                                    return; // 専用イベントを発生させたら、以降の処理は行わない
+                                }
+                            }
+                        }
+
+
+                        // --- 闘争令嬢 6階イベント ---
+                        if (gameState.floor === 6 && gameState.gameMode === 'brawling_belles') {
+                            const noel = gameState.party.find(p => p.name === 'ノエル');
+                            const flora = gameState.party.find(p => p.name === 'フローラ');
+                            if (noel && flora && noel.currentHp > 0 && flora.currentHp > 0) {
+                                if ((noel.height === 1 && flora.height !== 1) || (flora.height === 1 && noel.height !== 1)) {
+                                    triggerBellesFloor6Event(noel, flora);
+                                    return; // 専用イベントを発生させたら、以降の処理は行わない
+                                }
+                            }
+                        }
+
+
+                        // --- 闘争令嬢 29階イベント ---
+                        if (gameState.floor === 29 && gameState.gameMode === 'brawling_belles') {
+                            triggerBellesFloor29Event();
+                            return; // 専用イベントを発生させたら、以降の処理は行わない
+                        }
+
 
                         const floor = gameState.floor;
                         const mode = gameState.gameMode;
@@ -4489,6 +4524,12 @@
                         // サマータイム・スペシャルライブ！のボス戦
                         if (mode === 'summer_live' && (floor === 30 || floor === 60)) {
                             startBattle(true);
+                            return;
+                        }
+
+                        // 闘争令嬢モードの30階ボス
+                        if (mode === 'brawling_belles' && floor === 30) {
+                            startBattle(true, 'phantom_hero');
                             return;
                         }
 
@@ -4709,6 +4750,114 @@
                             log("一行は休憩を終え、気を引き締めて冒険を続ける。");
                             triggerRandomEvent(); // 通常のイベントフローを再開
                         };
+                    }
+
+                    async function triggerBellesFloor29Event() {
+                        dungeonCommands.classList.add('hidden'); // コマンドを隠す
+                        const noel = gameState.party.find(p => p.name === 'ノエル');
+                        const flora = gameState.party.find(p => p.name === 'フローラ');
+
+                        if (!noel || !flora || noel.currentHp <= 0 || flora.currentHp <= 0) {
+                            log("決戦を前に、二人のうちどちらかが倒れている…。");
+                            dungeonCommands.classList.remove('hidden');
+                            return;
+                        }
+
+                        log("ノエル「フローラ、いよいよですね。この先に、元凶がいます」");
+                        await new Promise(resolve => setTimeout(resolve, 2500));
+                        log("フローラ「はい、ノエル様。わたくしたちの力を合わせれば、きっと…！」");
+                        await new Promise(resolve => setTimeout(resolve, 2500));
+                        log("ノエル「ええ。必ず、このダンジョンを制圧します」");
+                        await new Promise(resolve => setTimeout(resolve, 2500));
+
+                        // 身長比較による会話分岐
+                        const heightDifference = noel.height - flora.height;
+
+                        if (heightDifference > 50) { // ノエルが50cm以上大きい
+                            log("ノエル「…それにしても、フローラ。あなたは本当に小さいですね。愛らしいです」");
+                            await new Promise(resolve => setTimeout(resolve, 2500));
+                            log("フローラ「まあ、ノエル様。からかわないでくださいまし。ノエル様が大きすぎるのですわ」");
+                            await new Promise(resolve => setTimeout(resolve, 2500));
+                            log("ノエル「ふふ、そうかもしれませんね。ですが、この体格差があるからこそ、私はあなたを完璧に守れます」");
+                        } else if (heightDifference < -50) { // フローラが50cm以上大きい
+                            log("フローラ「ふふっ。ノエル様、わたくしの方が見晴らしが良いですわね」");
+                            await new Promise(resolve => setTimeout(resolve, 2500));
+                            log("ノエル「…少し、悔しいです。ですが、フローラが頼もしいのは良いことです」");
+                            await new Promise(resolve => setTimeout(resolve, 2500));
+                            log("フローラ「まあ、戯れですわ。どんな姿であろうと、わたくしはノエル様にお仕えするメイドですもの」");
+                        } else { // 身長差が50cm以内
+                            log("ノエル「フローラ。いつの間にか、あなたと私の目線が同じくらいになりましたね」");
+                            await new Promise(resolve => setTimeout(resolve, 2500));
+                            log("フローラ「本当ですわね。なんだか、本当の姉妹のようですわ」");
+                            await new Promise(resolve => setTimeout(resolve, 2500));
+                            log("ノエル「姉妹…悪くない響きです。さあ、最後の戦いです。姉妹の力、見せてあげましょう」");
+                        }
+
+                        await new Promise(resolve => setTimeout(resolve, 2500));
+                        log("二人の決意が共鳴し、HPとMPが全回復した！");
+                        await animateStatChange(noel, 'hp', noel.maxHp, 'increase');
+                        await animateStatChange(flora, 'hp', flora.maxHp, 'increase');
+                        await animateStatChange(noel, 'mp', noel.maxMp, 'increase');
+                        await animateStatChange(flora, 'mp', flora.maxMp, 'increase');
+
+                        dungeonCommands.classList.remove('hidden'); // コマンドを再表示
+                    }
+
+                    async function triggerBellesFloor6Event(noel, flora) {
+                        dungeonCommands.classList.add('hidden'); // コマンドを隠す
+
+                        if (noel.height === 1) {
+                            // ノエルが小さい場合の会話
+                            log("フローラ「まあ、ノエル様！なんて可愛らしいお姿に…！」");
+                            await new Promise(resolve => setTimeout(resolve, 2500));
+                            log("ノエル「…フローラ、あまりジロジロ見ないでください。これは戦術的縮小です」");
+                            await new Promise(resolve => setTimeout(resolve, 2500));
+                            log("フローラ「ふふ、わかっておりますわ。ですが、思わずポケットに入れてしまいたくなるくらい愛らしいですもの」");
+                            await new Promise(resolve => setTimeout(resolve, 2500));
+                            log("フローラ「さあ、わたくしの手の中に。はぐれてしまったら大変ですわ」");
+                        } else {
+                            // フローラが小さい場合の会話
+                            log("ノエル「フローラ、そのサイズは…危険です。私の手のひらに乗っていてください」");
+                            await new Promise(resolve => setTimeout(resolve, 2500));
+                            log("フローラ「きゃっ、ノエル様！だ、大丈夫ですわ！わたくし、これでも戦えますもの！」");
+                            await new Promise(resolve => setTimeout(resolve, 2500));
+                            log("ノエル「いえ、許可できません。万が一あなたに何かあれば、私は…」");
+                            await new Promise(resolve => setTimeout(resolve, 2500));
+                            log("ノエル「さあ、こちらへ。マスターの命令です」");
+                        }
+
+                        dungeonCommands.classList.remove('hidden'); // コマンドを再表示
+                    }
+
+                    async function triggerBellesReviveEvent(noel, flora) {
+                        gameState.bellesReviveEventTriggered = true; // イベント発生フラグを立てる
+                        dungeonCommands.classList.add('hidden');
+
+                        const fallenChar = noel.currentHp <= 0 ? noel : flora;
+                        const survivor = noel.currentHp > 0 ? noel : flora;
+
+                        log(`${survivor.name}は倒れた${fallenChar.name}を必死に揺り動かす…`);
+                        await new Promise(resolve => setTimeout(resolve, 2500));
+
+                        fallenChar.currentHp = 1;
+                        updatePartyStatus(); // HP1で復活したのをUIに反映
+
+                        log(`${fallenChar.name}「…うぅん…」`);
+                        await new Promise(resolve => setTimeout(resolve, 2500));
+
+                        if (fallenChar.name === 'ノエル') {
+                            // ノエルが倒れていた場合
+                            log(`フローラ「ノエル様！よかった…！目が覚めたのですね…！」`);
+                            await new Promise(resolve => setTimeout(resolve, 2500));
+                            log(`フローラ「わたくし、ノエル様がこのまま目覚めないのかと…！もう、無茶はなさらないでくださいまし…！」`);
+                        } else {
+                            // フローラが倒れていた場合
+                            log(`ノエル「フローラ！よかった…意識が戻ったのですね」`);
+                            await new Promise(resolve => setTimeout(resolve, 2500));
+                            log(`ノエル「あなたが倒れた時、私の全機能が停止するかと思いました…。もう、私の側を離れないでください」`);
+                        }
+
+                        dungeonCommands.classList.remove('hidden');
                     }
 
                     function triggerSelectableEvent() {
@@ -7577,8 +7726,11 @@
                                 { // メンテナンス
                                     log(`${caster.name}は${skill.name}を開始した！`);
                                     await animateStatChange(caster, 'hp', caster.maxHp, 'increase');
-                                    caster.statusEffects.paralysis = true; // 1ターン麻痺
-                                    log(`${caster.name}のHPが全回復したが、システムがオーバーヒートし麻痺してしまった！`);
+                                    await animateStatChange(caster, 'mp', caster.maxMp, 'increase');
+                                    caster.statusEffects.paralysis = {
+                                        turns: 2
+                                    }; // 1ターン麻痺(次のターンは動けない)
+                                    log(`${caster.name}のHPとMPが全回復したが、システムがオーバーヒートし麻痺してしまった！`);
                                     break;
                                 }
                             case 'hp_cost_growth':
