@@ -1737,28 +1737,30 @@
                                 power: 2.8,
                                 type: 'hp_cost_physical',
                                 targetType: 'enemy',
-                                description: 'HPを消費し、敵単体に斧による強力な一撃を見舞う。'
+                                description: 'HPを20消費し、敵単体に斧による強力な一撃を見舞う。'
                             }, {
                                 name: 'メンテナンス',
                                 cost: 0,
                                 type: 'self_heal_and_paralyze',
                                 targetType: 'self',
                                 description: '自身のHPを全回復するが、1ターン麻痺状態になる。'
-                            }, {
+                            }],
+                            unlockableSkill: {
                                 name: 'バンプアップ',
                                 cost: 50, // HP cost
                                 power: 100, // growth amount
                                 type: 'hp_cost_growth',
                                 targetType: 'self',
                                 description: 'HPを大きく消費し、自身の身長を爆発的に伸ばす。'
-                            }, {
+                            },
+                            unlockableSkillLv4: {
                                 name: 'オーバーブースト',
                                 cost: 10, // MP cost
                                 power: 2.0,
                                 type: 'mp_burst_height_scaling',
                                 targetType: 'enemies',
                                 description: '敵全体に大ダメージを与える。身長が高いほど威力に特大ボーナス。MPを全て消費する。'
-                            }],
+                            },
                             bgClass: 'bg-char-noel',
                             themeColor: 'rose',
                         }, {
@@ -1783,19 +1785,21 @@
                                 type: 'height_transfer',
                                 targetType: 'ally',
                                 description: '味方ひとりに、それ以外の味方全員の身長を移動させる。'
-                            }, {
+                            }],
+                            unlockableSkill: {
                                 name: 'ティータイム',
                                 cost: 10,
                                 type: 'party_cure_all',
                                 targetType: 'party',
                                 description: '味方全体の毒、麻痺、鈍化、脱衣を解除する。'
-                            }, {
+                            },
+                            unlockableSkillLv4: {
                                 name: 'マジカルエナジー',
                                 cost: 30,
                                 type: 'maid_special_buff',
                                 targetType: 'self',
                                 description: '自身に複数の強化効果を付与し、身長が初期値より低い場合は元に戻す。'
-                            }],
+                            },
                             bgClass: 'bg-char-flora',
                             themeColor: 'emerald',
                         },
@@ -6021,7 +6025,7 @@
                             log(`${target.name}は挑発でビームの威力を弱めた！`);
                         }
                         animateStatChange(target, 'height', -shrinkAmount, 'decrease');
-                        flashCard(target, 'yellow');
+                        flashCard(target, 'yellow', 'enemy');
                         log(`${enemy.name}は${target.name}に縮小ビームを放った！身長が${shrinkAmount}cm縮んだ！`);
                         updatePartyStatus();
                     }
@@ -6125,7 +6129,7 @@
                                 log(`${p.name}は不思議な力で守られ、体の変化を防いだ！`);
                                 continue;
                             }
-                            await animateStatChange(p, 'height', -shrinkAmount, 'decrease');
+                            await animateStatChange(p, 'height', -shrinkAmount, 'decrease', 'enemy');
                         }
                     }
 
@@ -7581,12 +7585,19 @@
                                 { // バンプアップ
                                     if (caster.heightLocked) {
                                         log(`${caster.name}は${skill.name}を使おうとしたが、体が変化を拒んだ！`);
-                                        caster.currentHp += skill.cost; // HPを消費しない
+                                        // HPコストは消費される仕様のままにする
                                         break;
                                     }
+                                    let growthAmount = skill.power;
+                                    if (caster.height < caster.initialHeight) {
+                                        log(`${caster.name}はまず初期身長に戻った！`);
+                                        const resetAmount = caster.initialHeight - caster.height;
+                                        await animateStatChange(caster, 'height', resetAmount, 'increase');
+                                        await new Promise(resolve => setTimeout(resolve, 500)); // ログ表示のための短い待機
+                                    }
                                     log(`${caster.name}は${skill.name}で自らのボディを強化！`);
-                                    await animateStatChange(caster, 'height', skill.power, 'increase');
-                                    log(`${caster.name}の身長が${skill.power}cm伸びた！`);
+                                    await animateStatChange(caster, 'height', growthAmount, 'increase');
+                                    log(`${caster.name}の身長がさらに${growthAmount}cm伸びた！`);
                                     break;
                                 }
                             case 'mp_burst_height_scaling':
@@ -8180,9 +8191,10 @@
                         if (enemy.counterTarget) {
                             const {
                                 counterAttacker,
-                                damage // ファイター, ソーサラー, ナイト, メディック
+                                damage, // ファイター, ソーサラー, ナイト, メディック
+                                isHpAbsorb
                             } = enemy.counterTarget;
-                            await counterAttack(counterAttacker, enemy, damage);
+                            await counterAttack(counterAttacker, enemy, damage, isHpAbsorb);
                             delete enemy.counterTarget; // 反撃処理後にクリア
                         }
 
@@ -8258,7 +8270,8 @@
                             if (target.buffs && target.buffs.hp_absorb) {
                                 enemy.counterTarget = {
                                     counterAttacker: target,
-                                    damage: getEffectiveStats(target).atk
+                                    damage: getEffectiveStats(target).atk,
+                                    isHpAbsorb: true // HP吸収フラグを追加
                                 }; // ファイター, ソーサラー, ナイト, メディック
                             }
 
@@ -8279,11 +8292,18 @@
                         }
                     }
 
-                    async function counterAttack(counterAttacker, originalAttacker, damage) {
+                    async function counterAttack(counterAttacker, originalAttacker, damage, isHpAbsorb = false) {
                         log(`${counterAttacker.name}の反撃！`);
                         const counterDamage = Math.max(1, damage); // 保存しておいたダメージをそのまま使う
                         await dealDamage(originalAttacker, counterDamage);
                         log(`${originalAttacker.name}に${counterDamage}のダメージ！`);
+
+                        // HP吸収効果の処理
+                        if (isHpAbsorb) {
+                            const absorbAmount = Math.ceil(counterDamage * 0.2); // 与えたダメージの20%を吸収
+                            await animateStatChange(counterAttacker, 'hp', absorbAmount, 'increase');
+                            log(`${counterAttacker.name}は反撃から生命力を吸収した！(HP+${absorbAmount})`);
+                        }
                     }
 
                     async function heroicEndSkill(enemy, target) {
@@ -9256,7 +9276,7 @@
                                     if (p.heightLocked) {
                                         log(`${p.name}は体の変化を拒んだ！`);
                                         continue;
-                                    }
+                                    } // ファイター, ソーサラー, ナイト, メディック
                                     const change = Math.ceil(Math.random() * 201) - 100;
                                     await animateStatChange(p, 'height', change, change >= 0 ? 'increase' : 'decrease');
                                     log(`${p.name}の身長が${change > 0 ? '+' : ''}${change}cm変化した！`);
@@ -9344,7 +9364,7 @@
                     }
 
                     // Renamed and extended flashStat to handle both visual flash and number animation
-                    async function animateStatChange(target, statName, changeAmount, type) {
+                    async function animateStatChange(target, statName, changeAmount, type, source = 'player') {
                         if (target.isEnemy) return; // 敵のステータスは表示されていないので何もしない
                         // 身長固定フラグをチェック
                         if (statName === 'height' && target.heightLocked) {
@@ -9385,7 +9405,7 @@
                         // Update the actual game state value
                         if (statName === 'hp') target.currentHp += changeAmount;
                         else if (statName === 'mp') target.currentMp += changeAmount;
-                        else if (statName === 'height' && target.blessings && target.blessings.size_master) {
+                        else if (statName === 'height' && target.blessings && target.blessings.size_master && source === 'enemy') {
                             const buffAmount = Math.ceil(Math.abs(changeAmount) / 10);
                             target.buffs.atk_up = (target.buffs.atk_up || 0) + buffAmount;
                             target.buffs.protect = (target.buffs.protect || 0) + buffAmount;
