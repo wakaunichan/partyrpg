@@ -10206,6 +10206,7 @@
                 initGame(selectedMembers, fromSave);
 
                 // initGame の後にモード別の特殊設定を適用
+                let backgroundSet = false;
                 if (!fromSave) {
                     if (mode === 'little_panic') {
                         gameState.party.forEach(char => {
@@ -10241,57 +10242,55 @@
                         });
                         log("幼くなった仲間を守るため、シスターが本気を出す！");
                     }
-
-                    gameState.dungeonBackground = SUMMER_BEACH_BG;
-                    initGame(selectedMembers, fromSave);
-
-                    // 開始レベルを2にする
-                    if (!fromSave) {
+                    if (mode === 'summer_live') {
+                        backgroundSet = true;
+                        gameState.dungeonBackground = SUMMER_BEACH_BG;
+                        // 開始レベルを2にする
                         gameState.party.forEach(char => {
                             applyLevelUp(char, 1); // Lv1 -> Lv2
                             // レベルアップ後にHP/MPを全快させる
                             char.currentHp = char.maxHp;
                             char.currentMp = char.maxMp;
                         });
-                    }
 
-                    // 立ち絵を水着に変更
-                    gameState.party.forEach(char => {
-                        if (char.name === 'リリカ') char.bgClass = 'bg-char-ririka-a';
-                        if (char.name === 'ユイ') char.bgClass = 'bg-char-yui-a';
-                        if (char.name === 'ミコ') char.bgClass = 'bg-char-miko-a';
-                    });
-
-                    // リリィをフェアリー化＆スキル変更
-                    const lily = gameState.party.find(p => p.name === 'リリィ');
-                    if (lily) {
-                        const blueprint = allCharacterBlueprints.find(c => c.name === 'リリィ');
-                        const transformData = blueprint.transforms['fairy'];
-                        lily.originalState = { role: lily.role, skills: lily.skills, bgClass: lily.bgClass, height: lily.height };
-                        // 開始時の身長を30cmにする
-                        lily.height = 30;
-                        lily.role = transformData.role;
-                        lily.skills = transformData.skills.map(s => {
-                            if (s.type === 'transform_revert') {
-                                return { name: 'ビーチエール', cost: 10, type: 'cure_strip_party', targetType: 'party', description: '味方全員の脱衣状態を解除する。' };
-                            }
-                            return s;
+                        // 立ち絵を水着に変更
+                        gameState.party.forEach(char => {
+                            if (char.name === 'リリカ') char.bgClass = 'bg-char-ririka-a';
+                            if (char.name === 'ユイ') char.bgClass = 'bg-char-yui-a';
+                            if (char.name === 'ミコ') char.bgClass = 'bg-char-miko-a';
                         });
-                        lily.bgClass = 'bg-char-lily-fairy-a'; // 水着フェアリー
-                        lily.isTransformed = true;
-                    }
 
-                    // ユイのスキル変更
-                    const yui = gameState.party.find(p => p.name === 'ユイ');
-                    if (yui) {
-                        const devotionIndex = yui.skills.findIndex(s => s.name === '献身');
-                        if (devotionIndex !== -1) {
-                            yui.skills[devotionIndex] = { name: 'パッションハート', cost: 15, type: 'party_heal', targetType: 'party', description: '味方全体のHPを30%回復する。' };
+                        // リリィをフェアリー化＆スキル変更
+                        const lily = gameState.party.find(p => p.name === 'リリィ');
+                        if (lily) {
+                            const blueprint = allCharacterBlueprints.find(c => c.name === 'リリィ');
+                            const transformData = blueprint.transforms['fairy'];
+                            lily.originalState = { role: lily.role, skills: lily.skills, bgClass: lily.bgClass, height: lily.height };
+                            // 開始時の身長を30cmにする
+                            lily.height = 30;
+                            lily.role = transformData.role;
+                            lily.skills = transformData.skills.map(s => {
+                                if (s.type === 'transform_revert') {
+                                    return { name: 'ビーチエール', cost: 10, type: 'cure_strip_party', targetType: 'party', description: '味方全員の脱衣状態を解除する。' };
+                                }
+                                return s;
+                            });
+                            lily.bgClass = 'bg-char-lily-fairy-a'; // 水着フェアリー
+                            lily.isTransformed = true;
+                        }
+
+                        // ユイのスキル変更
+                        const yui = gameState.party.find(p => p.name === 'ユイ');
+                        if (yui) {
+                            const devotionIndex = yui.skills.findIndex(s => s.name === '献身');
+                            if (devotionIndex !== -1) {
+                                yui.skills[devotionIndex] = { name: 'パッションハート', cost: 15, type: 'party_heal', targetType: 'party', description: '味方全体のHPを30%回復する。' };
+                            }
                         }
                     }
                 }
                 // 通常モードの背景設定
-                else {
+                if (!backgroundSet) {
                     gameState.dungeonBackground = DEFAULT_DUNGEON_BG;
                 }
                 dungeonView.style.backgroundImage = gameState.dungeonBackground;
