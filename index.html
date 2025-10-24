@@ -349,6 +349,23 @@
         .bg-char-celestia {
             --char-bg-image: url('sgd_17.png');
         }
+        /* リトルパニック用 */
+        
+        .bg-char-hikari-a {
+            --char-bg-image: url('sgd_2a.png');
+        }
+        
+        .bg-char-eriza-a {
+            --char-bg-image: url('sgd_9a.png');
+        }
+        
+        .bg-char-koharu-a {
+            --char-bg-image: url('sgd_15a.png');
+        }
+        
+        .bg-char-olivia-a {
+            --char-bg-image: url('sgd_16a.png');
+        }
         /* トレジャーハンター用 */
         
         .bg-char-lily {
@@ -416,6 +433,31 @@
         
         .bg-char-lily-b {
             --char-bg-image: url('sgd_18b.png');
+        }
+        /* サマータイム・スペシャルライブ衣装（リリィ変身後） */
+        
+        .bg-char-lily-a {
+            --char-bg-image: url('sgd_18a.png');
+        }
+        
+        .bg-char-lily-succubus-a {
+            --char-bg-image: url('sgd_18-1a.png');
+        }
+        
+        .bg-char-lily-alraune-a {
+            --char-bg-image: url('sgd_18-3a.png');
+        }
+        
+        .bg-char-lily-succubus-b {
+            --char-bg-image: url('sgd_18-1b.png');
+        }
+        
+        .bg-char-lily-fairy-b {
+            --char-bg-image: url('sgd_18-2b.png');
+        }
+        
+        .bg-char-lily-alraune-b {
+            --char-bg-image: url('sgd_18-3b.png');
         }
         /* 緊急ボタンの表示制御 */
         
@@ -574,6 +616,7 @@
                     <button data-mode="brawl" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-red-700">武闘の宴</strong><span class="block text-sm text-gray-600">2フロアごとに必ず戦闘が発生する。</span></button>
                     <button data-mode="monster_march" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-red-800">魔物の行軍</strong><span class="block text-sm text-gray-600">全てのフロアで戦闘が発生する。勝利する度にレベルアップし、アイテムを獲得する。50階踏破を目指せ。</span></button>
                     <button data-mode="endless" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-slate-700">無限への挑戦</strong><span class="block text-sm text-gray-600">全滅するまでダンジョンを進み続ける。30階ごとにボスが出現し、倒すと試練が訪れる。</span></button>
+                    <button data-mode="little_panic" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-yellow-600">リトルパニック！</strong><span class="block text-sm text-gray-600">ソーサラー、ドクター、トラブルメーカーが幼い姿に！彼女たちを守るため、シスターが本気を出す。</span></button>
                     <button data-mode="brawling_belles" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-rose-500">闘争令嬢</strong><span class="block text-sm text-gray-600">特別なジョブ「アンドロイド」と「メイド」の2人で30階の踏破を目指す。クリアすると選抜チームに2人が追加される。</span></button>
                     <button data-mode="summer_live" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-sky-500">サマータイム・スペシャルライブ！</strong><span class="block text-sm text-gray-600">リリカ、ユイ、ミコ、リリィの4人で、ビーチと温泉を巡る特別な冒険に出る。60階踏破を目指せ。</span></button>
                     <button data-mode="uninhibited_souls" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-orange-700">奔放な魂</strong><span class="block text-sm text-gray-600">探索中、コマンドで味方を「脱衣」させたり、身長を自由に操作したりできる。</span></button>
@@ -880,7 +923,7 @@
                         foundEquipment: [],
                         killCount: 0, // ネクロマンサー用
                         walls: [], // ガーディアン用
-                        isEndlessVersion: false, // 無限版フラグ // ファイター, ソーサラー, ナイト, メディック
+                        isEndlessVersion: false, // 無限版フラグ
                         gameMode: 'normal', // normal, veterans, dwarves, brawl, solo, endgame, endless, indecent, enjoy, saint_march, fixed_path, uninhibited_souls, random_party, divine_trial, treasure_map
                         triggeredSpecialConvos: [],
                         dungeonBackground: DEFAULT_DUNGEON_BG, // 背景画像をgameStateで管理
@@ -1389,41 +1432,6 @@
                             bgClass: 'bg-char-miko',
                             themeColor: 'lime',
                         }, {
-                            name: 'セレスティア',
-                            role: '聖女',
-                            hp: 110,
-                            mp: 60,
-                            atk: 45,
-                            def: 15,
-                            agi: 16,
-                            height: 140,
-                            description: '神の祝福を受けし聖なる乙女。その身に宿す聖なる力で、たった一人で穢れたダンジョンを浄化する使命を帯びている。',
-                            skills: [{
-                                name: 'ホーリーエッジ',
-                                cost: 10,
-                                power: 1.9,
-                                type: 'physical',
-                                targetType: 'enemy',
-                                description: '聖なる力を刃に乗せ、敵一体に物理ダメージを与える。'
-                            }, {
-                                name: 'セイクリッドウォール',
-                                cost: 10,
-                                type: 'saint_wall',
-                                targetType: 'self',
-                                effect: 'protect',
-                                description: '聖なる障壁で身を守り、自身の防御力を一時的に上昇させる。'
-                            }],
-                            unlockableSkill: {
-                                name: 'ジャッジメント',
-                                cost: 25,
-                                power: 1.5,
-                                type: 'magic',
-                                targetType: 'enemies',
-                                description: '天からの光で、敵全体に聖なる魔法ダメージを与える。'
-                            },
-                            bgClass: 'bg-char-celestia',
-                            themeColor: 'yellow',
-                        }, {
                             name: 'レンカ',
                             role: 'ネクロマンサー',
                             hp: 90,
@@ -1568,15 +1576,15 @@
                                 power: 60,
                                 type: 'heal',
                                 targetType: 'ally',
-                                description: '味方一人のHPを少し回復する。'
+                                description: '味方一人のHPを少し回復する。' // ファイター, ソーサラー, ナイト, メディック
                             }],
-                            unlockableSkill: { // ファイター, ソーサラー, ナイト, メディック
-                                name: 'ホーリーライト', // ファイター, ソーサラー, ナイト, メディック
+                            unlockableSkill: {
+                                name: 'ホーリーライト',
                                 cost: 20,
-                                power: 120, // ファイター, ソーサラー, ナイト, メディック
+                                power: 120,
                                 type: 'heal',
                                 targetType: 'ally',
-                                description: '味方一人のHPを大きく回復する。'
+                                description: '味方一人のHPを大きく回復する。' // ファイター, ソーサラー, ナイト, メディック
                             },
                             unlockableSkillLv4: {
                                 name: '祈りの円環',
@@ -1587,6 +1595,49 @@
                             },
                             bgClass: 'bg-char-olivia',
                             themeColor: 'sky',
+                        }, {
+                            name: 'セレスティア',
+                            role: '聖女',
+                            hp: 110,
+                            mp: 60,
+                            atk: 45,
+                            def: 15,
+                            agi: 16,
+                            height: 140,
+                            description: '神の祝福を受けし聖なる乙女。その身に宿す聖なる力で、たった一人で穢れたダンジョンを浄化する使命を帯びている。',
+                            skills: [{
+                                name: 'ホーリーエッジ',
+                                cost: 10,
+                                power: 1.9,
+                                type: 'physical',
+                                targetType: 'enemy',
+                                description: '聖なる力を刃に乗せ、敵一体に物理ダメージを与える。'
+                            }, {
+                                name: 'セイクリッドウォール',
+                                cost: 10,
+                                type: 'saint_wall',
+                                targetType: 'self',
+                                effect: 'protect',
+                                description: '聖なる障壁で身を守り、自身の防御力を一時的に上昇させる。'
+                            }],
+                            unlockableSkill: {
+                                name: 'ジャッジメント',
+                                cost: 25,
+                                power: 1.5,
+                                type: 'magic',
+                                targetType: 'enemies',
+                                description: '天からの光で、敵全体に聖なる魔法ダメージを与える。'
+                            },
+                            unlockableSkillLv4: {
+                                name: 'ディバインライト',
+                                cost: 30,
+                                power: 0.3, // 30%
+                                type: 'divine_light',
+                                targetType: 'enemy',
+                                description: '敵ひとりに、その敵の最大HPの30%にあたる固定ダメージを与える。'
+                            },
+                            bgClass: 'bg-char-celestia',
+                            themeColor: 'yellow',
                         }, {
                             name: 'リリィ',
                             role: 'トレジャーハンター',
@@ -3345,6 +3396,59 @@
                             lines: ["さあ、最後のビッグゲームよ。全部賭ける覚悟はできてる？", "ふふ、どんな魂が待っているのかしら。楽しみね。", "私の研究の集大成を見せてあげますわ。"]
                         }, ]
                     };
+                    const littlePanicConversations = {
+                        floor1: [{
+                            char: 'ヒカリ',
+                            line: '…体が、縮んだ…？'
+                        }, {
+                            char: 'エリザ',
+                            line: 'なんですのこれは！？私の完璧なボディバランスが…子供のようですわ！'
+                        }, {
+                            char: 'コハル',
+                            line: 'わーい！ちっちゃくなっちゃいました！なんだか楽しいです！'
+                        }, {
+                            char: 'オリビア',
+                            line: '皆さん…！なんておいたわしい姿に…。大丈夫です、このオリビアが、必ず皆さんを守り抜いてみせます！'
+                        }],
+                        floor6: [{
+                            char: 'オリビア',
+                            line: '皆さん、お怪我はありませんか？疲れていませんか？'
+                        }, {
+                            char: 'ヒカリ',
+                            line: '…問題ない。このサイズ、むしろ敵の死角に入りやすい。'
+                        }, {
+                            char: 'エリザ',
+                            line: 'ふふん、わたくしを誰だとお思いですの？この程度の状況、研究対象として興味深いくらいですわ。'
+                        }, {
+                            char: 'コハル',
+                            line: 'はい！元気いっぱいです！なんだか冒険がもっと楽しくなりました！'
+                        }, {
+                            char: 'オリビア',
+                            line: '（…皆さん、気丈に振る舞ってはいますが…）わかりました。ですが、決して無理はしないでくださいね。'
+                        }],
+                        floor29: [{
+                            char: 'オリビア',
+                            line: '…この先に、元凶がいます。あれを倒せば、きっと皆さんは元の姿に戻れるはずです。'
+                        }, {
+                            char: 'ヒカリ',
+                            line: '…ええ。ここまで来たら、やるしかない。'
+                        }, {
+                            char: 'エリザ',
+                            line: '当然ですわ。わたくしの貴重な研究データを元に戻してもらいませんと。'
+                        }, {
+                            char: 'コハル',
+                            line: 'はい！みんなで力を合わせれば、絶対勝てます！'
+                        }, {
+                            char: 'オリビア',
+                            line: 'ええ、行きましょう！私たちの日常を取り戻すために！'
+                        }]
+                    };
+
+
+
+
+
+
                     const blessings = {
                         // --- 攻撃系 ---
                         double_attack: {
@@ -4150,6 +4254,17 @@
                             });
                         }
                     }
+                    async function playConversation(conversation) {
+                        dungeonCommands.classList.add('hidden');
+                        for (const part of conversation) {
+                            const speaker = gameState.party.find(p => p.name === part.char);
+                            if (speaker && speaker.currentHp > 0) {
+                                log(`${part.char}「${part.line}」`);
+                                await new Promise(resolve => setTimeout(resolve, 2500));
+                            }
+                        }
+                        dungeonCommands.classList.remove('hidden');
+                    }
 
                     function updateFloorDisplay() {
                         if (!gameState.inBattle && gameState.floor > 0) {
@@ -4437,8 +4552,23 @@
                     }
 
                     function advanceFloor() {
+                        // --- リトルパニック！モード専用会話 ---
+                        if (gameState.gameMode === 'little_panic') {
+                            if (gameState.floor === 0) { // 1階に到達した直後
+                                playConversation(littlePanicConversations.floor1);
+                                // この会話の後、通常のフロア進行処理に進む
+                            } else if (gameState.floor === 5) { // 6階に到達する前
+                                playConversation(littlePanicConversations.floor6);
+                            } else if (gameState.floor === 28) { // 29階に到達する前
+                                playConversation(littlePanicConversations.floor29);
+                            }
+                        }
+
+
                         gameState.floor++;
                         updateFloorDisplay();
+
+
 
                         // --- ノエルとフローラのプライベート衣装イベント ---
                         const hasNoel = gameState.party.some(p => p.name === 'ノエル');
@@ -4649,11 +4779,11 @@
                             'beach': {
                                 'リリカ': 'bg-char-ririka-a',
                                 'ユイ': 'bg-char-yui-a',
-                                'ミコ': 'bg-char-miko-a',
-                                'リリィ': 'bg-char-lily-a', // 通常リリィの水着
-                                'サキュバス': 'bg-char-lily-succubus-a',
+                                'ミコ': 'bg-char-miko-a', // 通常リリィの水着
+                                'リリィ': 'bg-char-lily-a',
+                                'サキュバス': 'bg-char-lily-succubus-a', // 通常リリィの水着
                                 'フェアリー': 'bg-char-lily-fairy-a',
-                                'アルラウネ': 'bg-char-lily-alraune-a'
+                                'アルラウネ': 'bg-char-lily-alraune-a' // 通常リリィの水着
                             },
                             'onsen': {
                                 'リリカ': 'bg-char-ririka-b',
@@ -5927,7 +6057,9 @@
 
                         // サマータイム・スペシャルライブ！モードでのフロア補正
                         if (gameState.gameMode === 'summer_live') {
-                            floor = Math.floor(floor * 0.6); // 敵の強化テーブルを60%に抑える
+                            // ボス階層の判定を正しく行うため、gameState.floorを直接参照する
+                            // 通常敵の強さ調整は、この後の処理で行う
+                            floor = gameState.floor;
                         }
 
                         if (isBoss && isEnhanced === 'phantom_hero') {
@@ -5939,6 +6071,7 @@
                                 pDef: 25 + floor,
                                 mDef: 25 + floor,
                                 agi: 25 + Math.floor(floor / 2),
+                                buffs: {},
                                 isEnemy: true,
                                 isBoss: true,
                                 statusEffects: {},
@@ -5966,6 +6099,7 @@
                                     mDef: 20 + Math.floor(floor * 1.0),
                                     agi: 20,
                                     isEnemy: true,
+                                    buffs: {},
                                     statusEffects: {},
                                     skills: [{
                                         name: 'フォーカス',
@@ -6036,6 +6170,7 @@
                                 isEnemy: true,
                                 isBoss: true,
                                 turnCount: 0, // ターンカウント用
+                                buffs: {},
                                 statusEffects: {},
                                 regenUses: 0, // 自己再生の使用回数カウンター 
                             };
@@ -6050,6 +6185,11 @@
                             // サマータイム・スペシャルライブ！モードでのボス弱体化
                             if (gameState.gameMode === 'summer_live') {
                                 boss.maxHp = Math.ceil(boss.maxHp * 0.8); // HPを20%削減
+                                // 通常敵の強さ調整と同様に、フロア補正をここで行う
+                                const summerFloor = Math.floor(gameState.floor * 0.6);
+                                boss.maxHp = Math.ceil((boss.maxHp + summerFloor * 15) * statMultiplier);
+                                boss.atk = Math.ceil((boss.atk + Math.ceil(summerFloor * 1.2)) * statMultiplier);
+
                                 boss.currentHp = boss.maxHp;
                                 boss.atk = Math.ceil(boss.atk * 0.85); // 攻撃力を15%削減
                             }
@@ -6062,8 +6202,8 @@
                                     boss.maxHp = Math.ceil(800 * statMultiplier);
                                     boss.currentHp = boss.maxHp;
                                     boss.atk = Math.ceil(32 * statMultiplier);
-                                    boss.pDef = Math.ceil((25 + floor * 0.8) * 3.0 * statMultiplier); // 物理防御が極端に高い
-                                    boss.mDef = Math.ceil(Math.max(1, (15 + floor * 0.8) * 0.1) * statMultiplier); // 魔法防御が非常に低い
+                                    boss.pDef = Math.ceil((25 + Math.floor(floor * 0.6) * 0.8) * 3.0 * statMultiplier); // 物理防御が極端に高い
+                                    boss.mDef = Math.ceil(Math.max(1, (15 + Math.floor(floor * 0.6) * 0.8) * 0.1) * statMultiplier); // 魔法防御が非常に低い
                                     boss.agi = 18;
                                     boss.skills = []; // スキルなし
                                 } else if (floor === 60) {
@@ -6071,8 +6211,8 @@
                                     boss.maxHp = Math.ceil(1500 * statMultiplier);
                                     boss.currentHp = boss.maxHp;
                                     boss.atk = Math.ceil(45 * statMultiplier);
-                                    boss.pDef = Math.ceil((30 + floor * 1.0) * 0.5 * statMultiplier); // 物理防御が低い
-                                    boss.mDef = Math.ceil((20 + floor * 1.0) * 1.0 * statMultiplier);
+                                    boss.pDef = Math.ceil((30 + Math.floor(floor * 0.6) * 1.0) * 0.5 * statMultiplier); // 物理防御が低い
+                                    boss.mDef = Math.ceil((20 + Math.floor(floor * 0.6) * 1.0) * 1.0 * statMultiplier);
                                     boss.agi = 22;
                                     boss.skills = [{
                                         name: 'ミニマムシャワー',
@@ -6138,6 +6278,11 @@
                         const finalPDef = Math.ceil(Math.max(1, Math.ceil(baseDef * blueprint.pDefRatio)) * statMultiplier);
                         const finalMDef = Math.ceil(Math.max(1, Math.ceil(baseDef * blueprint.mDefRatio)) * statMultiplier);
 
+                        // サマータイム・スペシャルライブ！モードでの通常敵の強さ調整
+                        if (gameState.gameMode === 'summer_live') {
+                            floor = Math.floor(gameState.floor * 0.6);
+                        }
+
                         return {
                             name: blueprint.name,
                             maxHp: finalMaxHp,
@@ -6147,6 +6292,7 @@
                             mDef: finalMDef,
                             agi: 7 + floor,
                             isEnemy: true,
+                            buffs: {},
                             skills: (blueprint.name === 'ウィスプ') ? [{
                                     name: '状態異常攻撃',
                                     func: inflictStatusEffect
@@ -6207,7 +6353,8 @@
                         // 対象がナイト、サムライ、聖女、または防御中の場合、スキルは失敗
                         const immuneRoles = ['ナイト', 'サムライ', '聖女', 'アンドロイド'];
                         if (immuneRoles.includes(target.role) || target.isDefending || target.isWall || target === gameState.golem) {
-                            // log(`${enemy.name}は${target.name}にいたずらを仕掛けたが、効果がなかった！`);
+                            const targetDisplayName = target.isWall ? '防壁' : target.name;
+                            log(`${enemy.name}は${targetDisplayName}にいたずらを仕掛けたが、効果がなかった！`);
                             return false; // 行動しなかったことを示す
                         }
 
@@ -6243,7 +6390,8 @@
                         // 対象がナイト、サムライ、聖女、または防御中の場合、スキルは失敗
                         const immuneRoles = ['ナイト', 'サムライ', '聖女', 'アンドロイド'];
                         if (immuneRoles.includes(target.role) || target.isDefending || target.isWall || target === gameState.golem) {
-                            log(`${enemy.name}は${target.name}にいたずらを仕掛けたが、効果がなかった！`);
+                            const targetDisplayName = target.isWall ? '防壁' : target.name;
+                            log(`${enemy.name}は${targetDisplayName}にいたずらを仕掛けたが、効果がなかった！`);
                             return; // 何もせずターン終了
                         }
 
@@ -6391,9 +6539,12 @@
                         // 状態異常のターン経過
                         if (currentActor.statusEffects) {
                             // 脱衣状態の経過ターンを増やす
-                            if (currentActor.statusEffects.stripped && gameState.gameMode !== 'indecent') {
-                                currentActor.statusEffects.stripped.turns++;
-                                log(`${currentActor.name}はだんだん恥ずかしさに慣れてきた…`);
+                            if (currentActor.statusEffects.stripped && gameState.gameMode !== 'indecent' && !currentActor.isLiberatedStripped) {
+                                const failChance = Math.max(0, 0.3 - (currentActor.statusEffects.stripped.turns * 0.05));
+                                if (failChance > 0) {
+                                    currentActor.statusEffects.stripped.turns++;
+                                    log(`${currentActor.name}はだんだん恥ずかしさに慣れてきた…`);
+                                }
                             }
                             ['poison', 'slow', 'regeneration'].forEach(effect => {
                                 if (currentActor.statusEffects[effect]) {
@@ -6868,6 +7019,11 @@
                                         const skillDamage = calculateDamage(caster, target, modifiedSkill);
                                         await dealDamage(target, skillDamage);
                                         log(`${caster.name}は${skill.name}を放った！ ${target.name}に${skillDamage}のダメージ！`);
+                                        // 天の裁きの副作用
+                                        if (skill.name === '天の裁き') {
+                                            await handleHeavensJudgmentSideEffect(caster);
+                                        }
+
                                     }
                                     break;
                                 }
@@ -7638,6 +7794,16 @@
                                         log(`${caster.name}は聖なる障壁を展開した！`);
                                     }
                                     flashCard(caster, 'yellow');
+                                    break;
+                                }
+                            case 'divine_light':
+                                {
+                                    // 敵の最大HPに対する割合ダメージ
+                                    const damage = Math.ceil(target.maxHp * skill.power);
+                                    log(`${caster.name}は${skill.name}を放った！ ${target.name}に聖なる光が降り注ぐ！`);
+                                    // dealDamageは固定ダメージを直接与える
+                                    await dealDamage(target, damage);
+                                    log(`${target.name}に${damage}の神聖なダメージ！`);
                                     break;
                                 }
                             case 'cure_strip_party':
@@ -9082,14 +9248,6 @@
                             // isEndlessフラグも正しく渡す
                             levelUpCharacter(gameState.party[0], true, isEndless);
                             return; // ファイター, ソーサラー, ナイト, メディック
-                        } else if (gameState.gameMode === 'summer_live' && gameState.floor === 60) {
-                            showModal("ライブ大成功！", "おめでとう！あなたはビーチと温泉でのスペシャルライブを大成功させ、ダンジョンを制覇しました！彼女たちの夏の思い出は、最高の形で幕を閉じました。");
-                            // クリアフラグを保存
-                            const clearFlags = JSON.parse(localStorage.getItem('sizeDungeonClearFlags') || '{}');
-                            clearFlags.summerLiveCleared = true;
-                            localStorage.setItem('sizeDungeonClearFlags', JSON.stringify(clearFlags));
-                            gameState.gameOver = true;
-                            return;
                         }
 
 
@@ -9112,6 +9270,15 @@
                             levelUpPartyList.appendChild(card);
                         });
 
+                        if (gameState.gameMode === 'summer_live' && gameState.floor === 60) {
+                            showModal("ライブ大成功！", "おめでとう！あなたはビーチと温泉でのスペシャルライブを大成功させ、ダンジョンを制覇しました！彼女たちの夏の思い出は、最高の形で幕を閉じました。");
+                            // クリアフラグを保存
+                            const clearFlags = JSON.parse(localStorage.getItem('sizeDungeonClearFlags') || '{}');
+                            clearFlags.summerLiveCleared = true;
+                            localStorage.setItem('sizeDungeonClearFlags', JSON.stringify(clearFlags));
+                            gameState.gameOver = true;
+                            return;
+                        }
                         levelUpModal.classList.remove('hidden');
                     }
 
@@ -9574,6 +9741,13 @@
                                 changeAmount = 10 - target.height; // 10cmまでの変化量に修正
                                 newHeight = 10;
                             }
+                            // 「リトルパニック！」モードでの身長上限チェック
+                            if (gameState.gameMode === 'little_panic' && ['ソーサラー', 'ドクター', 'トラブルメーカー'].includes(target.role)) {
+                                if (newHeight > target.initialHeight) {
+                                    changeAmount = target.initialHeight - target.height;
+                                    newHeight = target.initialHeight;
+                                }
+                            }
                             if (newHeight > 2000) {
                                 if (target.height < 2000) {
                                     // 上限に達した瞬間にメッセージを表示
@@ -10001,9 +10175,6 @@
                     selectedMembers = ['ノエル', 'フローラ'];
                 }
 
-
-
-
                 // メンバー選択が必要なモードで、まだメンバーが選ばれていない場合 (聖女の行進は除く)
                 if ((mode === 'solo' || mode === 'indecent' || (mode === 'trial' && toggleSelectTeam.checked) || (toggleSelectTeam.checked && !['normal', 'saint_march', 'treasure_map', 'summer_live', 'random_party'].includes(mode))) && !selectedMembers) {
                     whatIfModal.classList.add('hidden');
@@ -10025,20 +10196,52 @@
                     selectedMembers = ['セレスティア'];
                 }
 
-                if (mode === 'brawling_belles') {
-                    selectedMembers = ['ノエル', 'フローラ'];
-                    initGame(selectedMembers, fromSave);
-                }
-
-                if (mode === 'treasure_map') {
-                    selectedMembers = ['リリィ'];
+                // サマータイム・スペシャルライブ！モードの初期設定
+                if (mode === 'summer_live') {
+                    selectedMembers = ['リリカ', 'ユイ', 'ミコ', 'リリィ']; // ファイター, ソーサラー, ナイト, メディック
+                } else if (mode === 'little_panic') {
+                    selectedMembers = ['ヒカリ', 'エリザ', 'コハル', 'オリビア'];
                 }
 
                 initGame(selectedMembers, fromSave);
 
-                // サマータイム・スペシャルライブ！モードの初期設定
-                if (mode === 'summer_live') {
-                    selectedMembers = ['リリカ', 'ユイ', 'ミコ', 'リリィ']; // ファイター, ソーサラー, ナイト, メディック
+                // initGame の後にモード別の特殊設定を適用
+                if (!fromSave) {
+                    if (mode === 'little_panic') {
+                        gameState.party.forEach(char => {
+                            switch (char.role) {
+                                case 'シスター':
+                                    // レベル10に設定
+                                    applyLevelUp(char, 9);
+                                    // スキル変更
+                                    char.skills = char.skills.map(skill => {
+                                        if (skill.name === 'ホーリーライト') {
+                                            return littlePanicSkills.holySphere;
+                                        }
+                                        if (skill.name === '祈りの円環') {
+                                            return littlePanicSkills.heavensJudgment;
+                                        }
+                                        return skill;
+                                    });
+                                    // 立ち絵変更
+                                    char.bgClass = 'bg-char-olivia-a';
+                                    break;
+                                case 'ソーサラー':
+                                case 'ドクター':
+                                case 'トラブルメーカー':
+                                    // 身長と初期身長を-30
+                                    char.height -= 30;
+                                    char.initialHeight -= 30;
+                                    // 立ち絵変更
+                                    if (char.role === 'ソーサラー') char.bgClass = 'bg-char-hikari-a';
+                                    if (char.role === 'ドクター') char.bgClass = 'bg-char-eriza-a';
+                                    if (char.role === 'トラブルメーカー') char.bgClass = 'bg-char-koharu-a';
+                                    break;
+                            }
+                        });
+                        log("幼くなった仲間を守るため、シスターが本気を出す！");
+                    }
+
                     gameState.dungeonBackground = SUMMER_BEACH_BG;
                     initGame(selectedMembers, fromSave);
 
@@ -10156,6 +10359,44 @@
                     startGame(mode);
                 });
             });
+            // リトルパニックモードのスキル定義
+            const littlePanicSkills = {
+                holySphere: {
+                    name: 'ホーリースフィア',
+                    cost: 40,
+                    power: 2.5,
+                    type: 'magic',
+                    targetType: 'enemies',
+                    description: '敵全体に超高威力の聖なる魔法ダメージを与える。'
+                },
+                heavensJudgment: {
+                    name: '天の裁き',
+                    cost: 50,
+                    power: 999,
+                    type: 'magic',
+                    targetType: 'enemy',
+                    description: '敵ひとりをほぼ確実に倒す魔法攻撃。低確率で味方ひとりが大ダメージを受ける。'
+                }
+            };
+
+            // 天の裁きの副作用処理
+            async function handleHeavensJudgmentSideEffect(caster) {
+                if (Math.random() < 0.15) { // 15%の確率で副作用
+                    const aliveAllies = gameState.party.filter(p => p.currentHp > 0 && p !== caster);
+                    if (aliveAllies.length > 0) {
+                        const victim = aliveAllies[Math.floor(Math.random() * aliveAllies.length)];
+                        const damage = Math.ceil(victim.currentHp * 0.7);
+                        log(`天罰が下り、${victim.name}が巻き添えを食らった！`);
+                        await dealDamage(victim, damage);
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+
+
+
             scanModalClose.addEventListener('click', () => {
                 scanModal.classList.add('hidden');
                 // 「調べる」をキャンセルした場合、元のキャラクターのターンに戻す
@@ -10263,8 +10504,21 @@
                         return; // 痴態騒ぎモードではナイト、サムライ、聖女をスキップ
                     }
 
+                    const specialRoles = ['聖女', 'トレジャーハンター', 'アンドロイド', 'メイド'];
+                    const isSpecialChar = specialRoles.includes(char.role);
+
                     const card = document.createElement('div');
-                    card.className = `p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 transition ${char.role === '聖女' ? 'border-yellow-300 bg-yellow-50' : ''} ${char.role === 'アンドロイド' || char.role === 'メイド' ? 'border-rose-300 bg-rose-50' : ''}`;
+                    let cardClasses = 'p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 transition';
+
+                    // 特別なキャラクターの背景色を少し変える
+                    if (isSpecialChar) {
+                        // TailwindのJITコンパイラが動的にクラスを生成できるよう、完全なクラス名を記述します。
+                        if (char.themeColor === 'yellow') cardClasses += ' bg-gradient-to-br from-yellow-50 to-yellow-100';
+                        else if (char.themeColor === 'lime') cardClasses += ' bg-gradient-to-br from-lime-50 to-lime-100';
+                        else if (char.themeColor === 'rose') cardClasses += ' bg-gradient-to-br from-rose-50 to-rose-100';
+                        else if (char.themeColor === 'emerald') cardClasses += ' bg-gradient-to-br from-emerald-50 to-emerald-100';
+                    }
+                    card.className = cardClasses;
                     card.dataset.name = char.name;
                     card.innerHTML = `
                         <p class="font-bold text-lg text-${char.themeColor}-700">${char.name}</p>
@@ -10431,7 +10685,6 @@
                 clearFlags[flagName] = !clearFlags[flagName];
                 localStorage.setItem('sizeDungeonClearFlags', JSON.stringify(clearFlags));
                 updateDebugButtons();
-                showSelectTeamModal(gameState.gameMode); // 変更を反映させるためにキャラクター選択モーダルを再描画
             }
 
             debugSaintButton.addEventListener('click', () => toggleClearFlag('saintMarchCleared'));
