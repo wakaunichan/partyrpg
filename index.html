@@ -43,7 +43,7 @@
         .character-card {
             transition: all 0.3s ease;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-            min-height: 160px;
+            min-height: 140px;
             /* 少し高さを増やして見栄えを調整 */
             position: relative;
             overflow: hidden;
@@ -72,7 +72,7 @@
             background-position: var(--char-bg-position, center bottom);
             /* 位置 (JSで変更) */
             background-repeat: no-repeat;
-            opacity: 1;
+            opacity: 0.6;
             /* 背景画像の透明度を調整 */
             z-index: 0;
             transition: background-size 0.5s ease-in-out, background-position 0.5s ease-in-out;
@@ -279,6 +279,27 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+        }
+        /* ゴーレムと防壁のオーバーレイ表示 */
+        
+        .golem-status-container,
+        .wall-status-container {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            right: 4px;
+            z-index: 2;
+            /* character-stats(z-index:1)より手前に表示 */
+            pointer-events: none;
+            /* 下の要素をクリックできるように */
+        }
+        
+        .golem-card-inner,
+        .wall-card-inner {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 2px 4px;
+            border-radius: 4px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
         }
         /* キャラクター背景画像 */
         
@@ -656,6 +677,13 @@
                     <div id="scan-modal-content" class="space-y-3 text-gray-700 max-h-96 overflow-y-auto pr-2">
                         <!-- 調査結果がここに挿入されます -->
                     </div>
+                    <style>
+                        /* スキャンモーダルの立ち絵表示用 */
+                        
+                        #scan-modal-image-container>div {
+                            background-image: var(--char-bg-image);
+                        }
+                    </style>
                     <div class="text-right mt-4">
                         <button id="scan-modal-close" class="action-button bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded-lg shadow-lg">閉じる</button>
                     </div>
@@ -2392,7 +2420,7 @@
                             lines: ["見てみて、ユイちゃん！この貝殻、すっごく綺麗！", "本当ですね、リリカさん！まるで宝石みたいです！"]
                         }, {
                             chars: ['ミコ', 'リリィ'],
-                            lines: ["リリィちゃん、見て！砂でモコ作ったんだ！", "わー、上手だね！じゃあ私は、その隣におっきなゴーレMくんを作ろっかな！"]
+                            lines: ["リリィちゃん、見て！砂でモコ作ったんだ！", "わー、上手だね！じゃあ私は、その隣におっきなゴーレムくんを作ろっかな！"]
                         }, {
                             chars: ['リリカ', 'ミコ'],
                             lines: ["ミコちゃん、あそこのかき氷屋さん、どっちが早く着くか競争だよ！", "わーい！負けないぞー！モコ、応援しててね！"]
@@ -3793,9 +3821,18 @@
                             const pairConvo = possibleConvos.length > 0 ? possibleConvos[Math.floor(Math.random() * possibleConvos.length)] : null;
 
                             if (pairConvo) {
-                                log(`${char1.name}「${pairConvo.lines[0]}」`);
+                                // char1が会話のどちらの順番かを確認して、正しいセリフを割り当てる
+                                const char1Index = pairConvo.chars.indexOf(char1.name);
+                                const char2Index = 1 - char1Index; // 0なら1, 1なら0
+
+                                const firstSpeaker = char1Index === 0 ? char1 : char2;
+                                const secondSpeaker = char1Index === 0 ? char2 : char1;
+                                const firstLine = pairConvo.lines[0];
+                                const secondLine = pairConvo.lines[1];
+
+                                log(`${firstSpeaker.name}「${firstLine}」`);
                                 setTimeout(() => {
-                                    log(`${char2.name}「${pairConvo.lines[1]}」`);
+                                    log(`${secondSpeaker.name}「${secondLine}」`);
                                     setTimeout(() => dungeonCommands.classList.remove('hidden'), 2000);
                                 }, 2000);
                             } else {
@@ -4030,6 +4067,10 @@
                                 if (priorityTarget) break;
                             }
 
+                            // 優先ターゲットが見つかった場合、char1とchar2を入れ替える
+                            if (priorityTarget && priorityTarget !== char1) {
+                                [char1, char2] = [char2, priorityTarget];
+                            }
 
                             if (priorityTarget && priorityTarget !== char1) {
                                 char2 = priorityTarget; // 会話相手をターゲットに設定
@@ -4049,6 +4090,10 @@
                                 } else if (situation2 === 'grown') {
                                     situation1 = 'allyGrown';
                                 }
+                            } else {
+                                // 優先ターゲットがない場合、通常の状況を再評価
+                                situation1 = getCharacterSituation(char1);
+                                situation2 = getCharacterSituation(char2);
                             }
                         }
 
@@ -4082,16 +4127,18 @@
                                 (sit.startsWith('shrunk') && charConvos['shrunk']) ||
                                 charConvos['default'];
 
-                            // 選択したセリフに他のキャラクター名が含まれていて、それが会話相手と同じ場合は再抽選する
-                            // さらに、パーティにいないキャラクターの名前が含まれているセリフも除外する
+                            // 会話の文脈に合わないセリフを除外する
+                            // 1. パーティにいないキャラクターの名前が含まれているセリフを除外
+                            // 2. 話し相手以外のキャラクターの名前が含まれているセリフを除外 (例: アカリがユイに話しかけているのに、ヒカリの名前が入ったセリフ)
                             let filteredLines = lines.filter(line => {
-                                const mentionedFixedName = allCharacterBlueprints.map(c => c.name).find(name => line.includes(name) && name !== char.name && name !== otherChar.name);
-                                if (mentionedFixedName && !partyMemberNames.includes(mentionedFixedName)) {
-                                    return false; // パーティにいないキャラの名前が含まれていたら除外
+                                // 話し手(char)と話し相手(otherChar)以外の名前を探す
+                                const thirdPartyName = allCharacterBlueprints
+                                    .map(c => c.name)
+                                    .find(name => name !== char.name && name !== otherChar.name && line.includes(name));
+                                if (thirdPartyName) {
+                                    return false; // 第三者の名前が含まれていたら、そのセリフは除外
                                 }
-
-                                const mentionedName = otherPartyNames.find(name => line.includes(name));
-                                return !mentionedName || mentionedName !== otherChar.name;
+                                return true; // 問題なければセリフを候補に残す
                             });
                             // フィルター後の候補がなくなってしまった場合は、元のリストから選ぶ
                             if (filteredLines.length === 0) filteredLines = lines;
@@ -4137,6 +4184,7 @@
                             isDefending: false,
                             hate: 0, // ファイター, ソーサラー, ナイト, メディック
                             statusEffects: {}, // 状態異常
+                            liberationCooldown: 0, // 解放イベント拒否クールダウン
                         })); // ファイター, ソーサラー, ナイト, メディック
                         gameState.party.forEach(p => p.heightLocked = false); // 身長固定フラグを初期化
                         gameState.golem = null;
@@ -4391,25 +4439,29 @@
 
                                 // Initial render of the inner structure
                                 card.innerHTML = `
+                            <div class="golem-status-container"></div>
+                            <div class="wall-status-container"></div>
                             <div class="character-stats w-full">
                                 <div class="stat-name" data-char-name="${char.name}">
-                                    <p class="font-bold text-sm truncate text-${char.themeColor}-700">${char.name}</p>
-                                    <p class="text-xs text-gray-600">Lv.${char.level} ${char.role}</p>
+                                    <p class="font-bold text-xs truncate text-${char.themeColor}-700">${char.name}</p>
+                                    <p class="text-[11px] text-gray-600">Lv.${char.level} ${char.role}</p>
                                 </div>
-                                <p class="text-xs stat-hp">HP: <span class="font-semibold">${char.currentHp}</span>/${char.maxHp}</p>
-                                <div class="w-full bg-gray-300 rounded-full h-2 my-1"><div class="hp-bar-inner bg-red-500 h-2 rounded-full" style="width: ${Math.max(0, char.currentHp / char.maxHp * 100)}%"></div></div>
-                                <p class="text-xs stat-mp">MP: <span class="font-semibold">${char.currentMp}</span>/${char.maxMp}</p>
-                                <div class="w-full bg-gray-300 rounded-full h-2 my-1"><div class="mp-bar-inner bg-blue-500 h-2 rounded-full" style="width: ${Math.max(0, char.currentMp / char.maxMp * 100)}%"></div></div>
-                                <p class="text-xs stat-height">身長: <span class="font-semibold">${char.height}cm</span> (${char.height - char.initialHeight >= 0 ? '+' : ''}${char.height - char.initialHeight})</p>
-                                <div class="wall-status-container mt-1"></div>
-                                <div class="golem-status-container mt-1"></div>
+                                <p class="text-[10px] stat-hp">HP: <span class="font-semibold">${char.currentHp}</span>/${char.maxHp}</p>
+                                <div class="w-full bg-gray-300 rounded-full h-1.5 my-0.5"><div class="hp-bar-inner bg-red-500 h-1.5 rounded-full" style="width: ${Math.max(0, char.currentHp / char.maxHp * 100)}%"></div></div>
+                                <p class="text-[10px] stat-mp">MP: <span class="font-semibold">${char.currentMp}</span>/${char.maxMp}</p>
+                                <div class="w-full bg-gray-300 rounded-full h-1.5 my-0.5"><div class="mp-bar-inner bg-blue-500 h-1.5 rounded-full" style="width: ${Math.max(0, char.currentMp / char.maxMp * 100)}%"></div></div>
+                                <p class="text-[11px] stat-height">身長: <span class="font-semibold">${char.height}cm</span> (${char.height - char.initialHeight >= 0 ? '+' : ''}${char.height - char.initialHeight})</p>
+                                <!-- 攻撃力と防御力の表示を追加 -->
+                                <p class="text-[11px] stat-atk">攻撃: <span class="font-semibold">0</span></p>
+                                <p class="text-[11px] stat-def">防御: <span class="font-semibold">0</span></p>
+                                <p class="text-[11px] stat-agi">素早: <span class="font-semibold">0</span></p>
                                 <div class="stat-statuses text-xs"></div>
                             </div>
                         `;
                             }
                             card.onclick = () => playerSelectAlly(index); // onclickを常に再設定
                             // Update card classes
-                            card.className = `character-card w-full sm:w-1/5 p-2 rounded-lg shadow-md border-4 border-${char.themeColor}-400 ${char.currentHp <= 0 ? 'opacity-50' : ''} ${char.bgClass || ''}`;
+                            card.className = `character-card w-full sm:w-1/5 p-1 rounded-lg shadow-md border-4 border-${char.themeColor}-400 ${char.currentHp <= 0 ? 'opacity-50' : ''} ${char.bgClass || ''}`;
 
                             // 身長に応じて背景の立ち絵を調整
                             const heightRatio = char.height / char.initialHeight;
@@ -4451,25 +4503,25 @@
                             }
 
                             // Update HP (only if not currently animating, or to ensure final state)
-                            const hpSpan = card.querySelector('.stat-hp .font-semibold');
+                            const hpSpan = card.querySelector('.stat-hp > .font-semibold');
                             if (hpSpan) hpSpan.textContent = char.currentHp;
                             // Update max HP text
                             const hpTextElement = card.querySelector('.stat-hp');
                             if (hpTextElement) {
-                                hpTextElement.innerHTML = `HP: <span class="font-semibold">${char.currentHp}</span>/${char.maxHp}`;
+                                hpTextElement.innerHTML = `HP: <span class="font-semibold">${char.currentHp}</span>/${char.maxHp}`; // text-[11px]は親要素で指定済み
                             }
 
                             const hpBarInner = card.querySelector('.hp-bar-inner');
                             if (hpBarInner) hpBarInner.style.width = `${Math.max(0, char.currentHp / char.maxHp * 100)}%`;
 
                             // Update MP
-                            const mpSpan = card.querySelector('.stat-mp .font-semibold');
+                            const mpSpan = card.querySelector('.stat-mp > .font-semibold');
                             if (mpSpan) mpSpan.textContent = char.currentMp;
                             const mpBarInner = card.querySelector('.mp-bar-inner');
                             // Update max MP text
                             const mpTextElement = card.querySelector('.stat-mp');
                             if (mpTextElement) {
-                                mpTextElement.innerHTML = `MP: <span class="font-semibold">${char.currentMp}</span>/${char.maxMp}`;
+                                mpTextElement.innerHTML = `MP: <span class="font-semibold">${char.currentMp}</span>/${char.maxMp}`; // text-[11px]は親要素で指定済み
                             }
                             if (mpBarInner) mpBarInner.style.width = `${Math.max(0, char.currentMp / char.maxMp * 100)}%`;
 
@@ -4479,7 +4531,57 @@
                             const heightDiffElement = card.querySelector('.stat-height'); // This is the parent <p>
                             if (heightDiffElement) {
                                 const diff = char.height - char.initialHeight;
-                                heightDiffElement.innerHTML = `身長: <span class="font-semibold">${char.height}cm</span> (${diff >= 0 ? '+' : ''}${diff})`;
+                                heightDiffElement.innerHTML = `身長: <span class="font-semibold">${char.height}cm</span> (${diff >= 0 ? '+' : ''}${diff})`; // text-[11px]は親要素で指定済み
+                            }
+
+                            // 攻撃力と防御力の表示を更新
+                            const effectiveStats = getEffectiveStats(char);
+                            const heightDiff = char.height - char.initialHeight; // 身長差
+                            let atkHeightBonus = 0;
+                            let defHeightBonus = 0;
+                            let agiHeightBonus = 0;
+
+                            // getEffectiveStatsのロジックに合わせてボーナス値を計算
+                            if (char.role === 'リーパー') {
+                                if (heightDiff > 0) atkHeightBonus = Math.floor(char.atk * (heightDiff / char.initialHeight * 0.8));
+                            } else if (char.role === 'サキュバス') {
+                                atkHeightBonus = Math.floor(char.atk * (heightDiff / char.initialHeight * 1.2));
+                                defHeightBonus = Math.floor(char.def * (heightDiff / char.initialHeight * 1.2));
+                            } else if (char.role === 'アルラウネ') {
+                                atkHeightBonus = Math.floor(char.atk * (heightDiff / char.initialHeight * 1.0));
+                                defHeightBonus = Math.floor(char.def * (heightDiff / char.initialHeight * 1.0));
+                            } else if (char.role === 'フェアリー') {
+                                if (heightDiff > 0) atkHeightBonus = Math.floor(char.atk * (heightDiff / char.initialHeight * 0.8));
+                            } else {
+                                // 上記以外の通常ジョブ
+                                atkHeightBonus = Math.floor(char.atk * (heightDiff / char.initialHeight * 0.8));
+                            }
+
+                            // 防御ボーナスはサキュバスとアルラウネ以外は共通
+                            if (char.role !== 'サキュバス' && char.role !== 'アルラウネ') {
+                                defHeightBonus = Math.floor(char.def * (heightDiff / char.initialHeight * 0.8));
+                            }
+
+                            // 素早さボーナス
+                            if (char.role === 'フェアリー') {
+                                agiHeightBonus = Math.floor(char.agi * (heightDiff / char.initialHeight * -3.0));
+                            } else {
+                                agiHeightBonus = Math.floor(char.agi * (heightDiff / char.initialHeight * -1.5));
+                            }
+
+                            const atkElement = card.querySelector('.stat-atk');
+                            if (atkElement) {
+                                atkElement.innerHTML = `攻撃: <span class="font-semibold">${effectiveStats.atk}</span> <span class="text-gray-500">(${atkHeightBonus >= 0 ? '+' : ''}${atkHeightBonus})</span>`;
+                            }
+
+                            const defElement = card.querySelector('.stat-def');
+                            if (defElement) {
+                                defElement.innerHTML = `防御: <span class="font-semibold">${effectiveStats.def}</span> <span class="text-gray-500">(${defHeightBonus >= 0 ? '+' : ''}${defHeightBonus})</span>`;
+                            }
+
+                            const agiElement = card.querySelector('.stat-agi');
+                            if (agiElement) {
+                                agiElement.innerHTML = `素早: <span class="font-semibold">${effectiveStats.agi}</span> <span class="text-gray-500">(${agiHeightBonus >= 0 ? '+' : ''}${agiHeightBonus})</span>`;
                             }
 
                             // ゴーレムのステータス表示
@@ -4487,7 +4589,7 @@
                             if (golemContainer) {
                                 if (char.role === 'サモナー' && gameState.golem && gameState.golem.hp > 0) {
                                     golemContainer.innerHTML = `
-                                <div class="golem-card-inner bg-gray-700/80 p-1 rounded text-white text-center border border-yellow-400">
+                                <div class="golem-card-inner text-white text-center">
                                     <p class="font-bold text-xs">ゴーレム HP: ${gameState.golem.hp}/${gameState.golem.maxHp}</p>
                                     <div class="w-full bg-gray-500 rounded-full h-1.5"><div class="bg-yellow-500 h-1.5 rounded-full" style="width: ${Math.max(0, gameState.golem.hp / gameState.golem.maxHp * 100)}%"></div></div>
                                 </div>
@@ -4503,7 +4605,7 @@
                                 const wall = gameState.walls.find(w => w.targetId === index);
                                 if (wall) {
                                     wallContainer.innerHTML = `
-                                <div class="wall-card-inner bg-stone-700/80 p-1 rounded text-white text-center border border-stone-400">
+                                <div class="wall-card-inner text-white text-center">
                                     <p class="font-bold text-xs">防壁 HP: ${wall.hp}/${wall.maxHp}</p>
                                     <div class="w-full bg-gray-500 rounded-full h-1.5"><div class="bg-stone-500 h-1.5 rounded-full" style="width: ${Math.max(0, wall.hp / wall.maxHp * 100)}%"></div></div>
                                 </div>`;
@@ -4583,7 +4685,6 @@
                             // アルラウネは全体的にステータスボーナスが高い
                             atk += Math.floor(char.atk * (heightDiff / char.initialHeight * 1.0));
                             def += Math.floor(char.def * (heightDiff / char.initialHeight * 1.0));
-                            agi += Math.floor(char.agi * (heightDiff / char.initialHeight * -1.0)); // 素早さ低下は少し緩やか
                         } else if (char.role === 'フェアリー') {
                             // フェアリーは身長が低くてもステータスが低下しない
                             if (heightDiff > 0) {
@@ -4593,12 +4694,13 @@
                             atk += Math.floor(char.atk * (heightDiff / char.initialHeight * 0.8));
                         }
                         def += Math.floor(char.def * (heightDiff / char.initialHeight * 0.8));
-                        agi += Math.floor(char.agi * (heightDiff / char.initialHeight * -1.5)); // 小さいほど素早い 
-                        if (char.role !== 'フェアリー') {
-                            agi += Math.floor(char.agi * (heightDiff / char.initialHeight * -1.5)); // 小さいほど素早い
-                        } else {
+                        if (char.role === 'フェアリー') {
                             // フェアリーは素早さボーナスが倍
                             agi += Math.floor(char.agi * (heightDiff / char.initialHeight * -3.0));
+                        } else if (char.role === 'アルラウネ') {
+                            agi += Math.floor(char.agi * (heightDiff / char.initialHeight * -1.0)); // 素早さ低下は少し緩やか
+                        } else {
+                            agi += Math.floor(char.agi * (heightDiff / char.initialHeight * -1.5)); // 小さいほど素早い
                         }
 
                         if (char.buffs && char.buffs.agi_up) agi *= 1.5;
@@ -4630,7 +4732,7 @@
                         return {
                             atk: Math.floor(atk),
                             def: Math.floor(def),
-                            agi: Math.floor(agi)
+                            agi: Math.max(0, Math.floor(agi)) // 素早さの下限を0に設定
                         };
                     }
 
@@ -4652,39 +4754,45 @@
                         });
                     }
 
-                    function advanceFloor() {
+                    async function advanceFloor() {
                         // --- リトルパニック！モード専用会話 ---
+                        // クールダウン処理
+                        gameState.party.forEach(p => {
+                            if (p.liberationCooldown > 0) {
+                                p.liberationCooldown--;
+                            }
+                        });
                         if (gameState.gameMode === 'little_panic') {
                             if (gameState.floor === 0) { // 1階に到達した直後
-                                playConversation(littlePanicConversations.floor1);
+                                await playConversation(littlePanicConversations.floor1);
                                 // この会話の後、通常のフロア進行処理に進む
                             } else if (gameState.gameMode === 'saint_march') {
                                 if (gameState.floor === 0) {
-                                    playConversation(saintMarchConversations.floor1);
+                                    await playConversation(saintMarchConversations.floor1);
                                 }
                             } else if (gameState.gameMode === 'treasure_map') {
                                 if (gameState.floor === 0) {
-                                    playConversation(treasureMapConversations.floor1);
+                                    await playConversation(treasureMapConversations.floor1);
                                 }
                             }
                             if (gameState.floor === 5) { // 6階に到達する前
                                 if (gameState.gameMode === 'little_panic') {
-                                    playConversation(littlePanicConversations.floor6);
+                                    await playConversation(littlePanicConversations.floor6);
                                 } else if (gameState.gameMode === 'treasure_map') {
                                     const lily = gameState.party[0]; // リリィは常にパーティの0番目
                                     const conversationKey = lily.isTransformed ?
                                         `floor6_${lily.role.toLowerCase()}` :
                                         'floor6_normal';
                                     if (treasureMapConversations[conversationKey]) {
-                                        playConversation(treasureMapConversations[conversationKey]);
+                                        await playConversation(treasureMapConversations[conversationKey]);
                                     }
                                 }
-                            } else if (gameState.floor === 11) { // 12階に到達する前
-                                playConversation(littlePanicConversations.floor12);
-                            } else if (gameState.floor === 23) { // 24階に到達する前
-                                playConversation(littlePanicConversations.floor24);
-                            } else if (gameState.floor === 28) { // 29階に到達する前
-                                playConversation(littlePanicConversations.floor29);
+                            } else if (gameState.floor === 11) { // 12階に到達する前 // ファイター, ソーサラー, ナイト, メディック
+                                await playConversation(littlePanicConversations.floor12);
+                            } else if (gameState.floor === 23) { // 24階に到達する前 // ファイター, ソーサラー, ナイト, メディック
+                                await playConversation(littlePanicConversations.floor24);
+                            } else if (gameState.floor === 28) { // 29階に到達する前 // ファイター, ソーサラー, ナイト, メディック
+                                await playConversation(littlePanicConversations.floor29);
                             }
                         }
 
@@ -4696,7 +4804,7 @@
                         if (gameState.floor === 1) {
                             // 「はじめから」モードの場合のみ導入会話を再生
                             if (gameState.gameMode === 'normal') {
-                                playConversation(normalModeConversations.floor1);
+                                await playConversation(normalModeConversations.floor1);
                                 return;
                             }
                             // 他のモードの1階イベントもここに追加可能
@@ -5137,8 +5245,7 @@
                             button.textContent = event.name;
                             button.onclick = () => {
                                 eventChoiceModal.classList.add('hidden');
-                                event.func();
-                                updatePartyStatus();
+                                executeEvent(event.func);
                             };
                             eventChoiceButtons.appendChild(button);
                         });
@@ -5173,18 +5280,7 @@
                         const shamePilloryEvent = {
                             name: "羞恥の張り付け",
                             func: foundShamePillory,
-                            weight: isAnyoneStripped && gameState.gameMode !== 'summer_live' ? 3 : 0, // サマーライブ中は発生しない
-                            // 新しいイベントの定義
-                            liberatedMonsterAttackEvent: {
-                                name: "魔物の奇襲",
-                                func: foundLiberatedMonsterAttack,
-                                weight: 0
-                            },
-                            liberatedTeaseEvent: {
-                                name: "仲間との会話",
-                                func: foundLiberatedTease,
-                                weight: 0
-                            }
+                            weight: isAnyoneStripped && gameState.gameMode !== 'summer_live' ? 3 : 0 // サマーライブ中は発生しない
                         };
                         const shrineOfPrayerEvent = {
                             name: "祈りのほこら",
@@ -5263,6 +5359,22 @@
                             highMouseHoleEvent,
                         ];
 
+                        // 新しいイベントの定義（サマーライブ専用）
+                        const liberatedMonsterAttackEvent = {
+                            name: "魔物の奇襲",
+                            func: foundLiberatedMonsterAttack,
+                            weight: 0
+                        };
+                        const liberatedTeaseEvent = {
+                            name: "仲間との会話",
+                            func: foundLiberatedTease,
+                            weight: 0
+                        };
+                        const liberatedPlayEvent = {
+                            name: "解放のじゃれあい",
+                            func: foundLiberatedPlay,
+                            weight: 0
+                        };
                         // サマータイム・スペシャルライブ！専用イベントをプールに追加
                         if (gameState.gameMode === 'summer_live') {
                             if (gameState.floor <= 30) {
@@ -5300,17 +5412,14 @@
                                     weight: 5
                                 });
                             }
-                            // 新しいイベントの定義
-                            events.push({
-                                name: "解放のじゃれあい",
-                                func: foundLiberatedPlay,
-                                weight: 0
-                            });
+                            // イベントをプールに追加
+                            events.push(liberatedMonsterAttackEvent, liberatedTeaseEvent, liberatedPlayEvent);
+
                             // 解放状態のキャラがいる場合、特別イベントの発生確率を設定
                             const isLiberated = gameState.party.some(p => p.isLiberatedStripped);
                             events.find(e => e.name === "魔物の奇襲").weight = isLiberated ? 5 : 0;
                             events.find(e => e.name === "仲間との会話").weight = isLiberated ? 5 : 0;
-                            // 「解放のじゃれあい」は解放状態のキャラが2人以上いる場合に発生
+                            // 「解放のじゃれあい」は解放状態のキャラが2人以上いる場合に発生するよう重みを設定
                             events.find(e => e.name === "解放のじゃれあい").weight = gameState.party.filter(p => p.isLiberatedStripped && p.currentHp > 0).length >= 2 ? 5 : 0;
                         }
 
@@ -5357,10 +5466,23 @@
                         }
                     }
 
+                    async function executeEvent(eventFunc) {
+                        dungeonCommands.classList.add('hidden');
+                        try {
+                            await eventFunc();
+                        } finally {
+                            // モーダルが表示されている場合や戦闘中の場合を除き、コマンドを再表示
+                            if (!modal.classList.contains('hidden') || !itemModal.classList.contains('hidden') || !levelUpModal.classList.contains('hidden') || !challengeModal.classList.contains('hidden') || !eventChoiceModal.classList.contains('hidden') || gameState.inBattle) {
+                                // 何もしない
+                            } else {
+                                dungeonCommands.classList.remove('hidden');
+                            }
+                        }
+                    }
+
                     function triggerRandomEvent() {
                         const chosenEvent = getRandomEvent();
-                        chosenEvent.func();
-                        updatePartyStatus();
+                        executeEvent(chosenEvent.func);
                     }
 
                     async function foundLiberatedMonsterAttack() {
@@ -5530,31 +5652,31 @@
                         }
                     }
 
-                    function triggerShrinkTrap() {
+                    async function triggerShrinkTrap() {
                         const target = getRandomPartyMember();
                         if (target.heightLocked) {
                             log(`${target.name}は不思議な力で守られており、罠の効果を受けなかった！`);
                             return;
                         }
                         const shrinkAmount = Math.floor(Math.random() * 11) + 10; // 10〜20cm縮む
-                        animateStatChange(target, 'height', -shrinkAmount, 'decrease');
+                        await animateStatChange(target, 'height', -shrinkAmount, 'decrease');
                         flashCard(target, 'yellow'); // Flash the card itself
                         log(`奇妙な罠が作動した！ ${target.name}の体が縮んでしまった！(身長-${shrinkAmount}cm)`);
                     }
 
-                    function triggerGrowTrap() {
+                    async function triggerGrowTrap() {
                         const target = getRandomPartyMember();
                         if (target.heightLocked) {
                             log(`${target.name}は不思議な力で守られており、光の影響を受けなかった！`);
                             return;
                         }
                         const growAmount = Math.floor(Math.random() * 11) + 10; // 10〜20cm伸びる
-                        animateStatChange(target, 'height', growAmount, 'increase');
+                        await animateStatChange(target, 'height', growAmount, 'increase');
                         flashCard(target, 'yellow');
                         log(`不思議な光が降り注いだ！ ${target.name}の体が巨大化してしまった！(身長+${growAmount}cm)`);
                     }
 
-                    function triggerDamageTrap() {
+                    async function triggerDamageTrap() {
                         const target = getRandomPartyMember();
                         const damage = Math.ceil(target.maxHp * 0.1); // 最大HPの10%ダメージ
                         let messages;
@@ -5572,7 +5694,7 @@
                             ];
                         }
                         log(messages[Math.floor(Math.random() * messages.length)]);
-                        dealDamage(target, damage);
+                        await dealDamage(target, damage);
                     }
 
                     function foundAltar() {
@@ -5600,11 +5722,13 @@
                                 } else {
                                     log("祭壇に捧げるものがなく、何も起こらなかった。");
                                 }
+                                dungeonCommands.classList.remove('hidden'); // コマンドを再表示
                             }
                         };
                         challengeDeclineButton.onclick = () => {
                             challengeModal.classList.add('hidden');
                             log("一行は怪しげな祭壇を後にして、先へ進んだ。");
+                            dungeonCommands.classList.remove('hidden'); // コマンドを再表示
                         };
                     }
 
@@ -5619,7 +5743,7 @@
                         log(`全員の攻撃力が一時的に上昇した！`);
                     }
 
-                    function foundClothes() {
+                    async function foundClothes() {
                         const strippedMembers = gameState.party.filter(p => p.statusEffects.stripped);
                         if (strippedMembers.length > 0) {
                             // 衣装状態に応じてメッセージを変更
@@ -5636,6 +5760,7 @@
                             }
 
                             log(foundMessage);
+                            await new Promise(resolve => setTimeout(resolve, 1500));
                             strippedMembers.forEach(member => {
                                 delete member.statusEffects.stripped;
                                 // 解放状態も同時に解除
@@ -5748,7 +5873,7 @@
                             return; // 全員解放イベントを実行したらここで終了
                         }
 
-                        const potentialTargets = gameState.party.filter(p => p.currentHp > 0 && !p.statusEffects.stripped && !p.isLiberatedStripped);
+                        const potentialTargets = gameState.party.filter(p => p.currentHp > 0 && !p.statusEffects.stripped && !p.isLiberatedStripped && (!p.liberationCooldown || p.liberationCooldown <= 0));
                         if (potentialTargets.length === 0) {
                             nothingHappened();
                             return;
@@ -5777,6 +5902,7 @@
                             celestiaEventModal.classList.add('hidden');
                             const stopLine = (conversations[target.name] && conversations[target.name].beach_liberation_stop && conversations[target.name].beach_liberation_stop[0]) || "ちぇっ、つまんないの。";
                             log(`${target.name}「${stopLine}」`);
+                            target.liberationCooldown = 5; // 5フロアのクールダウンを設定
                         };
                     }
 
@@ -5821,7 +5947,7 @@
                             return; // 全員解放イベントを実行したらここで終了
                         }
 
-                        const potentialTargets = gameState.party.filter(p => p.currentHp > 0 && !p.statusEffects.stripped && !p.isLiberatedStripped);
+                        const potentialTargets = gameState.party.filter(p => p.currentHp > 0 && !p.statusEffects.stripped && !p.isLiberatedStripped && (!p.liberationCooldown || p.liberationCooldown <= 0));
                         if (potentialTargets.length === 0) {
                             nothingHappened();
                             return;
@@ -5850,6 +5976,8 @@
                             celestiaEventModal.classList.add('hidden');
                             const stopLine = (conversations[target.name] && conversations[target.name].onsen_liberation_stop && conversations[target.name].onsen_liberation_stop[0]) || "うん、わかった。もうちょっとだけこのままでいさせて。";
                             log(`${target.name}「${stopLine}」`);
+                            target.liberationCooldown = 5; // 5フロアのクールダウンを設定
+                            log(`（${target.name}はしばらくの間、大胆な気分にはならないだろう…）`);
                         };
                     }
 
@@ -7432,12 +7560,14 @@
                                         target.buffs.atk_up = 3; // 3ターン攻撃力アップ
                                         flashCard(target, 'yellow');
                                         log(`${caster.name}は${target.name}に${skill.name}を唱えた！ 攻撃力が上がった！`);
+                                    } else if (skill.effect === 'protect') {
+                                        target.buffs.protect = 3; // 3ターン防御力アップ
+                                        flashCard(target, 'yellow');
+                                        log(`${caster.name}は${target.name}に${skill.name}を唱えた！ 防御力が上がった！`);
                                     } else if (skill.effect === 'def_down') {
                                         target.buffs.def_down = 3; // 3ターン防御力ダウン
                                         flashCard(target, 'yellow');
                                         log(`${caster.name}は${target.name}に${skill.name}を唱えた！ 防御力が下がった！`);
-                                    } else { // 既存のプロテクト
-                                        // このelseブロックは不要になりました。下の分岐で処理されます。
                                     }
                                     break;
                                 }
@@ -7873,11 +8003,25 @@
                                 }
                             case 'summon_golem':
                                 { // ゴーレム召喚
-                                    const golemHp = Math.ceil(caster.maxHp * skill.power);
+                                    let golemHp = Math.ceil(caster.maxHp * skill.power);
+                                    let golemMaxHp = golemHp;
+
+                                    // 術者にウォールがあるかチェック
+                                    const casterIndex = gameState.party.indexOf(caster);
+                                    const wallIndex = gameState.walls.findIndex(w => w.targetId === casterIndex);
+                                    if (wallIndex !== -1) {
+                                        const wall = gameState.walls[wallIndex];
+                                        log(`${caster.name}は自らの防壁を破壊し、ゴーレムの素材にした！`);
+                                        golemHp += wall.hp;
+                                        golemMaxHp += wall.maxHp;
+                                        // ウォールを削除
+                                        gameState.walls.splice(wallIndex, 1);
+                                    }
+
                                     gameState.golem = {
                                         name: 'ゴーレム',
                                         hp: golemHp,
-                                        maxHp: golemHp
+                                        maxHp: golemMaxHp
                                     };
                                     log(`${caster.name}は${skill.name}を唱えた！パーティの前にゴーレムが現れた！`);
                                     updatePartyStatus();
@@ -7933,13 +8077,20 @@
                             case 'guardian_wall':
                                 {
                                     const wallHp = Math.ceil(caster.maxHp * (caster.buffs.guardian_high ? skill.power * 1.5 : skill.power));
-                                    gameState.walls.push({
-                                        targetId: gameState.party.indexOf(target),
-                                        hp: wallHp,
-                                        maxHp: wallHp
-                                    });
+                                    // 対象がゴーレム持ちのサモナーかチェック
+                                    if (target.role === 'サモナー' && gameState.golem && gameState.golem.hp > 0) {
+                                        gameState.golem.hp += wallHp;
+                                        gameState.golem.maxHp += wallHp;
+                                        log(`${caster.name}は${target.name}のゴーレムに防壁の力を注ぎ込んだ！ ゴーレムのHPが強化された！`);
+                                    } else {
+                                        gameState.walls.push({
+                                            targetId: gameState.party.indexOf(target),
+                                            hp: wallHp,
+                                            maxHp: wallHp
+                                        });
+                                        log(`${caster.name}は${target.name}の前に${skill.name}を展開した！`);
+                                    }
                                     if (caster.buffs.guardian_high) delete caster.buffs.guardian_high;
-                                    log(`${caster.name}は${target.name}の前に${skill.name}を展開した！`);
                                     break;
                                 }
                             case 'guardian_wall_party':
@@ -7948,11 +8099,18 @@
                                     gameState.party.forEach((p, index) => {
                                         if (p.currentHp > 0) {
                                             const wallHp = Math.ceil(caster.maxHp * skill.power);
-                                            gameState.walls.push({
-                                                targetId: index,
-                                                hp: wallHp,
-                                                maxHp: wallHp
-                                            });
+                                            // 対象がゴーレム持ちのサモナーかチェック
+                                            if (p.role === 'サモナー' && gameState.golem && gameState.golem.hp > 0) {
+                                                gameState.golem.hp += wallHp;
+                                                gameState.golem.maxHp += wallHp;
+                                                log(`${p.name}のゴーレムが防壁の力を吸収し、強化された！`);
+                                            } else {
+                                                gameState.walls.push({
+                                                    targetId: index,
+                                                    hp: wallHp,
+                                                    maxHp: wallHp
+                                                });
+                                            }
                                         }
                                     });
                                     break;
@@ -8115,7 +8273,9 @@
                                 }
                             case 'alchemist_craft':
                                 { // マジッククラフト
-                                    const quantity = Math.floor(Math.random() * 2) + 1; // 1〜2個
+                                    // レベル4ごとに最大作成数が1増える (Lv1-3: 1-2個, Lv4-7: 1-3個, ...)
+                                    const maxQuantity = 2 + Math.floor((caster.level - 1) / 4);
+                                    const quantity = Math.floor(Math.random() * maxQuantity) + 1;
                                     const itemToCraft = Math.random() < 0.5 ? 'glass_blade' : 'crazy_bomb';
                                     const itemName = itemBlueprints[itemToCraft].name;
 
@@ -8402,18 +8562,29 @@
                                 log(`${target.name}の身長が${itemInfo.power}cmになった！`);
                                 break;
                             case 'damage':
-                                if (itemInfo.target === 'enemies') {
-                                    const damagePromisesItem = [];
-                                    for (const t of target) {
-                                        damagePromisesItem.push(dealDamage(t, itemInfo.power));
+                                {
+                                    let baseDamage = itemInfo.power;
+                                    let floorBonus = 0;
+                                    if (item.id === 'glass_blade') {
+                                        floorBonus = gameState.floor * 5;
+                                    } else if (item.id === 'crazy_bomb') {
+                                        floorBonus = gameState.floor * 3;
                                     }
-                                    log(`敵全体に${itemInfo.power}のダメージ！`);
-                                    await Promise.all(damagePromisesItem);
-                                } else {
-                                    await dealDamage(target, itemInfo.power); // Await damage
-                                    log(`${target.name}に${itemInfo.power}の特大ダメージ！`);
+                                    const finalDamage = baseDamage + floorBonus;
+
+                                    if (itemInfo.target === 'enemies') {
+                                        const damagePromisesItem = [];
+                                        for (const t of target) {
+                                            damagePromisesItem.push(dealDamage(t, finalDamage));
+                                        }
+                                        log(`敵全体に${finalDamage}のダメージ！`);
+                                        await Promise.all(damagePromisesItem);
+                                    } else {
+                                        await dealDamage(target, finalDamage); // Await damage
+                                        log(`${target.name}に${finalDamage}の特大ダメージ！`);
+                                    }
+                                    break;
                                 }
-                                break;
                             case 'restore_mp_full':
                                 const mpToRestore = target.maxMp - target.currentMp;
                                 await animateStatChange(target, 'mp', mpToRestore, 'increase');
@@ -10344,9 +10515,10 @@
                     if (target.blessings && Object.keys(target.blessings).length > 0) {
                         blessingHtml += '<div class="mt-3 pt-3 border-t border-gray-300 space-y-1">';
                         blessingHtml += '<p class="font-bold text-amber-700">授かった祝福</p>';
-                        Object.values(target.blessings).forEach(blessing => {
-                            if (blessing && blessing.name && blessing.description) {
-                                blessingHtml += `<div class="p-2 bg-amber-50 rounded-md"><p class="font-semibold text-amber-800">${blessing.name}</p><p class="text-sm text-amber-700">${blessing.description}</p></div>`;
+                        Object.keys(target.blessings).forEach(blessingKey => {
+                            const blessingInfo = blessings[blessingKey];
+                            if (blessingInfo) {
+                                blessingHtml += `<div class="p-2 bg-amber-50 rounded-md"><p class="font-semibold text-amber-800">${blessingInfo.name}</p><p class="text-sm text-amber-700">${blessingInfo.description}</p></div>`;
                             }
                         });
                         blessingHtml += '</div>';
@@ -10365,7 +10537,8 @@
 
                     // 立ち絵の表示
                     const imgDiv = document.createElement('div');
-                    imgDiv.className = `absolute inset-0 bg-no-repeat opacity-80 ${target.bgClass || blueprint.bgClass}`;
+                    const bgClass = target.bgClass || blueprint.bgClass;
+                    imgDiv.className = `absolute inset-0 bg-no-repeat ${bgClass}`;
                     imgDiv.style.backgroundSize = 'contain';
                     imgDiv.style.backgroundPosition = 'center';
                     scanModalImageContainer.appendChild(imgDiv);
