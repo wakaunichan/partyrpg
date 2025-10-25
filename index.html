@@ -554,6 +554,16 @@
             </div>
         </div>
 
+        <!-- 願い星イベントモーダル -->
+        <div id="wishing-star-modal" class="hidden absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-lg p-8 shadow-2xl max-w-2xl w-full">
+                <h2 id="wishing-star-modal-title" class="text-3xl font-bold mb-2 text-center text-cyan-600">願い星</h2>
+                <p id="wishing-star-modal-prompt" class="mb-6 text-center">願い事をする仲間を一人選んでください。</p>
+                <div id="wishing-star-char-select" class="grid grid-cols-2 sm:grid-cols-4 gap-4"></div>
+                <div id="wishing-star-options" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            </div>
+        </div>
+
         <div id="item-modal" class="hidden absolute inset-0 bg-black/70 flex items-center justify-center z-40 p-4">
             <div class="bg-white rounded-lg p-6 text-left shadow-2xl max-w-md w-full">
                 <h2 class="text-2xl font-bold mb-4">アイテム</h2>
@@ -629,7 +639,6 @@
                     <button data-mode="indecent" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-pink-700">痴態騒ぎ</strong><span class="block text-sm text-gray-600">全員が脱衣状態で開始。服は手に入らず、恥ずかしさに慣れることもない。ナイトとサムライは参加不可。</span></button>
                     <button data-mode="dwarves" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-green-700">小人族の戦い</strong><span class="block text-sm text-gray-600">全員の身長が10cmの状態で冒険を開始する。</span></button>
                     <button data-mode="unstable_bodies" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-cyan-700">流転の体躯</strong><span class="block text-sm text-gray-600">戦闘に勝利するたび、生存者全員の身長が-50cm～+50cmの範囲でランダムに変動する。</span></button>
-                    <button data-mode="fixed_path" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-indigo-700">決まった道程</strong><span class="block text-sm text-gray-600">5の倍数階以外の探索時、2つのイベントから好きな方を選んで進める。</span></button>
                     <button data-mode="veterans" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-purple-700">歴戦の勇者たち</strong><span class="block text-sm text-gray-600">全員レベル4の状態で冒険を開始する。</span></button>
                     <button data-mode="saint_march" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-yellow-500">聖女の行進</strong><span class="block text-sm text-gray-600">特別なジョブ「聖女」ひとりで30階の踏破を目指す。彼女はターン開始時にHPとMPが回復し、脱衣を無効化する。</span></button>
                     <button data-mode="treasure_map" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-lime-700">秘宝の地図</strong><span class="block text-sm text-gray-600">特別なジョブ「トレジャーハンター」ひとりで30階の踏破を目指す。彼女は魔物に変身する能力を持つ。</span></button>
@@ -748,6 +757,14 @@
                     <div class="p-3 border rounded-lg">
                         <button id="device-blue-button" class="action-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg w-full">青いボタン</button>
                         <p class="text-sm text-gray-600 mt-2">二人の身長を平均化する。</p>
+                    </div>
+                    <div id="device-green-button-container" class="hidden p-3 border rounded-lg">
+                        <button id="device-green-button" class="action-button bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg w-full">緑のボタン</button>
+                        <p class="text-sm text-gray-600 mt-2">味方ひとりの身長を100cm伸ばす。</p>
+                    </div>
+                    <div id="device-white-button-container" class="hidden p-3 border rounded-lg">
+                        <button id="device-white-button" class="action-button bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg shadow-lg w-full">白いボタン</button>
+                        <p class="text-sm text-gray-600 mt-2">味方ひとりの能力を永続的に強化する。</p>
                     </div>
                     <button id="device-ignore-button" class="action-button bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg mt-2">無視する</button>
                 </div>
@@ -909,6 +926,10 @@
                     const deviceRedButton = document.getElementById('device-red-button');
                     const deviceBlueButton = document.getElementById('device-blue-button');
                     const deviceIgnoreButton = document.getElementById('device-ignore-button');
+                    const deviceGreenButtonContainer = document.getElementById('device-green-button-container');
+                    const deviceGreenButton = document.getElementById('device-green-button');
+                    const deviceWhiteButtonContainer = document.getElementById('device-white-button-container');
+                    const deviceWhiteButton = document.getElementById('device-white-button');
                     const twoMemberSelectModal = document.getElementById('two-member-select-modal');
                     const twoMemberSelectList = document.getElementById('two-member-select-list');
                     const twoMemberSelectConfirm = document.getElementById('two-member-select-confirm');
@@ -933,6 +954,12 @@
                     const blessingCharSelectList = document.getElementById('blessing-char-select-list');
                     const blessingOptionsList = document.getElementById('blessing-options-list');
 
+                    // 願い星イベントモーダル
+                    const wishingStarModal = document.getElementById('wishing-star-modal');
+                    const wishingStarModalPrompt = document.getElementById('wishing-star-modal-prompt');
+                    const wishingStarCharSelect = document.getElementById('wishing-star-char-select');
+                    const wishingStarOptions = document.getElementById('wishing-star-options');
+
                     // 背景画像のURLを定数化
                     const DEFAULT_DUNGEON_BG = "url('https://image.pollinations.ai/prompt/fantasy%20rpg%20dungeon,%20dark,%20mysterious,%20glowing%20runes,%20stone%20columns,%20roots,%20moss,%20pathway,%20digital%20painting')";
                     const SUMMER_BEACH_BG = "url('https://image.pollinations.ai/prompt/beautiful%20anime%20style%20beach,%20sparkling%20ocean,%20white%20sand,%20blue%20sky,%20summer,%20palm%20trees,%20digital%20painting')";
@@ -956,7 +983,11 @@
                         triggeredSpecialConvos: [],
                         dungeonBackground: DEFAULT_DUNGEON_BG, // 背景画像をgameStateで管理
                         bellesPrivateCostumeEventTriggered: false, // 闘争令嬢プライベート衣装イベント用フラグ
+                        summerBeachAllLiberatedTriggered: false, // サマーライブビーチ全員解放イベント用フラグ
+                        summerOnsenAllLiberatedTriggered: false, // サマーライブ温泉全員解放イベント用フラグ
                         bellesReviveEventTriggered: false, // 闘争令嬢復活イベント用フラグ
+                        wishingStarNoClothes: false, // 願い星イベントで服発見を無効化するフラグ
+                        nextBattleIsImitation: false, // 模倣の呪いフラグ
                     };
 
                     const allCharacterBlueprints = [{
@@ -2195,6 +2226,7 @@
                             stripped_shrunk: ["えぇ！？小さくなっちゃった上に、この格好！？もう、どうしたらいいのー！", "恥ずかしいけど、小さくなったから隠れやすいかも…？いや、やっぱり恥ずかしい！", "こんなに小さいのに、服がないなんて…！敵に見つかったらどうしよう！", "誰か、私を隠してー！小さすぎて、余計に目立っちゃうよ！"],
                             solo_stripped_tiny: ["こんなに小さくて、服もないなんて…！岩陰に隠れていよう…。", "（こそこそ…）誰にも見つかりませんように…！", "（しくしく…）もう、お嫁にいけないよぉ…。", "（じっ…）敵が通り過ぎるまで、息を潜めていよう…。", "このサイズなら、葉っぱ一枚で隠れるかな…？"],
                             fairy_shrunk: ["妖精さんみたいでしょ！えへへ、なんだか楽しいな！", "このサイズなら、どんな隙間でも探検できちゃう！冒険の始まりだ！", "見てみて！指先サイズのアカリだよ！最強に可愛い！"],
+                            liberated: ["ふっふーん！見てみて、これが本当の私！", "もう何も隠すものなんてない！かかってきなさい！", "なんだか、すっごく身軽で、どこまでも飛んでいけそう！"],
                             dollhouse_explore: ["わーい、ミニチュアのお家だ！探検、探検！", "何かお宝、隠されてないかな？わくわくする！", "おじゃましまーす！ちっちゃくて可愛いお家だね！"],
                             cracked_rock_break: ["うおおお！この岩、私が粉々にしてやるー！", "邪魔だよー！えいっ！", "これで道が開けたね！"],
                             allyNew: ["{name}、よろしくね！私がしっかり守ってあげる！", "新しい仲間だ！{name}、一緒に頑張ろうね！"],
@@ -2246,6 +2278,7 @@
                             allyNew: ["…{name}か。よろしく。足を引っ張るなよ。", "…新しい仲間。{name}、君の実力を見せてもらう。"],
                             stripped_shrunk: ["…体が縮み、さらにこの状態。…魔力集中が困難だ。", "…この状況で、敵に遭遇すれば…最悪だ。", "…この小ささで、この格好。…隠れる場所を探す。", "…恥辱。だが、この状況を乗り越えねば。"],
                             solo_stripped_tiny: ["…この小ささで、この格好。…屈辱だ。", "…物陰に隠れる。気配を消せば、見つかることはない。", "…早く、この状況を脱したい。", "…（魔導書を盾のようにして、体を隠している）"],
+                            liberated: ["…これが、真理に近い姿。", "…魔力の流れを、肌で直接感じる。悪くない。", "…無駄な装飾は、思考の妨げになる。"],
                             dollhouse_explore: ["…この家、精巧な作りだ。調査の価値がある。", "…微弱な魔力の残滓を感じる。何かあるな。", "…侵入する。何者かの生活痕跡か。"],
                             cracked_rock_break: ["…魔力で、内部から破壊する。", "…道を開ける。", "…邪魔。"],
                             fairy_shrunk: ["…世界の解像度が上がったようだ。全てが鮮明に見える。", "…魔力の流れが、いつもより肌で感じられる。悪くない。", "…この体、エーテルの循環が最適化されている。"],
@@ -2300,6 +2333,7 @@
                             allyGrown: ["おぉ、{name}、見上げるほど大きくなったじゃないか！頼もしいね！", "{name}、あんまり大きいと敵に見つかりやすいから気をつけな。"],
                             allyNew: ["お、新しい仲間かい。{name}、よろしくな。あたしがしっかり守ってやるよ。", "ようこそ、{name}。歓迎するよ。"],
                             // シズカは脱衣状態にならないため、stripped_shrunkも発生しない
+                            allyLiberated: ["おやおや、{name}。随分と開放的じゃないか。風邪ひくんじゃないよ。", "{name}、その格好…何か吹っ切れたのかい？まあ、あんたがいいならあたしは何も言わないけどね。", "はは、大胆だねぇ。敵もびっくりして逃げ出すんじゃないか？"],
                             // シズカは脱衣状態にならないため、stripped_pairは発生しない
                             dollhouse_explore: ["はは、こりゃまた可愛らしい家だねぇ。誰か住んでるのかい？", "よし、ちょっと失礼して中を拝見させてもらうよ。", "こんな小さな家にも、暮らしがあるのかねぇ。"],
                             cracked_rock_break: ["はっはっは！あたしのでかさをなめてもらっちゃ困るよ！", "どきな！こんな岩、盾の一撃で十分さ！", "ふんっ！…よし、道が開いたね。"],
@@ -2354,6 +2388,7 @@
                             stripped_shrunk: ["ひゃああっ！小さくなった上に、こんな格好だなんて…！もう、泣いちゃいそうですぅ…！", "だ、誰か、私を隠してください…！小さすぎて、余計に目立っちゃいます…！", "こんなに小さいのに、服がないなんて…！敵に見つかったらどうしましょう…！", "恥ずかしいですぅ…！でも、回復はちゃんとしますから…！"],
                             solo_stripped_tiny: ["ふぇぇ…こんなに小さくて、お洋服もないなんて…！石の後ろに隠れてます…。", "（きゅるん…）誰か、助けてください…。", "（ふるふる…）寒くて、恥ずかしいですぅ…。", "もう、涙で前が見えません…。", "（ぽつん…）"],
                             dollhouse_explore: ["わぁ、お人形さんのお家みたいです！とっても可愛い！", "おじゃまします！何か困っていることはありませんか？", "綺麗なお家…！私もこんなお家に住んでみたいです！"],
+                            liberated: ["は、はいぃ…！こ、これが、私の覚悟です！", "も、もう何も怖くありません！みんなを、守るためなら…！", "なんだか、心がすーっとして…祈りが、もっと深くなった気がします…！"],
                             cracked_rock_break: ["わわっ！こんなに大きくなっちゃったんですから、これくらい！", "えいっ！…わー！壊れちゃいました！", "みなさんのために、頑張ります！"],
                             fairy_shrunk: ["妖精さんになっちゃいました！なんだか、飛べそうな気がします！", "小さくても、ヒールはちゃんと届きますからね！安心してください！", "わあ、お花畑にいるみたいです！綺麗…！"],
                             allyStripped_shrunk: ["きゃっ！{name}さん、小さくなった上にその格好ですか！？私が守りますから！", "{name}さん、大丈夫ですか！？小さくて可愛いけど、その格好は…！", "シズカさん、早く敵を倒してください！{name}さんがかわいそうです！"],
@@ -2412,8 +2447,9 @@
                             summer_onsen_costume_shrunk: ["わわっ、タオルのまま小さくなっちゃいました…！これじゃあ、タオルに埋もれちゃいますぅ…！", "この格好で小さいと、湯船で溺れちゃいそうです…！"],
                             summer_onsen_costume_stripped: ["ひゃあああっ！？タオルまで取られちゃうなんて…！もう、隠すものが何も…！", "ふぇぇ…！み、見ないでくださいぃ…！うぅ…！"],
                             summer_onsen_costume_grown: ["わわっ、タオルのまま大きくなっちゃいました！なんだか、お相撲さんみたいです…！", "この格好で大きいと、タオルがはだけちゃいそうで、すごく心配です…！"],
+                            liberated_beach: ["太陽の光が、私のすべてを照らしてくれます…！なんだか、女神様になったみたいです…！", "この格好なら、もっとたくさんの人を癒せる気がします！えへへ！"],
+                            liberated_onsen: ["温泉の湯気が、私を優しく包んでくれます…。もう、何も恥ずかしくなんてありません…。", "このまま、自然と一つになりたいです…。ふふっ。"],
                         },
-                        // ベアトリス (アルケミスト): 知的、大人、丁寧語。
                         // サマータイム・スペシャルライブ！専用掛け合い
                         summer_beach_pair: [{
                             chars: ['リリカ', 'ユイ'],
@@ -2542,6 +2578,7 @@
                             chars: ['リリィ', 'ユイ', 'リリカ', 'ミコ'],
                             lines: ["ねえ、みんなで恋バナとかしない？こういう時の定番でしょ！", "こ、恋バナですか！？そ、そんな、私には…！", "いいねー！じゃあまずリリィちゃんから！", "えーっ！？ミコからがいい！"]
                         }, ],
+                        // ベアトリス (アルケミスト): 知的、大人、丁寧語。
                         'ベアトリス': {
                             default: ["ふむ、このダンジョンの構造、興味深いですね。", "皆さん、消耗品は足りていますか？私のほうでいくつか合成できますが。", "この空気の淀み…錬金術の素材になりそうな気配がしますわ。", "アカリさん、あまり突っ走ると危険ですよ。", "ヒカリさん、その魔導書、少し見せてもらっても？", "シズカさん、その大盾、素晴らしいですね。どんな金属で？", "ユイさん、いつも助かりますわ。ありがとう。", "リリカさん、その舞、戦場を和ませますわね。", "サクヤさん、その剣筋、見事ですわ。", "シャオメイさん、その拳、岩をも砕きそうですね。"],
                             lowHp: ["あら…少し計算が狂いましたわね。", "大丈夫です。まだ研究の途中ですから。", "この程度の傷、ポーションでどうにでもなりますわ。"],
@@ -2561,6 +2598,7 @@
                             allyNew: ["新しい仲間…{name}さん、ですわね。あなたの能力、見せていただきましょう。"],
                             stripped_shrunk: ["…これは、想定外の事態ですわ。小さくて、服もないなんて。", "…隠れる場所を探しませんと。このままでは実験どころではありませんわ。"],
                             solo_stripped_tiny: ["あらあら…これは、非常に非合理的な状況ですわね。", "（フラスコの後ろに隠れて、体を丸めている）", "この状況、錬金術でどうにかならないかしら…？", "…誰か来たら、ネズミのふりをしましょうか。"],
+                            liberated: ["ふふ、これぞ機能美の極致ですわ。無駄な装飾を排した、完璧なフォルム…。", "私の知性も、肉体も、全てを白日の下に晒しましょう。さあ、観察なさい。", "この方が、薬品の調合もスムーズですわ。合理的です。"],
                             dollhouse_explore: ["ふむ、この家の建材、興味深いですわね。分析の価値がありそうですわ。", "失礼しますわよ。何か珍しい素材はないかしら…？", "このサイズ感…ドールハウスの設計にも応用できそうですわね。"],
                             cracked_rock_break: ["この岩の組成なら…この薬品で脆くなるはずですわ。ほら。", "ふふ、力だけが全てではありませんのよ。", "錬金術にかかれば、このような障害、無いに等しいですわ。"],
                             fairy_shrunk: ["ふふ、この視点、新しい発見がありそうですわ。", "世界の構成要素を、よりミクロな視点で観察できる…素晴らしいですわ！", "この体、空気抵抗が最小限ですわね。移動が効率的です。"],
@@ -2612,6 +2650,7 @@
                             allyNew: ["新しいファン…じゃなくて、仲間だね！{name}ちゃん、よろしくね！リリカが最高のステージを見せてあげる！"],
                             stripped_shrunk: ["ひゃあ！ちっちゃい上にこの格好は、さすがにマズいよぉ！", "こ、これじゃあ、ただの恥ずかしい子だよぉ…！早く服を見つけなきゃ！"],
                             solo_stripped_tiny: ["ひゃーん！こんな姿、誰にも見せられないよぉ！", "（きのこの傘の下に隠れて、膝を抱えている）", "リリカのアイドル生命、終わっちゃうかも…！", "でも…これも新しいキャラ付けってことにすれば…！ううん、無理！"],
+                            liberated: ["みんなー！見てー！これがリリカの最終形態だよ！", "もう何も隠さない！リリカの全部、受け止めて！", "ふふん、これぞ究極のファンサービスってね！"],
                             dollhouse_explore: ["きゃー！可愛いお家！リリカの新しいステージにぴったりじゃない？", "おじゃましまーす！ここでゲリラライブしちゃうよー！", "見てみて！このお家、リリカのドールハウスみたい！"],
                             cracked_rock_break: ["みんなー！リリカのパワフルなステージ、見ててね！せーのっ！", "こんな岩、リリカの情熱で溶かしちゃう！", "これでリリカのステージが広くなったね！"],
                             fairy_shrunk: ["ミニミニリリカだよー！みんな、ちゃんと見ててね！", "このサイズなら、マスコットとしてデビューできちゃうかも！", "ポケットに入れてくれたら、そこでスペシャルライブしちゃうよ！"],
@@ -2669,6 +2708,8 @@
                             summer_onsen_costume_shrunk: ["あれれ？タオルのままちっちゃくなっちゃった！これじゃあ、タオルに埋もれちゃうよぉ！", "ミニミニ温泉アイドルだよ！みんな、ちゃんと見えてるー？"],
                             summer_onsen_costume_stripped: ["きゃー！タオルまで取られちゃうなんて！これはもう、R-18指定だよぉ！", "こ、これじゃあ、ファンのみんなに合わせる顔がないよぉ…！"],
                             summer_onsen_costume_grown: ["わーい、タオルのままおっきくなったよ！これなら、どんな温泉も貸し切り状態だね！", "この格好で大きいと、なんだかセクシーすぎて、みんながのぼせちゃうかも！"],
+                            liberated_beach: ["見てみて！太陽の光を浴びて、リリカ、キラキラでしょ！", "ビーチの視線は、リリカが独り占めしちゃうんだから！"],
+                            liberated_onsen: ["ふふっ、温泉の湯気で、もっとセクシーに見えちゃうかも？", "このまま温泉の女神様になっちゃおうかな！"],
                         },
                         // サクヤ (サムライ): 寡黙、求道的、武士。
                         'サクヤ': {
@@ -2688,6 +2729,7 @@
                             grown_max: ["…これ以上は、我が器を超えている。…だが、悪くない。", "…天に、手が届きそうだ。"],
                             allyGrown: ["…{name}、巨人か。頼もしい。", "…{name}、その巨体、狭い場所では足手まといにならぬよう。"],
                             allyNew: ["…{name}と申すか。拙者はサクヤ。…腕、見せてもらうぞ。", "…新たな仲間。互いに、背中は預けられるか。"],
+                            allyLiberated: ["…{name}、破廉恥な。…だが、その覚悟、悪くない。", "…無防備すぎる。敵に隙を見せるな。", "…その姿、何か意味があるのか。…まあ、よかろう。"],
                             // サクヤは脱衣状態にならない
                             allyStripped: ["…{name}、破廉恥な。…これを。拙者の羽織でよければ。", "…敵の所業、武士の風上にも置けぬ。斬る。"],
                             dollhouse_explore: ["…小さな家。…だが、造りはしっかりしている。侮れぬ。", "…失礼する。中に、何者かの気配は…ないか。", "…静寂。茶でも一服点てたいものだ。"],
@@ -2737,6 +2779,7 @@
                             allyNew: ["お！新しいの！オラはシャオメイだ！よろしくな！", "{name}か！強えのか？"],
                             stripped_shrunk: ["うおっ！？ちっちぇーし、服もねえ！これはさすがにマズいんじゃねえか？", "隠れるとこ探さねえと！風邪ひく！"],
                             solo_stripped_tiny: ["うおっ！？ちっちぇーし、服もねえ！これはさすがに…！", "（岩陰で体育座りしている）…腹、冷えるな…。", "誰か来たら、石ころのフリでもすっか…。", "は、腹減った…"],
+                            liberated: ["はっはっは！動きやすくて最高だぜ！", "これぞ、肉体言語ってやつよ！", "邪魔な服がねえから、拳がもっと速く出せる気がするぜ！"],
                             dollhouse_explore: ["お、ちっちぇー家だな！中に食いもんはあるか！？", "おーい！誰かいるかー！いねえなら入るぞー！", "なんだか秘密基地みてえで、わくわくすっぞ！"],
                             cracked_rock_break: ["うおおお！オラの拳、岩をも砕く！見てろよ！", "邪魔だ、どけぇ！", "腹が減ってちゃ、岩も壊せねえからな！…ふんっ！"],
                             fairy_shrunk: ["うおー！ちっちぇー！でも、拳の重さは変わんねえぞ！", "このサイズ、速すぎて敵には見えねえんじゃねえか！？", "腹は減るな！"],
@@ -2773,6 +2816,7 @@
                             allyNew: ["私がエリザですわ。あなた、私の研究の役に立ちそうですわね。期待していますわよ。", "新しい仲間ですの？ふふ、せいぜい私の足手まといにならないようになさい。"],
                             stripped_shrunk: ["小さくて、この格好…！これは、私の経歴の汚点ですわ…！", "…隠れますわよ。ええ、合理的な判断ですわ。"],
                             solo_stripped_tiny: ["（こんな屈辱…！ありえませんわ…！）", "（物陰でうずくまっている）…早くこの状況を打開する薬を開発しませんと…。", "（誰か来たら、新種のキノコのフリをしますわ…）"],
+                            liberated: ["ふふ、これぞ究極の機能美。私の完璧な肉体を、存分に観察なさい。", "この方が動きやすいですし、体温調節も容易ですわ。実に合理的。", "さあ、私の研究の成果、その目に焼き付けなさい！"],
                             dollhouse_explore: ["あら、ドールハウスですの？私の研究室の模型作りの参考にさせていただきますわ。", "失礼。内部構造を調査させていただきますわよ。", "このサイズなら、人体の縮小モデルとしても有用ですわね。"],
                             cracked_rock_break: ["ふふ、私の特製薬を使えば、こんな岩、豆腐のようになりますわ。", "邪魔ですわね。さっさと片付けてしまいましょう。", "私の知性の前には、このような障害、無意味ですわ。"],
                             fairy_shrunk: ["素晴らしい！このサイズなら、人体の未知なる領域を探求できますわ！", "ふふ、私の知性がこの小さな体に凝縮されているのですわ。", "検体との距離が近い。観察にはもってこいですわね。"],
@@ -2824,6 +2868,7 @@
                             allyNew: ["私がルナよ。あなた、ツイてる？私と一緒に、最高のギャンブルをしましょう。", "新しい仲間ね。あなたに賭ける価値があるか、見極めさせてもらうわ。"],
                             stripped_shrunk: ["小さくて、この格好…！これは、さすがに計算外だわ…！", "…隠れるわよ。ええ、次のゲームのための戦略的撤退よ。"],
                             solo_stripped_tiny: ["（こんな屈辱…ありえないわ…！次の勝負で絶対に取り返してやる…！）", "（コインの影でうずくまっている）…ツイてない。流れが悪いわね…。", "（誰か来たら、新種のキノコのフリでもしてやろうかしら…）"],
+                            liberated: ["ふふ、面白いじゃない。全部見せた方が、勝負は盛り上がるってものよ。", "さあ、私のすべてを賭けるわ。あなたも、覚悟はいい？", "この方が、カードを隠す場所がなくて、フェアでいいでしょ？"],
                             dollhouse_explore: ["ふふ、面白いじゃない。この家にはお宝が眠ってる…そんな予感がするわ。", "オールインよ！きっと何かいいものが見つかるはず！", "失礼するわね。家探しは得意なのよ。"],
                             cracked_rock_break: ["この岩を壊せるかどうかに、私の運命、賭けてみるわ！", "ふふ、ツイてるわね。ちょうどいいところにヒビが入ってるじゃない。", "邪魔よ。どきなさい。"],
                             fairy_shrunk: ["ふふ、面白いじゃない。このサイズ、誰も私を警戒しないわ。最高のブラフね。", "サイコロの目で世界を見てるみたい。悪くないわ。", "カードの裏に隠れられるなんて、イカサマし放題じゃない！"],
@@ -2875,6 +2920,7 @@
                             allyNew: ["…クロエ。…あなたの魂、見せて。", "…よろしく。…あなたの最期、私が見届けてあげる。"],
                             stripped_shrunk: ["…小さくて、服もない。…これは、一番、死に近い。", "…隠れる。…誰にも、見つからないように。"],
                             solo_stripped_tiny: ["（…もう、消えてしまいたい…）", "（…影の中で、じっとしている）", "（…誰か来たら、石になる…）"],
+                            liberated: ["…服なんて、生者のためのもの。…私には、不要。", "…魂の形が、一番わかりやすい。…これでいい。", "…風が、肌を撫でる。…死者の囁きみたい。"],
                             dollhouse_explore: ["…小さな、魂の器。…誰が、住んでいたの？", "…おじゃまします。…静かね。…好き。", "…何か、残された想いは、ない？"],
                             cracked_rock_break: ["…この岩にも、魂はある。…でも、今は邪魔。", "…道を開けて。…お願い。", "…鎌で、少しずつ。"],
                             fairy_shrunk: ["…影と、一体になれる。…心地いい。", "…魂の囁きが、もっと近くで聞こえる。", "…この姿なら、誰にも気づかれずに、魂を狩れる。"],
@@ -2926,6 +2972,7 @@
                             allyNew: ["はじめまして！ミコだよ！こっちは相棒のモコ！{name}ちゃん、よろしくね！", "新しいお友達だ！{name}ちゃん、モンスター好き？"],
                             stripped_shrunk: ["ちっちゃくて、服もないなんて…！モコ、ミコのこと隠してー！", "これじゃあ、ただの迷子の子だよぉ…！"],
                             solo_stripped_tiny: ["（しくしく…）モコ、どうしよう…。", "（葉っぱの裏に隠れて、モコを抱きしめている）", "もう、おうちに帰りたいよぉ…"],
+                            liberated: ["わーい！なんだか、ミコもモンスターになった気分！", "この方が、モコともっと仲良くなれる気がする！", "見てみて！ミコ、元気いっぱいだよ！"],
                             dollhouse_explore: ["わーい！モコのお家みたい！おじゃまします！", "ちいさいモンスターさん、いませんかー？", "モコ、見て！ベッドもテーブルもみんなちっちゃいね！"],
                             cracked_rock_break: ["ゴーレムくん、お願い！この岩、壊して！", "モコ、危ないから下がっててね！せーのっ！", "サラマンダーくん、この岩、燃やしちゃえ！"],
                             fairy_shrunk: ["わーい！モコと同じ目線だ！お話しやすいね！", "このサイズなら、小さいモンスターさんとお友達になれるかも！", "モコの背中に乗って冒険だー！"],
@@ -2969,6 +3016,8 @@
                             summer_onsen_costume_shrunk: ["わわっ、タオルのままちっちゃくなっちゃった！おちょこのお風呂に入れそうだね！", "モコ、ミコのこと、タオルと間違えて持って行かないでね！"],
                             summer_onsen_costume_stripped: ["ひゃっ！？タオル取られちゃった！だめだよぉ、ゴーレムくん、隠してー！", "うぅ…こんな格好、恥ずかしいよぉ…！"],
                             summer_onsen_costume_grown: ["わー！タオルのままおっきくなった！これなら、露天風呂も小さく見えるかも！", "モコ、見て！ミコ、おっきいよー！タオル、足りるかな？"],
+                            liberated_beach: ["太陽さんとお友達になったみたい！ミコ、無敵だよ！", "この格好なら、お魚さんたちも仲間だって思ってくれるかな？"],
+                            liberated_onsen: ["温泉の神様と、お話しできちゃうかも！", "モコもミコも、ぽっかぽかだよー！"],
                         },
                         // レンカ (ネクロマンサー): ミステリアス、お姉さん、死者と対話。
                         'レンカ': {
@@ -2990,6 +3039,7 @@
                             allyNew: ["新しい魂…{name}、よろしくね。あなたの最期、私が見届けてあげる。", "ふふ、可愛い子。仲良くしましょうね。"],
                             stripped_shrunk: ["小さくて、服もないなんて…これは、さすがに想定外ね。", "…隠れましょうか。死者のように、気配を消して。"],
                             solo_stripped_tiny: ["（…これは、屈辱ね。あの敵の魂、必ず私のものにする…）", "（物陰で膝を抱えている）…寒い。死者の温もりが恋しいわ。", "（誰か来たら、ただの石ころのフリでもしましょうか…）"],
+                            liberated: ["ふふ、これぞ死者に最も近い姿。魂が、喜んでいるわ。", "この方が、魂たちとの対話がしやすいのよ。", "私のすべて、死者たちに捧げましょう。"],
                             dollhouse_explore: ["あら、可愛いお家。死者の魂はいないようね。…残念。", "ふふ、おじゃましますわ。何か面白いもの、残ってないかしら。", "この家、私のコレクションに加えるのも悪くないわね。"],
                             cracked_rock_break: ["ふふ、こんな岩、私のアンデッドたちに命令すれば一瞬よ。", "邪魔ね。魂ごと砕いてあげる。", "死の力の前には、岩も砂と同じよ。"],
                             fairy_shrunk: ["ふふ、魂の重さは変わらないもの。この姿も一興ね。", "死者の囁きが、より鮮明に聞こえるわ。悪くない。", "まるで魂そのものになった気分。面白いわね。"],
@@ -3034,6 +3084,7 @@
                             allyNew: ["新入りかい？ボクが先輩のイオリだ。よろしくな。ボクがしっかり守ってやる。", "ようこそ、{name}。歓迎するよ。"],
                             stripped_shrunk: ["うわぁ…！小さくて、この格好は…！もうダメだ…！", "…隠れる。ボクにはもう、みんなを守る資格なんて…ないかもしれない…。"],
                             solo_stripped_tiny: ["（…もう、だめだ…先輩失格だ…）", "（岩陰で蹲り、盾で体を隠している）", "（ごめん、みんな…）"],
+                            liberated: ["この体でも、守るという意志は変わらない！むしろ、覚悟は決まった！", "これがボクの覚悟だ！みんなは、ボクが絶対に守る！", "身軽になった分、もっと速くみんなの盾になれる！"],
                             dollhouse_explore: ["お、小さい家だな。中に誰かいるのか？ボクが守ってやるぞ！", "よし、偵察だ！先輩に任せなさい！", "秘密基地みたいで、ちょっとわくわくするな！"],
                             cracked_rock_break: ["みんな、下がってて！この岩は、ボクがなんとかする！", "先輩の力、見せてやる！うおおお！", "これくらい、ボクのウォールより脆いさ！"],
                             fairy_shrunk: ["この体でも、守る心は変わらない！むしろ、小回りが利いて守りやすい！", "先輩をなめるなよ！このサイズだからこそできる守り方があるんだ！", "盾に隠れるのが楽でいいな！"],
@@ -3079,6 +3130,7 @@
                             allyNew: ["はじめまして！コハルです！これから、よろしくお願いします！えへへ。", "新しいお仲間ですね！一緒に面白いこと、たくさん見つけましょうね！"],
                             stripped_shrunk: ["ひゃー！ちっちゃい上にこの格好は、さすがに…！もう、どうしたらいいんですかー！", "隠れる場所を探さないと！あ、でも小さいから隠れやすいかも？"],
                             solo_stripped_tiny: ["（うぅ…こんな姿、誰にも見られたくないです…）", "（葉っぱの裏で丸まってます…）", "（お母さーん…）"],
+                            liberated: ["わーい！なんだか、すっごく楽しい気分です！", "これがコハルの本当の姿です！えへへ！", "なんだか、すごいハプニングが起こりそうな予感がします！"],
                             dollhouse_explore: ["わー！お菓子の家みたいです！食べられるかな？", "おじゃまします！何か面白いもの、ありませんかー？", "探検、探検！きっと何かハプニングが起こりますよ！"],
                             cracked_rock_break: ["わわっ！こんな大きな岩、どうしましょう！？…えいっ！あ、壊れちゃった！", "コハルのハプニングパワー、見せちゃいます！", "きっと、この岩を壊したら面白いことが起こりますよ！"],
                             fairy_shrunk: ["わーい！お人形さんみたいになっちゃいました！楽しいです！", "このサイズなら、面白い発見がたくさんありそうです！探検に出発！", "転んでも痛くなさそうです！えへへ！"],
@@ -3123,6 +3175,7 @@
                             allyNew: ["新しく来られた方ですね。私はオリビアと申します。{name}さん、よろしくお願いします。", "ようこそ。あなたとの出会いに、神の祝福があらんことを。"],
                             stripped_shrunk: ["こ、こんなに小さくて、このような格好だなんて…！主よ、お許しください…！", "…物陰に隠れて、祈りを捧げましょう。心が落ち着くまで…。"],
                             solo_stripped_tiny: ["（主よ…なぜ私にこのような試練を…）", "（祭壇の影で、膝を抱えて祈っている）", "（早く、この恥ずかしさから救ってください…）"],
+                            liberated: ["主よ…この姿こそ、あなたが望んだ私の真の姿なのでしょうか…。", "この身一つで、神に仕える覚悟はできております。", "祈りが、より清らかになった気がします…。"],
                             dollhouse_explore: ["まあ、可愛らしいお家。神の御業は、細部に宿るのですね。", "失礼いたします。中に、救いを求める方はおりませんか？", "この家にも、主の祝福がありますように。"],
                             cracked_rock_break: ["主よ、我に力を…！この岩を砕き、道を開く力を！", "神の御名において、この障害を打ち破ります！", "祈りだけでは、道は開けませんからね。"],
                             fairy_shrunk: ["まあ、まるで天使様のように小さくなってしまいました。主の御心も近いかもしれません。", "この姿なら、小さな花の祈りも聞こえてきそうです。", "祈りの力は、体の大きさにはよりませんから。"],
@@ -3174,6 +3227,7 @@
                             allyNew: ["{name}ちゃん、よろしくね！私はリリィ！一緒に頑張ろう！", "新しい仲間だ！{name}ちゃん、お宝探しは好き？"],
                             allyStripped_shrunk: ["{name}ちゃん、大丈夫！？小さくなった上にその格好は大変でしょ！私が守ってあげるからね！", "わわわ、{name}ちゃん！敵の趣味、悪すぎ！絶対許さないんだから！"],
                             allyStripped: ["{name}ちゃん、大丈夫！？とりあえず私のジャケット使って！", "わわわ、{name}ちゃん！目のやり場に困るよ！…まあ、私は慣れてるけどね。"],
+                            liberated: ["ふふっ、これぞ真のトレジャーハンターの姿！身軽なのが一番でしょ！", "お宝のためなら、なんだってしてやるんだから！覚悟してよね！", "この方が、どんな罠もひらりとかわせそうでしょ？"],
                             allyShrunk_70: ["{name}ちゃん、そのサイズ感、なんだか懐かしい感じがするね！", "ちっちゃい{name}ちゃんも可愛い！"],
                             allyShrunk_50: ["{name}ちゃん、半分くらいになっちゃった！？大丈夫？", "わっ、そこにいたの！？気づかなかった！"],
                             shame_pillory: ["うわっ、何これ！？ちょっと、ベタベタするんですけど！", "ふーん、面白いことするじゃない。でも、こんなので私が屈すると思った？", "（ガラスに映る自分を見て）まあ、悪くないかも？なんてね！"],
@@ -3221,6 +3275,8 @@
                             summer_onsen_costume_shrunk: ["わ、タオルのままちっちゃくなっちゃった！お猪口のお風呂に入れそうだね！", "ミニサイズのリリィだよ！タオルに埋もれちゃいそう！"],
                             summer_onsen_costume_stripped: ["おっと、タオルまで取られちゃった！ふーん、面白いことするじゃない。まあ、見たいなら見れば？", "これも経験のうちかな。さて、さっさと終わらせちゃおう！"],
                             summer_onsen_costume_grown: ["わーい、タオルのまま大きくなった！これなら、どんな温泉も貸し切り状態だね！", "この格好で大きいと、タオルがただのハンカチみたいに見えちゃうかも！"],
+                            liberated_beach: ["太陽の光が気持ちいいね！このまま一日中、探検してたいな！", "水着なんて、ただの飾りだよ！これが一番動きやすい！"],
+                            liberated_onsen: ["温泉の湯気と一体になった気分！もう何も怖くないよ！", "ふぅ、極楽極楽…。このままお宝のこと、考えちゃおうかな。"],
                         },
                         // セレスティア (聖女): 無口、聖なる力、使命感。
                         'セレスティア': {
@@ -3252,6 +3308,7 @@
                             allyGrown: ["{name}のサイズが拡大しました。脅威度が上昇しています。頼もしいですね。", "{name}、その巨体、障害物に注意してください。"],
                             allyNew: ["新しいユニットが編入されましたね。{name}、ようこそ。私の名前はノエルです。", "{name}、あなたの戦闘データを分析させていただきます。よろしくお願いします。"],
                             stripped_shrunk: ["ボディが縮小、かつ外部装甲がありません。防御力が著しく低下しています。注意が必要です。", "この状態は、戦術的に不利です。早急に改善を求めます。"],
+                            allyLiberated: ["{name}の状態をスキャン。外部装甲なし…これは、戦闘効率を最大化するための形態ですか。興味深いデータです。", "その状態、防御力は低下しますが、運動性能は向上する可能性がありますね。合理的な判断かもしれません。", "フローラには、あまり見せない方がよろしいかと。彼女が心配しますから。"],
                             solo_stripped_tiny: ["警告。最小サイズ、かつ非武装状態。生存確率が著しく低下しています。", "（岩陰に隠れ、自己修復シークエンスを実行しようと試みている）", "（敵性反応を探知。完全に気配を消します）"],
                             dollhouse_explore: ["ミニチュアハウスの内部構造をスキャンします。何か有用な情報があるかもしれません。", "侵入します。トラップの可能性を警戒してください。", "興味深い設計です。データとして記録します。"],
                             cracked_rock_break: ["この岩の構造的弱点を特定。最小限の力で破壊します。", "道を開きます。下がっていてください。", "計算通りです。これで進めますね。"],
@@ -3498,6 +3555,71 @@
                         }, {
                             char: 'オリビア',
                             line: 'ええ、行きましょう！私たちの日常を取り戻すために！'
+                        }]
+                    };
+
+                    const summerLiveConversations = {
+                        floor1: [{
+                            char: 'リリカ',
+                            line: 'みんなー！見てみて、この青い海、白い砂浜！最高のステージだよ！'
+                        }, {
+                            char: 'ユイ',
+                            line: 'わぁ…！本当に綺麗ですね！なんだか、冒険っていうよりバカンスみたいです！'
+                        }, {
+                            char: 'ミコ',
+                            line: 'モコもすっごく嬉しそう！ね、リリィちゃん、あっちまで競争だよ！'
+                        }, {
+                            char: 'リリィ',
+                            line: 'おー！いいね、楽しそう！でも、油断は禁物だよ。ここもダンジョンなんだからね！'
+                        }],
+                        floor32: [{
+                            char: 'リリィ',
+                            line: 'ふぅ～、やっぱり冒険の後の温泉は最高だね！疲れが全部とれちゃう！'
+                        }, {
+                            char: 'ミコ',
+                            line: 'わーい！おっきいお風呂！モコ、泳いでもいい？…え、だめなの？'
+                        }, {
+                            char: 'ユイ',
+                            line: 'ふふっ、ミコちゃん、はしゃぎすぎですよ。でも、本当に気持ちいいですね…。'
+                        }, {
+                            char: 'リリカ',
+                            line: 'よーっし！温泉でパワーを充電して、後半戦も最高のライブにしちゃうよー！'
+                        }]
+                    };
+                    const summerAllLiberatedPlayConversations = {
+                        beach: [{
+                            chars: ['リリカ', 'ユイ', 'ミコ', 'リリィ'],
+                            lines: [
+                                "ねえ、ユイちゃん…太陽のせいかな、なんだか体が熱いよ…",
+                                "は、はいぃ…！リリカさんが近くて、余計に…！",
+                                "わー！二人ともいい感じー！ミコも混ぜてー！",
+                                "こらこら、ミコちゃん。二人の邪魔しちゃダメでしょ。…まあ、私も混ぜてほしいけど。"
+                            ]
+                        }, {
+                            chars: ['リリィ', 'ミコ', 'ユイ', 'リリカ'],
+                            lines: [
+                                "ミコちゃん、波の音、気持ちいいね…。このまま二人で、どこか遠くに行っちゃう？",
+                                "うん…！リリィちゃんと一緒なら、どこまでも行きたいな…！",
+                                "まあ…！お二人とも、大胆ですわ…！",
+                                "ふふっ、青春だねー！見てるこっちがドキドキしちゃう！"
+                            ]
+                        }],
+                        onsen: [{
+                            chars: ['ユイ', 'リリカ', 'リリィ', 'ミコ'],
+                            lines: [
+                                "リリカさん…湯気で、よく見えません…。すぐそばに、いるんですよね…？",
+                                "もちろん、ここにいるよ、ユイちゃん。…ほら、手、繋いであげる。",
+                                "おー、やってるねぇ。私たちも負けてられないんじゃない？ミコちゃん。",
+                                "うん！ミコもリリィちゃんと、もっとくっつきたいな！"
+                            ]
+                        }, {
+                            chars: ['ミコ', 'リリィ', 'リリカ', 'ユイ'],
+                            lines: [
+                                "リリィちゃん、あったかいね…。なんだか、このまま溶けちゃいそう…。",
+                                "ふふ、ミコちゃんが溶けたら、私が全部集めてあげるよ。",
+                                "あらあら、あっちもラブラブだねー！私たちも負けてられないよ、ユイちゃん！",
+                                "ひゃっ！？り、リリカさん、いきなりは心の準備が…！"
+                            ]
                         }]
                     };
 
@@ -3992,12 +4114,28 @@
                         const getCharacterSituation = (char) => {
                             // 特別衣装の状態を最優先でチェック
                             if (char.costume && gameState.gameMode !== 'summer_live') {
+                                // 解放状態のセリフを追加
+                                if (char.isLiberatedStripped) {
+                                    const liberatedKey = `liberated_${char.costume}`;
+                                    // 専用セリフがあればそれを、なければ通常の解放セリフ
+                                    return conversations[char.name][liberatedKey] ? liberatedKey : 'liberated';
+                                }
                                 const situationKey = `${char.costume}_costume`;
                                 if (char.currentHp / char.maxHp < 0.4) return `${situationKey}_lowHp`;
                                 if (char.statusEffects.stripped) return `${situationKey}_stripped`;
                                 if (char.height > char.initialHeight * 1.15) return `${situationKey}_grown`;
                                 if (char.height < char.initialHeight * 0.7) return `${situationKey}_shrunk`;
                                 return situationKey;
+                            }
+                            // 解放状態をチェック
+                            if (char.isLiberatedStripped) {
+                                if (char.costume === 'beach' && conversations[char.name].liberated_beach) {
+                                    return 'liberated_beach';
+                                }
+                                if (char.costume === 'onsen' && conversations[char.name].liberated_onsen) {
+                                    return 'liberated_onsen';
+                                }
+                                return 'liberated';
                             }
                             // 最優先でフェアリーシロップの状態をチェック
                             if (char.heightLocked && char.height === 1) return 'fairy_shrunk';
@@ -4087,6 +4225,8 @@
                                     situation1 = 'allyStripped_shrunk';
                                 } else if (situation2 === 'stripped') {
                                     situation1 = 'allyStripped';
+                                } else if (situation2.startsWith('liberated')) { // 解放状態の相手への反応
+                                    situation1 = 'allyLiberated';
                                 } else if (situation2 === 'grown') {
                                     situation1 = 'allyGrown';
                                 }
@@ -4112,6 +4252,7 @@
 
                             // allyShrunk_100 のようなキーが存在しない場合、allyShrunk -> shrunk -> default の順にフォールバック
                             let lines = charConvos[sit] ||
+                                (sit.startsWith('liberated') && charConvos['liberated']) ||
                                 (sit.startsWith('summer_beach_costume') && charConvos['summer_beach_costume']) ||
                                 (sit.startsWith('private_costume') && charConvos['private_costume']) ||
                                 (sit.startsWith('summer_onsen_costume') && charConvos['summer_onsen_costume']) ||
@@ -4121,6 +4262,7 @@
                                 (sit === 'dollhouse_explore' && charConvos['dollhouse_explore']) ||
                                 (sit === 'allyStripped_shrunk' && charConvos['allyStripped_shrunk']) ||
                                 (sit === 'stripped_pair' && charConvos['stripped_pair']) ||
+                                (sit === 'allyLiberated' && charConvos['allyLiberated']) ||
                                 (sit === 'allyStripped' && charConvos['allyStripped']) ||
                                 (sit === 'allyGrown' && charConvos['allyGrown']) ||
                                 (sit.startsWith('allyShrunk') && charConvos['allyShrunk']) ||
@@ -4165,6 +4307,9 @@
                         gameState.triggeredSpecialConvos = []; // 発生済み会話をリセット
                         gameState.bellesPrivateCostumeEventTriggered = false; // イベントフラグをリセット
                         gameState.bellesReviveEventTriggered = false; // 復活イベントフラグをリセット
+                        gameState.summerBeachAllLiberatedTriggered = false; // サマーライブイベントフラグをリセット
+                        gameState.summerOnsenAllLiberatedTriggered = false; // サマーライブイベントフラグをリセット
+                        gameState.wishingStarNoClothes = false; // 願い星フラグをリセット
                         const blueprintsToUse = selectedMembers ?
                             selectedMembers.map(name => allCharacterBlueprints.find(c => c.name === name)) :
                             characterBlueprints;
@@ -4716,7 +4861,7 @@
                         }
 
                         // 脱衣状態の場合
-                        if (char.statusEffects && char.statusEffects.stripped) {
+                        if ((char.statusEffects && char.statusEffects.stripped) || char.isLiberatedStripped) {
                             if (char.role === 'サキュバス') {
                                 // サキュバスは脱衣で攻撃力が上がる
                                 atk *= 1.5;
@@ -4726,6 +4871,14 @@
                                 def *= 0.5; // 防御力半減
                             } else if (char.role !== 'トレジャーハンター' && char.role !== 'フェアリー' && char.role !== 'アルラウネ') {
                                 def *= 0.8; // 他のジョブは防御力20%減少
+                            }
+                        }
+                        // 解放状態の場合、素早さにボーナス
+                        if (char.isLiberatedStripped) {
+                            agi *= 1.2;
+                            // リーパーとサキュバス以外は攻撃力に5%のボーナス
+                            if (char.role !== 'リーパー' && char.role !== 'サキュバス') {
+                                atk *= 1.05;
                             }
                         }
 
@@ -4807,6 +4960,10 @@
                                 await playConversation(normalModeConversations.floor1);
                                 return;
                             }
+                            if (gameState.gameMode === 'summer_live') {
+                                await playConversation(summerLiveConversations.floor1);
+                                return;
+                            }
                             // 他のモードの1階イベントもここに追加可能
                             const hasNoel = gameState.party.some(p => p.name === 'ノエル');
                             const hasFlora = gameState.party.some(p => p.name === 'フローラ');
@@ -4815,6 +4972,12 @@
                                 triggerBellesPrivateCostumeEvent();
                                 return;
                             }
+                        }
+
+                        // --- サマータイム・スペシャルライブ！ 32階イベント ---
+                        if (gameState.floor === 32 && gameState.gameMode === 'summer_live') {
+                            await playConversation(summerLiveConversations.floor32);
+                            return;
                         }
 
                         // --- 闘争令嬢 復活イベント ---
@@ -4929,12 +5092,31 @@
                         }
 
                         // --- イベントの判定 ---
-                        if (mode === 'fixed_path') {
+                        // サマータイム・スペシャルライブ！の全員解放イベントチェック
+                        if (gameState.gameMode === 'summer_live') {
+                            const aliveParty = gameState.party.filter(p => p.currentHp > 0);
+                            const allLiberated = aliveParty.length > 0 && aliveParty.every(p => p.isLiberatedStripped);
+
+                            // ビーチでの全員解放イベント
+                            if (floor <= 30 && allLiberated && !gameState.summerBeachAllLiberatedTriggered) {
+                                gameState.summerBeachAllLiberatedTriggered = true;
+                                executeEvent(foundLiberatedPlay);
+                                return;
+                            }
+                            // 温泉での全員解放イベント
+                            if (floor > 30 && allLiberated && !gameState.summerOnsenAllLiberatedTriggered) {
+                                gameState.summerOnsenAllLiberatedTriggered = true;
+                                executeEvent(foundLiberatedPlay);
+                                return;
+                            }
+                        }
+
+                        // 25%の確率でイベント選択モーダルを表示
+                        if (Math.random() < 0.25) {
                             triggerSelectableEvent();
                         } else {
                             triggerRandomEvent();
                         }
-
                         updatePartyStatus();
                     }
 
@@ -5229,12 +5411,19 @@
                     }
 
                     function triggerSelectableEvent() {
-                        const event1 = getRandomEvent();
-                        let event2 = getRandomEvent();
+                        // 3つのグループからランダムに1つを選ぶ
+                        const groups = ['merit', 'special', 'demerit'];
+                        const selectedGroup = groups[Math.floor(Math.random() * groups.length)];
 
-                        // 2つのイベントが同じ場合は、異なるイベントが選ばれるまで再抽選
-                        while (event1.name === event2.name) {
-                            event2 = getRandomEvent();
+                        // 選ばれたグループから、重み付け抽選で2つの異なるイベントを選ぶ
+                        const event1 = getRandomEvent(selectedGroup);
+                        let event2 = getRandomEvent(selectedGroup);
+
+                        // 2つのイベントが同じ場合は、異なるイベントが選ばれるまで再抽選する
+                        // ただし、グループ内のイベントが1つしかない場合は無限ループを避ける
+                        const groupEvents = getEventPool(selectedGroup);
+                        while (groupEvents.length > 1 && event1.name === event2.name) {
+                            event2 = getRandomEvent(selectedGroup);
                         }
 
                         eventChoiceButtons.innerHTML = ''; // ボタンをクリア
@@ -5253,111 +5442,123 @@
                         eventChoiceModal.classList.remove('hidden');
                     }
 
-                    function getRandomEvent() {
+                    function getEventPool(group) {
                         const isAnyoneStripped = gameState.party.some(p => p.statusEffects.stripped);
-                        const restoreClothesEvent = {
+                        const meritEvents = [{
+                            name: "宝箱",
+                            func: foundTreasure,
+                            weight: 5
+                        }, {
+                            name: "泉",
+                            func: foundFountain,
+                            weight: 2
+                        }, {
                             name: "服を発見",
                             func: foundClothes, // 解放状態のキャラがいない場合のみ発生
-                            weight: isAnyoneStripped && gameState.gameMode !== 'indecent' && !gameState.party.some(p => p.isLiberatedStripped) ? 5 : 0
-                        };
-                        const remainingEquipment = getRemainingEquipment();
-                        const equipmentEvent = {
-                            name: "装備発見",
-                            func: foundEquipment,
-                            weight: remainingEquipment.length > 0 ? 3 : 0
-                        };
-
-                        const suspiciousDeviceEvent = {
-                            name: "怪しい装置",
-                            func: foundSuspiciousDevice,
-                            weight: gameState.party.length >= 2 ? 2 : 0 // 2人以上の場合のみ
-                        };
-                        const bewilderingStatueEvent = {
-                            name: "迷いの石像",
-                            func: foundBewilderingStatue,
+                            weight: isAnyoneStripped && gameState.gameMode !== 'indecent' && !gameState.party.some(p => p.isLiberatedStripped) && !gameState.wishingStarNoClothes ? 5 : 0
+                        }, {
+                            name: "吟遊詩人",
+                            func: foundBard,
+                            weight: 1
+                        }, {
+                            name: "守護の壁",
+                            func: foundProtectiveWall,
                             weight: 2
-                        };
-                        const shamePilloryEvent = {
-                            name: "羞恥の張り付け",
-                            func: foundShamePillory,
-                            weight: isAnyoneStripped && gameState.gameMode !== 'summer_live' ? 3 : 0 // サマーライブ中は発生しない
-                        };
-                        const shrineOfPrayerEvent = {
+                        }, {
+                            name: "魔力の結晶",
+                            func: foundMagicCrystal,
+                            weight: gameState.gameMode === 'endless' ? 1 : 0 // 無限モードでのみ出現
+                        }, {
                             name: "祈りのほこら",
                             func: foundShrineOfPrayer,
                             weight: 3
-                        };
+                        }];
+
+                        const remainingEquipment = getRemainingEquipment();
+                        if (remainingEquipment.length > 0) {
+                            meritEvents.push({
+                                name: "装備発見",
+                                func: foundEquipment,
+                                weight: 3
+                            });
+                        }
+
+                        const specialEvents = [{
+                            name: "怪しげな祭壇",
+                            func: foundAltar,
+                            weight: 2
+                        }, {
+                            name: "装備発見",
+                            func: foundEquipment,
+                            weight: remainingEquipment.length > 0 ? 3 : 0
+                        }, {
+                            name: "怪しい装置",
+                            func: foundSuspiciousDevice,
+                            weight: gameState.party.length >= 2 ? 2 : 0 // 2人以上の場合のみ
+                        }, {
+                            name: "迷いの石像",
+                            func: foundBewilderingStatue,
+                            weight: 2
+                        }, {
+                            name: "人形の家",
+                            func: foundDollhouse,
+                            weight: 2
+                        }, {
+                            name: "ひび割れた巨岩",
+                            func: foundCrackedRock,
+                            weight: 2
+                        }, {
+                            name: "高所のネズミ穴",
+                            func: foundHighMouseHole,
+                            weight: gameState.party.some(p => p.height >= 200) && gameState.party.some(p => p.height <= 10) ? 2 : 0 // 大きいキャラと小さいキャラがいる場合のみ
+                        }, {
+                            name: "願い星",
+                            func: foundWishingStar,
+                            weight: 1 // 低確率
+                        }, {
+                            name: "研ぎ澄まされた五感",
+                            func: foundLiberatedSenses,
+                            weight: gameState.party.some(p => p.isLiberatedStripped) ? 2 : 0 // 解放状態のキャラがいる場合のみ
+                        }];
+
                         const hasHolyCrystal = gameState.inventory.some(item => item.id === 'holy_crystal' && item.quantity > 0);
                         const hasEvilCrystal = gameState.inventory.some(item => item.id === 'evil_crystal' && item.quantity > 0);
-                        const liberationEvent = {
+                        if (gameState.gameMode === 'endless' && hasHolyCrystal && hasEvilCrystal) {
+                            specialEvents.push({
+                                name: "解放の祭壇",
+                                func: triggerLiberationEvent,
+                                weight: 5
+                            });
+                        }
+
+                        const demeritEvents = [{
+                            name: "身長が縮む罠",
+                            func: triggerShrinkTrap,
+                            weight: 2
+                        }, {
+                            name: "身長が伸びる罠",
+                            func: triggerGrowTrap,
+                            weight: 1
+                        }, {
+                            name: "ダメージの罠",
+                            func: triggerDamageTrap,
+                            weight: 3
+                        }, {
+                            name: "羞恥の張り付け",
+                            func: foundShamePillory,
+                            weight: isAnyoneStripped && gameState.gameMode !== 'summer_live' ? 3 : 0 // サマーライブ中は発生しない
+                        }, {
+                            name: "なにもない",
+                            func: nothingHappened,
+                            weight: 5
+                        }];
+
+                        const summerEvents = {
                             name: "解放の祭壇",
                             func: triggerLiberationEvent,
                             // 無限モードで両方の結晶を持っている場合にのみ候補になる
                             weight: (gameState.gameMode === 'endless' && hasHolyCrystal && hasEvilCrystal) ? 5 : 0
                         };
-                        const highMouseHoleEvent = {
-                            name: "高所のネズミ穴",
-                            func: foundHighMouseHole,
-                            weight: gameState.party.some(p => p.height >= 200) && gameState.party.some(p => p.height <= 10) ? 2 : 0 // 大きいキャラと小さいキャラがいる場合のみ
-                        };
-                        const events = [{
-                                name: "宝箱",
-                                func: foundTreasure,
-                                weight: 4
-                            }, {
-                                name: "泉",
-                                func: foundFountain,
-                                weight: 2
-                            }, {
-                                name: "身長が縮む罠",
-                                func: triggerShrinkTrap,
-                                weight: 2
-                            }, {
-                                name: "身長が伸びる罠",
-                                func: triggerGrowTrap,
-                                weight: 1
-                            }, {
-                                name: "ダメージの罠",
-                                func: triggerDamageTrap,
-                                weight: 3
-                            }, {
-                                name: "怪しげな祭壇",
-                                func: foundAltar,
-                                weight: 2
-                            }, {
-                                name: "吟遊詩人",
-                                func: foundBard,
-                                weight: 1
-                            }, {
-                                name: "人形の家",
-                                func: foundDollhouse,
-                                weight: 2
-                            }, {
-                                name: "ひび割れた巨岩",
-                                func: foundCrackedRock,
-                                weight: 2
-                            }, {
-                                name: "なにもない",
-                                func: nothingHappened,
-                                weight: 5
-                            }, {
-                                name: "守護の壁",
-                                func: foundProtectiveWall,
-                                weight: 2
-                            }, {
-                                name: "魔力の結晶",
-                                func: foundMagicCrystal,
-                                weight: gameState.gameMode === 'endless' ? 1 : 0 // 無限モードでのみ出現
-                            },
-                            equipmentEvent,
-                            restoreClothesEvent,
-                            suspiciousDeviceEvent,
-                            bewilderingStatueEvent,
-                            shrineOfPrayerEvent, // ファイター, ソーサラー, ナイト, メディック
-                            shamePilloryEvent, // ファイター, ソーサラー, ナイト, メディック
-                            liberationEvent,
-                            highMouseHoleEvent,
-                        ];
 
                         // 新しいイベントの定義（サマーライブ専用）
                         const liberatedMonsterAttackEvent = {
@@ -5379,7 +5580,7 @@
                         if (gameState.gameMode === 'summer_live') {
                             if (gameState.floor <= 30) {
                                 // ビーチイベント
-                                events.push({
+                                specialEvents.push({
                                     name: "スイカ割り",
                                     func: foundWatermelonSmash,
                                     weight: 5
@@ -5394,7 +5595,7 @@
                                 });
                             } else {
                                 // 温泉イベント
-                                events.push({
+                                specialEvents.push({
                                     name: "温泉卓球",
                                     func: foundOnsenPingPong,
                                     weight: 5
@@ -5413,17 +5614,30 @@
                                 });
                             }
                             // イベントをプールに追加
-                            events.push(liberatedMonsterAttackEvent, liberatedTeaseEvent, liberatedPlayEvent);
+                            specialEvents.push(liberatedMonsterAttackEvent, liberatedTeaseEvent, liberatedPlayEvent);
 
                             // 解放状態のキャラがいる場合、特別イベントの発生確率を設定
                             const isLiberated = gameState.party.some(p => p.isLiberatedStripped);
-                            events.find(e => e.name === "魔物の奇襲").weight = isLiberated ? 5 : 0;
-                            events.find(e => e.name === "仲間との会話").weight = isLiberated ? 5 : 0;
+                            specialEvents.find(e => e.name === "魔物の奇襲").weight = isLiberated ? 5 : 0;
+                            specialEvents.find(e => e.name === "仲間との会話").weight = isLiberated ? 5 : 0;
                             // 「解放のじゃれあい」は解放状態のキャラが2人以上いる場合に発生するよう重みを設定
-                            events.find(e => e.name === "解放のじゃれあい").weight = gameState.party.filter(p => p.isLiberatedStripped && p.currentHp > 0).length >= 2 ? 5 : 0;
+                            specialEvents.find(e => e.name === "解放のじゃれあい").weight = gameState.party.filter(p => p.isLiberatedStripped && p.currentHp > 0).length >= 2 ? 5 : 0;
                         }
 
-                        const filteredEvents = events.filter(event => event.weight > 0);
+                        switch (group) {
+                            case 'merit':
+                                return meritEvents.filter(e => e.weight > 0);
+                            case 'special':
+                                return specialEvents.filter(e => e.weight > 0);
+                            case 'demerit':
+                                return demeritEvents.filter(e => e.weight > 0);
+                            default: // 全てのイベントを結合
+                                return [...meritEvents, ...specialEvents, ...demeritEvents].filter(e => e.weight > 0);
+                        }
+                    }
+
+                    function getRandomEvent(group = null) {
+                        const filteredEvents = getEventPool(group);
                         const totalWeight = filteredEvents.reduce((sum, event) => sum + event.weight, 0);
                         let random = Math.random() * totalWeight;
                         for (const event of filteredEvents) {
@@ -5588,13 +5802,24 @@
                         // 4人全員が解放状態の場合、30%の確率で4人イベントに分岐
                         if (liberatedMembers.length === 4 && Math.random() < 0.3) {
                             log("解放された4人の衝動が共鳴し、互いを求め合う…！");
-                            await new Promise(resolve => setTimeout(resolve, 2500));
-                            for (const char of liberatedMembers) {
-                                log(`${char.name}「${playLinesAll[char.name]}」`);
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+
+                            const situation = gameState.floor <= 30 ? 'beach' : 'onsen';
+                            const convos = summerAllLiberatedPlayConversations[situation];
+                            const selectedConvo = convos[Math.floor(Math.random() * convos.length)];
+
+                            for (let i = 0; i < selectedConvo.chars.length; i++) {
+                                const charName = selectedConvo.chars[i];
+                                const line = selectedConvo.lines[i];
+                                log(`${charName}「${line}」`);
                                 await new Promise(resolve => setTimeout(resolve, 2500));
                             }
                             return;
                         }
+                        // 4人用のイベントが発生しなかった場合は、通常の2人用イベントに進む
+
+
+
 
                         log(`${char1.name}は解放された衝動のまま、${char2.name}の体にそっと触れた…。`);
                         await new Promise(resolve => setTimeout(resolve, 2500));
@@ -5712,6 +5937,7 @@
                                 addItemToInventory(foundItemId);
                                 log(`祭壇が輝き、なんと「${itemBlueprints[foundItemId].name}」を手に入れた！`);
                                 flashCard(getRandomPartyMember(), 'green');
+                                dungeonCommands.classList.remove('hidden'); // コマンドを再表示
                             } else { // 70%で失敗
                                 const availableItems = gameState.inventory.filter(item => item.quantity > 0);
                                 if (availableItems.length > 0) {
@@ -6163,11 +6389,38 @@
 
                     function foundSuspiciousDevice() {
                         log("一行は研究室のような部屋で、人が二人入れる奇妙な装置を見つけた…");
+
+                        // ボタンの表示状態をリセット
+                        deviceRedButton.parentElement.classList.remove('hidden');
+                        deviceBlueButton.parentElement.classList.remove('hidden');
+                        deviceGreenButtonContainer.classList.add('hidden');
+                        deviceWhiteButtonContainer.classList.add('hidden');
+
+                        const aliveParty = gameState.party.filter(p => p.currentHp > 0);
+
+                        // 赤いボタンの条件チェック
+                        const nonOneCmChars = aliveParty.filter(p => p.height !== 1 && !p.heightLocked);
+                        if (nonOneCmChars.length < 2) {
+                            deviceRedButton.parentElement.classList.add('hidden');
+                            deviceGreenButtonContainer.classList.remove('hidden');
+                        }
+
+                        // 青いボタンの条件チェック
+                        if (aliveParty.length >= 2) {
+                            const heights = aliveParty.map(p => p.height);
+                            const maxHeight = Math.max(...heights);
+                            const minHeight = Math.min(...heights);
+                            if (maxHeight - minHeight < 30 && Math.random() < 0.5) {
+                                deviceBlueButton.parentElement.classList.add('hidden');
+                                deviceWhiteButtonContainer.classList.remove('hidden');
+                            }
+                        }
+
                         deviceModal.classList.remove('hidden');
 
                         deviceRedButton.onclick = () => {
                             deviceModal.classList.add('hidden');
-                            showTwoMemberSelectionModal((char1, char2) => {
+                            showTwoMemberSelectionModal("身長を吸収するキャラと、されるキャラを順に選んでください。", (char1, char2) => {
                                 log(`装置に${char1.name}と${char2.name}が入り、赤いボタンを押した！`);
                                 if (char1.heightLocked || char2.heightLocked) {
                                     log("しかし、装置はうんともすんとも言わない。不思議な力で守られているようだ。");
@@ -6184,7 +6437,7 @@
 
                         deviceBlueButton.onclick = () => {
                             deviceModal.classList.add('hidden');
-                            showTwoMemberSelectionModal((char1, char2) => {
+                            showTwoMemberSelectionModal("身長を平均化するキャラを2人選んでください。", (char1, char2) => {
                                 log(`装置に${char1.name}と${char2.name}が入り、青いボタンを押した！`);
                                 if (char1.heightLocked || char2.heightLocked) {
                                     log("しかし、装置はうんともすんとも言わない。不思議な力で守られているようだ。");
@@ -6202,16 +6455,285 @@
                             });
                         };
 
+                        deviceGreenButton.onclick = () => {
+                            deviceModal.classList.add('hidden');
+                            showOneMemberSelectionModal(char => {
+                                log(`${char.name}が装置に入り、緑のボタンを押した！`);
+                                if (char.heightLocked) {
+                                    log("しかし、装置はうんともすんとも言わない。不思議な力で守られているようだ。");
+                                    return;
+                                }
+                                animateStatChange(char, 'height', 100, 'increase');
+                                log(`装置から光が溢れ、${char.name}の身長が100cm伸びた！`);
+                            }, "身長を伸ばすキャラを1人選んでください。");
+                        };
+
+                        deviceWhiteButton.onclick = () => {
+                            deviceModal.classList.add('hidden');
+                            showOneMemberSelectionModal(char => {
+                                log(`${char.name}が装置に入り、白いボタンを押した！`);
+                                const stats = ['atk', 'def', 'maxHp'];
+                                const statToUpgrade = stats[Math.floor(Math.random() * stats.length)];
+                                let upgradeAmount = 0;
+                                if (statToUpgrade === 'atk') upgradeAmount = 2;
+                                else if (statToUpgrade === 'def') upgradeAmount = 2;
+                                else if (statToUpgrade === 'maxHp') upgradeAmount = 10;
+
+                                char[statToUpgrade] += upgradeAmount;
+                                flashCard(char, 'green');
+                                log(`装置が作動し、${char.name}の${statToUpgrade === 'maxHp' ? '最大HP' : statToUpgrade === 'atk' ? '攻撃力' : '防御力'}が永続的に${upgradeAmount}上昇した！`);
+                            }, "強化するキャラを1人選んでください。");
+                        };
+
                         deviceIgnoreButton.onclick = () => {
                             deviceModal.classList.add('hidden');
                             log("一行は怪しい装置を無視して、先へ進んだ。");
                         };
                     }
 
-                    function showTwoMemberSelectionModal(callback) {
+                    async function foundLiberatedSenses() {
+                        const liberatedMembers = gameState.party.filter(p => p.currentHp > 0 && p.isLiberatedStripped);
+                        if (liberatedMembers.length === 0) {
+                            nothingHappened(); // 念の為のフォールバック
+                            return;
+                        }
+                        const explorer = liberatedMembers[Math.floor(Math.random() * liberatedMembers.length)];
+
+                        log(`${explorer.name}は解放されたことで五感が研ぎ澄まされている…`);
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        log(`「…！この先に、何かいいものの気配がする！」`);
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        const rareItemIds = Object.keys(itemBlueprints).filter(id => itemBlueprints[id].rare);
+                        const foundItemId = rareItemIds[Math.floor(Math.random() * rareItemIds.length)];
+                        addItemToInventory(foundItemId);
+                        log(`${explorer.name}は気配を頼りに、とても珍しい「${itemBlueprints[foundItemId].name}」を見つけ出した！`);
+                        flashCard(explorer, 'green');
+                    }
+
+                    function foundWishingStar() {
+                        log("壁に空いた穴から、綺麗な光が差し込んでいる…\n「あなたの願い事、聞いてあげる」という声が響いた。");
+
+                        wishingStarCharSelect.innerHTML = '';
+                        wishingStarOptions.innerHTML = '';
+                        wishingStarCharSelect.classList.remove('hidden');
+                        wishingStarOptions.classList.add('hidden');
+                        wishingStarModalPrompt.textContent = '願い事をする仲間を一人選んでください。';
+
+                        const aliveParty = gameState.party.filter(p => p.currentHp > 0);
+
+                        aliveParty.forEach(char => {
+                            const card = document.createElement('div');
+                            card.className = 'p-4 border rounded-lg cursor-pointer hover:bg-cyan-100 hover:shadow-lg transition';
+                            card.innerHTML = `<p class="font-bold text-lg text-${char.themeColor}-700">${char.name}</p><p class="text-sm text-gray-600">${char.role}</p>`;
+                            card.onclick = () => presentWishingStarChoices(char);
+                            wishingStarCharSelect.appendChild(card);
+                        });
+
+                        wishingStarModal.classList.remove('hidden');
+                    }
+
+                    function presentWishingStarChoices(char) {
+                        wishingStarCharSelect.classList.add('hidden');
+                        wishingStarOptions.classList.remove('hidden');
+                        wishingStarModalPrompt.textContent = `${char.name}は何を願いますか？`;
+
+                        const immuneToStripRoles = ['ナイト', 'サムライ', '聖女', 'アンドロイド'];
+
+                        const wishPool = [{
+                            id: 'level_up',
+                            text: '強くなりたい',
+                            description: 'レベルが1上がる。',
+                            effect: (c) => {
+                                levelUpCharacter(c, false);
+                                log(`${c.name}は星に願った…「強くなりたい！」`);
+                            },
+                            condition: (c) => true
+                        }, {
+                            id: 'full_recover',
+                            text: '元気になりたい',
+                            description: '全員のHPとMPが全回復する。',
+                            effect: async(c) => {
+                                log(`${c.name}は星に願った…「みんなが元気になりますように！」`);
+                                for (const p of gameState.party) {
+                                    if (p.currentHp > 0) {
+                                        await animateStatChange(p, 'hp', p.maxHp, 'increase');
+                                        await animateStatChange(p, 'mp', p.maxMp, 'increase');
+                                    }
+                                }
+                            },
+                            condition: (c) => true
+                        }, {
+                            id: 'permanent_stats',
+                            text: '装備を整えたい',
+                            description: '攻撃力と防御力が永続的に2ずつ上がる。',
+                            effect: (c) => {
+                                c.atk += 2;
+                                c.def += 2;
+                                log(`${c.name}は星に願った…「もっといい装備が欲しい！」\n星の光が${c.name}の体を包み、力がみなぎる！`);
+                            },
+                            condition: (c) => true
+                        }, {
+                            id: 'become_doll',
+                            text: 'お人形さんになりたい',
+                            description: '身長が20cmになる。(身長固定は解除)',
+                            effect: async(c) => {
+                                c.heightLocked = false;
+                                await animateStatChange(c, 'height', 20 - c.height, 'decrease');
+                                log(`${c.name}は星に願った…「お人形さんみたいになりたい！」\n体が小さくなり、身長が20cmになった！`);
+                            },
+                            condition: (c) => true
+                        }, {
+                            id: 'grow_big',
+                            text: '大きくなりたい',
+                            description: '身長が2倍になる。',
+                            effect: async(c) => {
+                                await animateStatChange(c, 'height', c.height, 'increase');
+                                log(`${c.name}は星に願った…「大きくなりたい！」\n体がぐんぐん伸びて、身長が2倍になった！`);
+                            },
+                            condition: (c) => c.height > c.initialHeight / 2 && !c.heightLocked
+                        }, {
+                            id: 'grow_reset',
+                            text: '大きくなりたい',
+                            description: '身長が初期身長まで戻る。',
+                            effect: async(c) => {
+                                const growth = c.initialHeight - c.height;
+                                await animateStatChange(c, 'height', growth, 'increase');
+                                log(`${c.name}は星に願った…「元の大きさに戻りたい！」\n体がぐんぐん伸びて、元の身長に戻った！`);
+                            },
+                            condition: (c) => c.height <= c.initialHeight / 2 && !c.heightLocked
+                        }, {
+                            id: 'liberate',
+                            text: 'すべてさらけ出したい',
+                            description: '解放状態になり、今後、服発見イベントが発生しなくなる。',
+                            effect: (c) => {
+                                c.statusEffects.stripped = {
+                                    turns: 0
+                                };
+                                c.isLiberatedStripped = true;
+                                gameState.wishingStarNoClothes = true;
+                                log(`${c.name}は星に願った…「すべてをさらけ出したい！」\n${c.name}は自ら服を脱ぎ捨て、解放状態になった！`);
+                            },
+                            condition: (c) => !immuneToStripRoles.includes(c.role) && !c.isLiberatedStripped
+                        }, {
+                            id: 'all_tiny',
+                            text: '違う世界が見たい',
+                            description: '全員の身長が1cmになる。',
+                            effect: async(c) => {
+                                log(`${c.name}は星に願った…「違う世界が見たい！」\n星の光がパーティを包み、全員の身長が1cmになった！`);
+                                for (const p of gameState.party) {
+                                    if (p.currentHp > 0) await animateStatChange(p, 'height', 1 - p.height, 'decrease');
+                                }
+                            },
+                            condition: (c) => !gameState.party.some(p => p.heightLocked)
+                        }, {
+                            id: 'get_supplies',
+                            text: '強敵に備えたい',
+                            description: 'ポーションx3, マナポーションx3, リバイブハーブx2を入手。',
+                            effect: (c) => {
+                                addItemToInventory('potion', 3);
+                                addItemToInventory('mana_potion', 3);
+                                addItemToInventory('revive_herb', 2);
+                                log(`${c.name}は星に願った…「強敵に備えたい！」\n足元に便利なアイテムがたくさん現れた！`);
+                            },
+                            condition: (c) => true
+                        }, {
+                            id: 'get_ale',
+                            text: 'エールで乾杯したい',
+                            description: 'ギガンテスエールをパーティの人数分入手する。',
+                            effect: (c) => {
+                                const count = gameState.party.filter(p => p.currentHp > 0).length;
+                                addItemToInventory('gigantes_ale', count);
+                                log(`${c.name}は星に願った…「みんなでエールで乾杯したい！」\n人数分のギガンテスエールを手に入れた！`);
+                            },
+                            condition: (c) => true
+                        }, {
+                            id: 'get_crystals',
+                            text: '英雄と手合わせ願いたい',
+                            description: '聖結晶と邪結晶を1個ずつ入手する。',
+                            effect: (c) => {
+                                addItemToInventory('holy_crystal', 1);
+                                addItemToInventory('evil_crystal', 1);
+                                log(`${c.name}は星に願った…「英雄と手合わせ願いたい！」\n聖と邪、二つの結晶が目の前に現れた！`);
+                            },
+                            condition: (c) => gameState.gameMode === 'endless'
+                        }, {
+                            id: 'hp_to_mp',
+                            text: '魔力と一体化したい',
+                            description: '最大HPが半分になり、その分最大MPが上昇する。',
+                            effect: (c) => {
+                                const hpLoss = Math.floor(c.maxHp / 2);
+                                c.maxHp -= hpLoss;
+                                c.currentHp = Math.min(c.currentHp, c.maxHp);
+                                c.maxMp += hpLoss;
+                                log(`${c.name}は星に願った…「魔力と一体になりたい！」\n${c.name}の生命力が魔力に変換された！`);
+                            },
+                            condition: (c) => c.maxHp > 1
+                        }, {
+                            id: 'mp_to_hp',
+                            text: '強靭な肉体を手にしたい',
+                            description: '最大MPが半分になり、その分最大HPが上昇する。',
+                            effect: (c) => {
+                                const mpLoss = Math.floor(c.maxMp / 2);
+                                c.maxMp -= mpLoss;
+                                c.currentMp = Math.min(c.currentMp, c.maxMp);
+                                c.maxHp += mpLoss;
+                                log(`${c.name}は星に願った…「強靭な肉体が欲しい！」\n${c.name}の魔力が生命力に変換された！`);
+                            },
+                            condition: (c) => c.maxMp > 1
+                        }, {
+                            id: 'get_blessing',
+                            text: '才能が欲しい',
+                            description: 'ランダムな祝福を一つ授かる。',
+                            effect: (c) => {
+                                const available = Object.values(blessings).filter(b => !Object.values(c.blessings).some(owned => owned.name === b.name));
+                                if (available.length > 0) {
+                                    const chosenBlessing = available[Math.floor(Math.random() * available.length)];
+                                    chosenBlessing.effect(c);
+                                    log(`${c.name}は星に願った…「新しい才能が欲しい！」\n${c.name}は祝福「${chosenBlessing.name}」を授かった！`);
+                                } else {
+                                    log(`${c.name}は既に全ての祝福を授かっていた！代わりにレベルが上がった！`);
+                                    levelUpCharacter(c, false);
+                                }
+                            },
+                            condition: (c) => true
+                        }, {
+                            id: 'fight_observer',
+                            text: 'あなたを超える',
+                            description: 'そこにメリットはない。',
+                            effect: (c) => {
+                                log(`${c.name}は星に願った…「お前を超えてやる！」\n声の主は不敵に笑い、姿を現した！`);
+                                startBattle(true, 'star_observer');
+                            },
+                            condition: (c) => true
+                        }, ];
+
+                        const choices = [];
+                        const availableWishes = wishPool.filter(w => w.condition(char));
+
+                        while (choices.length < 4 && availableWishes.length > 0) {
+                            const randomIndex = Math.floor(Math.random() * availableWishes.length);
+                            const chosenWish = availableWishes.splice(randomIndex, 1)[0];
+                            choices.push(chosenWish);
+                        }
+
+                        choices.forEach(wish => {
+                            const button = document.createElement('button');
+                            button.className = 'action-button bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg text-left';
+                            button.innerHTML = `<strong class="text-lg">${wish.text}</strong><span class="block text-sm text-cyan-100 mt-1">${wish.description}</span>`;
+                            button.onclick = async() => {
+                                wishingStarModal.classList.add('hidden');
+                                await wish.effect(char);
+                                updatePartyStatus();
+                            };
+                            wishingStarOptions.appendChild(button);
+                        });
+                    }
+
+                    function showTwoMemberSelectionModal(prompt, callback) {
                         twoMemberSelectList.innerHTML = '';
                         let selectedChars = [];
 
+                        document.getElementById('two-member-select-title').textContent = prompt;
                         const aliveParty = gameState.party.filter(p => p.currentHp > 0);
 
                         aliveParty.forEach(char => {
@@ -6327,10 +6849,11 @@
                         };
                     }
 
-                    function showOneMemberSelectionModal(callback) {
+                    function showOneMemberSelectionModal(callback, prompt = "対象を1人選んでください") {
                         oneMemberSelectList.innerHTML = '';
                         const aliveParty = gameState.party.filter(p => p.currentHp > 0);
 
+                        document.getElementById('one-member-select-title').textContent = prompt;
                         aliveParty.forEach(char => {
                             const card = document.createElement('div');
                             card.className = 'p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-indigo-100 transition';
@@ -6517,6 +7040,15 @@
                         gameState.inBattle = true;
                         dungeonCommands.classList.add('hidden');
                         emergencyButton.classList.add('battle-active'); // 緊急ボタンを有効化
+                        // 模倣の呪いチェック
+                        if (gameState.nextBattleIsImitation) {
+                            startImitationBattle();
+                            gameState.nextBattleIsImitation = false; // フラグをリセット
+                            return;
+                        } else if (isBoss && isEnhancedBoss === 'star_observer') {
+                            startBattle(true, 'star_observer');
+                            return;
+                        }
                         floorDisplay.classList.add('hidden');
                         gameState.golem = null; // 戦闘開始時にゴーレムをリセット
                         battleCommands.classList.remove('hidden');
@@ -6546,6 +7078,58 @@
                         setTimeout(() => {
                             nextTurn();
                         }, 1000); // メッセージ表示のための待機
+                    }
+
+                    function startImitationBattle() {
+                        log("不気味な気配と共に、見慣れた姿の敵が現れた！");
+                        gameState.inBattle = true;
+                        dungeonCommands.classList.add('hidden');
+                        emergencyButton.classList.add('battle-active');
+                        floorDisplay.classList.add('hidden');
+                        gameState.golem = null;
+                        battleCommands.classList.remove('hidden');
+
+                        gameState.enemies = [createImitationEnemy()];
+                        updateEnemyStatus();
+
+                        const combatants = [...gameState.party.filter(p => p.currentHp > 0), ...gameState.enemies];
+                        gameState.turnOrder = combatants.sort((a, b) => {
+                            const agiA = a.isEnemy ? a.agi : getEffectiveStats(a).agi;
+                            const agiB = b.isEnemy ? b.agi : getEffectiveStats(b).agi;
+                            return agiB - agiA;
+                        });
+                        gameState.currentTurnIndex = 0;
+
+                        setTimeout(() => {
+                            nextTurn();
+                        }, 1000);
+                    }
+
+                    function createImitationEnemy() {
+                        const floor = gameState.floor;
+                        const nonUnlockableRoles = ['聖女', 'トレジャーハンター', 'アンドロイド', 'メイド'];
+                        const targetBlueprints = allCharacterBlueprints.filter(c => !nonUnlockableRoles.includes(c.role));
+                        const blueprint = targetBlueprints[Math.floor(Math.random() * targetBlueprints.length)];
+
+                        const imitation = {
+                            name: `模倣体：${blueprint.name}`,
+                            maxHp: 1000 + floor * 25,
+                            currentHp: 1000 + floor * 25,
+                            atk: 35 + Math.floor(floor * 1.5),
+                            pDef: 20 + floor,
+                            mDef: 20 + floor,
+                            agi: 15 + Math.floor(floor / 2),
+                            isEnemy: true,
+                            isBoss: true, // ボス扱い
+                            buffs: {},
+                            statusEffects: {},
+                            skills: blueprint.skills.map(s => ({...s,
+                                originalType: s.type
+                            })), // 元のスキル情報を保持
+                            specialAIType: 'imitation',
+                            originalBlueprint: blueprint, // AIで参照するために元のブループリントを保持
+                        };
+                        return imitation;
                     }
 
                     function createEnemy(isBoss, isEnhanced = false) {
@@ -6587,6 +7171,22 @@
                                     func: heroicEndSkill
                                 }, ],
                                 specialAIType: 'phantom_hero'
+                            };
+                        }
+                        if (isBoss && isEnhanced === 'star_observer') {
+                            return {
+                                name: '星の観測者',
+                                maxHp: 1500 + floor * 25,
+                                currentHp: 1500 + floor * 25,
+                                atk: 45 + Math.floor(floor * 1.6),
+                                pDef: 22 + floor,
+                                mDef: 22 + floor,
+                                agi: 28 + Math.floor(floor / 2),
+                                isEnemy: true,
+                                isBoss: true,
+                                buffs: {},
+                                statusEffects: {},
+                                specialAIType: 'star_observer'
                             };
                         }
                         if (isBoss) {
@@ -7499,6 +8099,22 @@
                                 {
                                     if (Array.isArray(target) && target.every(t => t.isEnemy)) { // 敵全体への攻撃の場合
                                         let modifiedSkill = skill;
+                                        // 解放状態でのホットウェーブ強化
+                                        if (skill.name === 'ホットウェーブ' && caster.isLiberatedStripped) {
+                                            log(`${caster.name}の解放された熱情が、波をさらに熱くする！`);
+                                            await new Promise(resolve => setTimeout(resolve, 500));
+                                            modifiedSkill = {...skill,
+                                                power: skill.power * 1.2
+                                            };
+                                        }
+                                        // 解放状態でのプチウンディーネ強化
+                                        if (skill.name === 'プチウンディーネ' && caster.isLiberatedStripped) {
+                                            log(`${caster.name}の解放された魔力が、水の精霊を荒ぶらせる！`);
+                                            await new Promise(resolve => setTimeout(resolve, 500));
+                                            modifiedSkill = {...skill,
+                                                power: skill.power * 2.5
+                                            };
+                                        }
                                         log(`${caster.name}は${skill.name}を放った！`);
                                         const damagePromises = [];
                                         for (const t of target) {
@@ -7615,6 +8231,14 @@
                                 // 新しいLv4スキル
                             case 'height_power_physical':
                                 { // ボディドロップ
+                                    let modifiedSkill = skill;
+                                    if (caster.isLiberatedStripped) {
+                                        log(`${caster.name}の解放された肉体が、一撃の重みを増す！`);
+                                        await new Promise(resolve => setTimeout(resolve, 500));
+                                        modifiedSkill = {...skill,
+                                            power: skill.power * 1.2
+                                        };
+                                    }
                                     const heightBonus = Math.max(0, (caster.height - caster.initialHeight) * 0.1);
                                     const bodyDropDamage = calculateDamage(caster, target, {
                                         ...skill,
@@ -8415,8 +9039,14 @@
                             case 'party_heal':
                                 { // パッションハート
                                     log(`${caster.name}は${skill.name}で味方を癒した！`);
+                                    let healRatio = 0.3;
+                                    if (caster.isLiberatedStripped) {
+                                        log(`${caster.name}の解放された心が、癒やしの力を増幅させる！`);
+                                        await new Promise(resolve => setTimeout(resolve, 500));
+                                        healRatio = 0.5; // 解放状態なら50%回復
+                                    }
                                     for (const p of gameState.party.filter(p => p.currentHp > 0)) {
-                                        const healAmount = Math.ceil(p.maxHp * 0.3); // 30%回復
+                                        const healAmount = Math.ceil(p.maxHp * healRatio);
                                         await animateStatChange(p, 'hp', healAmount, 'increase');
                                     }
                                     break;
@@ -8970,6 +9600,79 @@
                             endEnemyTurn(enemy); // ターン終了
                             return;
                         }
+
+                        // 星の観測者の特殊AI
+                        if (enemy.specialAIType === 'star_observer') {
+                            const roll = Math.random();
+                            if (roll < 0.3) { // 30%で全体縮小
+                                log(`${enemy.name}は星屑のシャワーを降らせた！`);
+                                for (const p of gameState.party.filter(p => p.currentHp > 0)) {
+                                    if (!p.heightLocked) await animateStatChange(p, 'height', -20, 'decrease');
+                                }
+                            } else if (roll < 0.6) { // 30%で単体ステータス吸収
+                                log(`${enemy.name}は${target.name}の才能を盗み見た！`);
+                                const statToSteal = ['atk', 'def', 'agi'][Math.floor(Math.random() * 3)];
+                                target.buffs[`${statToSteal}_down`] = 3;
+                                enemy.buffs[`${statToSteal}_up`] = 3;
+                                log(`${target.name}の${statToSteal === 'atk' ? '攻撃力' : statToSteal === 'def' ? '防御力' : '素早さ'}が下がり、${enemy.name}の能力が上がった！`);
+                            } else { // 40%で通常攻撃
+                                await defaultEnemyAttack(enemy, target);
+                            }
+                            endEnemyTurn(enemy);
+                            return;
+                        }
+
+                        // 模倣体の特殊AI
+                        if (enemy.specialAIType === 'imitation') {
+                            // 50%の確率でスキルを使用
+                            if (enemy.skills.length > 0 && Math.random() < 0.5) {
+                                // 使用させたくないスキルタイプを除外
+                                const unusableSkillTypes = ['utility', 'samurai_counter_stance', 'summon_golem', 'guardian_wall'];
+                                const usableSkills = enemy.skills.filter(s => !unusableSkillTypes.includes(s.originalType));
+
+                                if (usableSkills.length > 0) {
+                                    const skill = usableSkills[Math.floor(Math.random() * usableSkills.length)];
+                                    log(`${enemy.name}は「${skill.name}」の構え！`);
+                                    await new Promise(resolve => setTimeout(resolve, 1000));
+
+                                    // スキルタイプに応じて処理を分岐
+                                    switch (skill.originalType) {
+                                        case 'physical': // なぎ払いなど
+                                            if (skill.targetType === 'enemies') {
+                                                await sweepAttack(enemy);
+                                            } else {
+                                                await defaultEnemyAttack(enemy, target, skill.power);
+                                            }
+                                            break;
+                                        case 'magic': // ファイアなど
+                                            const magicDamage = calculateDamage(enemy, target, {
+                                                type: 'magic',
+                                                power: skill.power
+                                            });
+                                            await dealDamage(target, magicDamage);
+                                            log(`${enemy.name}の${skill.name}！ ${target.name}に${magicDamage}のダメージ！`);
+                                            break;
+                                        case 'heal': // ヒールなど
+                                            const healAmount = Math.ceil(enemy.maxHp * 0.2); // 最大HPの20%回復
+                                            await dealDamage(enemy, -healAmount, true);
+                                            log(`${enemy.name}は${skill.name}で自身のHPを${healAmount}回復した！`);
+                                            break;
+                                        case 'buff': // プロテクトなど
+                                            enemy.buffs.protect = 3;
+                                            log(`${enemy.name}は${skill.name}で自身の防御力を上げた！`);
+                                            break;
+                                        default:
+                                            await defaultEnemyAttack(enemy, target);
+                                    }
+                                    endEnemyTurn(enemy);
+                                    return;
+                                }
+                            }
+                            // スキルを使わない、または使えるスキルがない場合は通常攻撃
+                            await defaultEnemyAttack(enemy, findTarget(enemy));
+                            endEnemyTurn(enemy);
+                            return; // 模倣体のターンを終了
+                        }
                         const target = findTarget(enemy);
 
                         // ターゲットがゴーレムやウォールの場合、特殊行動はせず通常攻撃
@@ -9090,16 +9793,22 @@
                         }, 1000);
                     }
 
-                    async function defaultEnemyAttack(enemy, target) {
+                    async function defaultEnemyAttack(enemy, target, power = 1.0) {
                         const damage = calculateDamage(enemy, target);
                         if (damage === 'evaded' && target.role === 'ダンサー' && target.buffs && target.buffs.provoke) {
                             // ダンサーの回避時反撃
-                            log(`${target.name}は攻撃を華麗にかわし、反撃の体勢に入った！`);
+                            let counterMessage = `${target.name}は攻撃を華麗にかわし、反撃の体勢に入った！`;
+                            let counterPowerMultiplier = 1.0;
+                            if (target.isLiberatedStripped) {
+                                counterMessage = `${target.name}の解放された肉体が、反撃の威力を増大させる！`;
+                                counterPowerMultiplier = 2.0;
+                            }
+                            log(counterMessage);
                             // ダンサー(target)が敵(enemy)に反撃する
                             const counterDamage = calculateDamage(target, enemy, null, true);
                             enemy.counterTarget = {
                                 counterAttacker: target,
-                                damage: counterDamage // isCounter=true
+                                damage: counterDamage * counterPowerMultiplier
                             };
                         } else if (damage === 'evaded') {
                             log(`${target.name}は攻撃をかわした！`);
@@ -9956,10 +10665,27 @@
                                 log(`突然の光に包まれ、${target.name}は…`);
                                 await new Promise(resolve => setTimeout(resolve, 1500));
 
-                                const outcomes = ['shrink', 'strip', 'glow', 'dress'];
+                                let outcomes = ['shrink', 'strip', 'glow', 'dress', 'full_recover'];
+                                // 身長が固定されている場合のみ、「いつもの姿が一番」を候補に追加
+                                if (target.heightLocked) {
+                                    outcomes.push('reset_height');
+                                }
+
                                 const outcome = outcomes[Math.floor(Math.random() * outcomes.length)];
 
                                 switch (outcome) {
+                                    case 'full_recover':
+                                        await animateStatChange(target, 'hp', target.maxHp, 'increase');
+                                        await animateStatChange(target, 'mp', target.maxMp, 'increase');
+                                        target.statusEffects = {};
+                                        log(`…「かわいいは元気から！」HPとMPが全回復し、状態異常も治った！`);
+                                        break;
+                                    case 'reset_height':
+                                        target.heightLocked = false;
+                                        const resetAmount = target.initialHeight - target.height;
+                                        await animateStatChange(target, 'height', resetAmount, resetAmount >= 0 ? 'increase' : 'decrease');
+                                        log(`…「いつもの姿が一番！」身長の固定が解除され、元の身長に戻った！`);
+                                        break;
                                     case 'shrink':
                                         if (target.heightLocked) {
                                             log(`…しかし、${target.name}の体は変化を拒んだ！`);
@@ -10166,6 +10892,63 @@
                             },
                             weight: 7,
                             needsTarget: true
+                        }, {
+                            id: 'lose_blessing',
+                            text: '祝福の喪失',
+                            description: 'ランダムな仲間一人の祝福が一つ失われる。',
+                            effect: (target) => {
+                                const blessings = target.blessings ? Object.keys(target.blessings) : [];
+                                if (blessings.length > 0) {
+                                    const blessingToLoseKey = blessings[Math.floor(Math.random() * blessings.length)];
+                                    const blessingToLoseName = window.blessings[blessingToLoseKey].name;
+                                    delete target.blessings[blessingToLoseKey];
+                                    log(`呪いによって${target.name}は祝福「${blessingToLoseName}」を失ってしまった…。`);
+                                } else {
+                                    log(`${target.name}は祝福を授かっていなかったため、呪いの影響を受けなかった。`);
+                                }
+                            },
+                            weight: 7,
+                            needsTarget: true,
+                            condition: () => gameState.party.some(p => p.blessings && Object.keys(p.blessings).length > 0)
+                        }, {
+                            id: 'swap_height',
+                            text: '天秤の悪戯',
+                            description: '最も身長が高いキャラと最も低いキャラの身長が入れ替わる。',
+                            effect: async() => {
+                                const aliveParty = gameState.party.filter(p => p.currentHp > 0 && !p.heightLocked);
+                                if (aliveParty.length < 2) {
+                                    log("呪いは発動したが、対象がいなかったため何も起こらなかった。");
+                                    return;
+                                }
+                                aliveParty.sort((a, b) => a.height - b.height);
+                                const smallest = aliveParty[0];
+                                const tallest = aliveParty[aliveParty.length - 1];
+
+                                if (smallest === tallest) {
+                                    log("呪いは発動したが、全員の身長が同じだったため何も起こらなかった。");
+                                    return;
+                                }
+
+                                const smallestHeight = smallest.height;
+                                const tallestHeight = tallest.height;
+
+                                log(`呪いによって、${tallest.name}と${smallest.name}の身長が入れ替わってしまった！`);
+                                await animateStatChange(smallest, 'height', tallestHeight - smallest.height, 'increase');
+                                await animateStatChange(tallest, 'height', smallestHeight - tallest.height, 'decrease');
+                            },
+                            weight: 6,
+                            condition: () => gameState.party.filter(p => p.currentHp > 0 && !p.heightLocked).length >= 2
+                        }, {
+                            id: 'imitation_curse',
+                            text: '模倣の呪い',
+                            description: '次のフロアで、あなたの仲間を模倣した強敵が出現する。',
+                            effect: () => {
+                                gameState.nextBattleIsImitation = true;
+                                log("次の戦いで、言い知れぬ恐怖と対峙することになるだろう…");
+                            },
+                            weight: 6,
+                            // 次のフロアがボスフロアの場合は出現しない
+                            condition: () => (gameState.floor + 1) % 30 !== 0
                         }, ]; // ファイター, ソーサラー, ナイト, メディック
 
                         // 4つの異なる呪いを選択
@@ -10176,6 +10959,16 @@
                             if (filtered.length === 0) break;
                             const index = Math.floor(Math.random() * filtered.length);
                             const curse = filtered[index];
+                            // 「なにも起こらない」を追加
+                            const allCurses = [...cursePool, {
+                                id: 'nothing',
+                                text: '空虚な刻',
+                                description: '幸運にも、呪いはあなたを素通りしていった。',
+                                effect: () => {
+                                    log("呪いの気配が霧散し、何も起こらなかった。");
+                                },
+                                weight: 5
+                            }];
                             if (curse.needsTarget) curse.target = aliveParty[Math.floor(Math.random() * aliveParty.length)];
                             selectedCurses.push(curse);
                             availableCurses.splice(availableCurses.findIndex(c => c.id === curse.id), 1);
