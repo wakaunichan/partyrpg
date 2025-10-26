@@ -5358,6 +5358,8 @@
                         log("一行は特製ジュースで乾杯した！");
                         addItemToInventory('kanpai_juice', 1);
                         log("「カンパイジュース」を1個手に入れた！");
+                        await new Promise(resolve => setTimeout(resolve, 1000)); // ログ表示のための待機
+                        dungeonCommands.classList.remove('hidden');
                     }
 
                     function changeCostume(type) {
@@ -6864,6 +6866,7 @@
                                 c.isLiberatedStripped = true;
                                 gameState.wishingStarNoClothes = true;
                                 log(`${c.name}は星に願った…「すべてをさらけ出したい！」\n${c.name}は自ら服を脱ぎ捨て、解放状態になった！`);
+                                dungeonCommands.classList.remove('hidden');
                             },
                             condition: (c) => !immuneToStripRoles.includes(c.role) && !c.isLiberatedStripped
                         }, {
@@ -6875,6 +6878,7 @@
                                 for (const p of gameState.party) {
                                     if (p.currentHp > 0) await animateStatChange(p, 'height', 1 - p.height, 'decrease');
                                 }
+                                dungeonCommands.classList.remove('hidden');
                             },
                             condition: (c) => !gameState.party.some(p => p.heightLocked)
                         }, {
@@ -6885,6 +6889,7 @@
                                 addItemToInventory('potion', 3);
                                 addItemToInventory('mana_potion', 3);
                                 addItemToInventory('revive_herb', 2);
+                                dungeonCommands.classList.remove('hidden');
                                 log(`${c.name}は星に願った…「強敵に備えたい！」\n足元に便利なアイテムがたくさん現れた！`);
                             },
                             condition: (c) => true
@@ -6896,6 +6901,7 @@
                                 const count = gameState.party.filter(p => p.currentHp > 0).length;
                                 addItemToInventory('gigantes_ale', count);
                                 log(`${c.name}は星に願った…「みんなでエールで乾杯したい！」\n人数分のギガンテスエールを手に入れた！`);
+                                dungeonCommands.classList.remove('hidden');
                             },
                             condition: (c) => true
                         }, {
@@ -6906,6 +6912,7 @@
                                 addItemToInventory('holy_crystal', 1);
                                 addItemToInventory('evil_crystal', 1);
                                 log(`${c.name}は星に願った…「英雄と手合わせ願いたい！」\n聖と邪、二つの結晶が目の前に現れた！`);
+                                dungeonCommands.classList.remove('hidden');
                             },
                             condition: (c) => gameState.gameMode === 'endless'
                         }, {
@@ -6917,6 +6924,7 @@
                                 c.maxHp -= hpLoss;
                                 c.currentHp = Math.min(c.currentHp, c.maxHp);
                                 c.maxMp += hpLoss;
+                                dungeonCommands.classList.remove('hidden');
                                 log(`${c.name}は星に願った…「魔力と一体になりたい！」\n${c.name}の生命力が魔力に変換された！`);
                             },
                             condition: (c) => c.maxHp > 1
@@ -6929,6 +6937,7 @@
                                 c.maxMp -= mpLoss;
                                 c.currentMp = Math.min(c.currentMp, c.maxMp);
                                 c.maxHp += mpLoss;
+                                dungeonCommands.classList.remove('hidden');
                                 log(`${c.name}は星に願った…「強靭な肉体が欲しい！」\n${c.name}の魔力が生命力に変換された！`);
                             },
                             condition: (c) => c.maxMp > 1
@@ -6945,6 +6954,7 @@
                                 } else {
                                     log(`${c.name}は既に全ての祝福を授かっていた！代わりにレベルが上がった！`);
                                     levelUpCharacter(c, false);
+                                    dungeonCommands.classList.remove('hidden');
                                 }
                             },
                             condition: (c) => true
@@ -6971,6 +6981,7 @@
                                     if (change !== 0) {
                                         await animateStatChange(p, 'height', change, change >= 0 ? 'increase' : 'decrease');
                                     }
+                                    dungeonCommands.classList.remove('hidden');
                                 }
                             },
                             condition: (c) => {
@@ -6996,6 +7007,7 @@
                                 wishingStarModal.classList.add('hidden');
                                 await wish.effect(char);
                                 updatePartyStatus();
+                                // dungeonCommands.classList.remove('hidden'); // 各effect内で個別に対応
                             };
                             wishingStarOptions.appendChild(button);
                         });
@@ -7197,6 +7209,7 @@
                         log(`${victim.name}は羞恥心から精神が乱れ、弱ってしまった…`);
                         victim.buffs.def_down = 3; // 3ターン防御力ダウン
                         const mpLoss = Math.ceil(victim.maxMp * 0.3);
+                        dungeonCommands.classList.remove('hidden');
                         await animateStatChange(victim, 'mp', -mpLoss, 'decrease');
 
                         log(`(${victim.name}の防御力が下がり、MPが${mpLoss}減少した)`);
@@ -7338,7 +7351,7 @@
                         // 模倣の呪いチェック
                         if (gameState.nextBattleIsImitation) {
                             startImitationBattle();
-                            gameState.nextBattleIsImitation = false; // フラグをリセット
+                            gameState.nextBattleIsImitation = false; // フラグをリセット // ファイター, ソーサラー, ナイト, メディック
                             return;
                         } else if (isBoss && isEnhancedBoss === 'star_observer') {
                             startBattle(true, 'star_observer');
@@ -7456,6 +7469,7 @@
                                 pDef: 25 + floor,
                                 mDef: 25 + floor,
                                 agi: 25 + Math.floor(floor / 2),
+                                height: 180,
                                 buffs: {},
                                 isEnemy: true,
                                 isBoss: true,
@@ -7482,6 +7496,7 @@
                                 pDef: 22 + floor,
                                 mDef: 22 + floor,
                                 agi: 28 + Math.floor(floor / 2),
+                                height: 500, // 巨大な存在
                                 isEnemy: true,
                                 isBoss: true,
                                 buffs: {},
@@ -7508,6 +7523,7 @@
                                 pDef: 50 + floor,
                                 mDef: 50 + floor,
                                 agi: 35 + Math.floor(floor / 2),
+                                height: 9999, // 計測不能
                                 buffs: {},
                                 isEnemy: true,
                                 isBoss: true,
@@ -7530,6 +7546,7 @@
                                     pDef: 30 + Math.floor(floor * 1.0),
                                     mDef: 20 + Math.floor(floor * 1.0),
                                     agi: 20,
+                                    height: 250,
                                     isEnemy: true,
                                     buffs: {},
                                     statusEffects: {},
@@ -7559,6 +7576,7 @@
                                 pDef: 25,
                                 mDef: 15,
                                 agi: 15,
+                                height: 200,
                                 skills: [{
                                     name: '縮小ビーム',
                                     func: shrinkBeam,
@@ -7575,6 +7593,7 @@
                                 pDef: 35,
                                 mDef: 5,
                                 agi: 10,
+                                height: 300,
                                 skills: [{
                                     name: '状態異常攻撃',
                                     func: inflictStatusEffect,
@@ -7591,6 +7610,7 @@
                                 pDef: 10,
                                 mDef: 30,
                                 agi: 20,
+                                height: 180,
                                 skills: [{
                                     name: 'いたずら',
                                     type: 'utility'
@@ -7637,7 +7657,8 @@
                                     boss.pDef = Math.ceil((25 + Math.floor(floor * 0.6) * 0.8) * 3.0 * statMultiplier); // 物理防御が極端に高い
                                     boss.mDef = Math.ceil(Math.max(1, (15 + Math.floor(floor * 0.6) * 0.8) * 0.1) * statMultiplier); // 魔法防御が非常に低い
                                     boss.agi = 18;
-                                    boss.skills = []; // スキルなし
+                                    boss.height = 250,
+                                        boss.skills = []; // スキルなし
                                 } else if (floor === 60) {
                                     boss.name = 'アクアドラゴン';
                                     boss.maxHp = Math.ceil(1500 * statMultiplier);
@@ -7646,10 +7667,11 @@
                                     boss.pDef = Math.ceil((30 + Math.floor(floor * 0.6) * 1.0) * 0.5 * statMultiplier); // 物理防御が低い
                                     boss.mDef = Math.ceil((20 + Math.floor(floor * 0.6) * 1.0) * 1.0 * statMultiplier);
                                     boss.agi = 22;
-                                    boss.skills = [{
-                                        name: 'ミニマムシャワー',
-                                        func: minimumShower
-                                    }];
+                                    boss.height = 800,
+                                        boss.skills = [{
+                                            name: 'ミニマムシャワー',
+                                            func: minimumShower
+                                        }];
                                     boss.specialAIType = 'aqua_dragon'; // 特殊AIタイプを設定
                                 }
                             }
@@ -7671,53 +7693,56 @@
                                 name: 'スライム',
                                 pDefRatio: 0.8, // 物理に弱く、魔法に強い
                                 mDefRatio: 1.2,
-                                baseAgi: 14 // 普通
+                                baseAgi: 14, // 普通
+                                height: 50
                             }, // 物理に弱く、魔法に強い
                             {
                                 name: 'ゴブリン',
                                 pDefRatio: 1.2, // 物理に強く、魔法に弱い
                                 mDefRatio: 0.8,
-                                baseAgi: 8 // 遅い
+                                baseAgi: 8, // 遅い
+                                height: 100
                             }, // 物理に強く、魔法に弱い
                             {
                                 name: 'コウモリ',
                                 pDefRatio: 1.0, // 平均的
                                 mDefRatio: 1.0,
-                                baseAgi: 20 // 速い
+                                baseAgi: 20, // 速い
+                                height: 30
                             }, // 平均的
                             {
                                 name: 'スケルトン',
                                 pDefRatio: 1.5, // 物理にとても強く、魔法にとても弱い
                                 mDefRatio: 0.5,
-                                baseAgi: 9 // 遅い
+                                baseAgi: 9, // 遅い
+                                height: 170
                             }, // 物理にとても強く、魔法にとても弱い
                             {
                                 name: 'ウィスプ',
                                 pDefRatio: 0.7, // 状態異常を使う
                                 mDefRatio: 1.5,
-                                baseAgi: 22 // 速い
+                                baseAgi: 22, // 速い
+                                height: 40
                             }, // 状態異常を使う
                             {
                                 name: 'リトルメイジ',
                                 pDefRatio: 0.8,
                                 mDefRatio: 1.2,
-                                baseAgi: 15 // 普通
+                                baseAgi: 15, // 普通
+                                height: 120
                             }, {
                                 name: 'インプ',
                                 pDefRatio: 0.9,
                                 mDefRatio: 1.1,
-                                baseAgi: 18 // 速い
+                                baseAgi: 18, // 速い
+                                height: 80
                             },
                         ];
 
                         let availableBlueprints = enemyBlueprints;
                         // 5階の戦闘ではスキルを持たない敵のみ出現させる
                         if (floor === 5) {
-                            availableBlueprints = enemyBlueprints.filter(bp =>
-                                bp.name !== 'ウィスプ' &&
-                                bp.name !== 'リトルメイジ' &&
-                                bp.name !== 'インプ'
-                            );
+                            availableBlueprints = enemyBlueprints.filter(bp => bp.name !== 'ウィスプ' && bp.name !== 'リトルメイジ' && bp.name !== 'インプ');
                         }
                         const blueprint = availableBlueprints[Math.floor(Math.random() * availableBlueprints.length)];
                         const baseDef = 5 + floor * 0.8;
@@ -7744,6 +7769,7 @@
                             pDef: finalPDef,
                             mDef: finalMDef,
                             agi: finalAgi,
+                            height: blueprint.height,
                             isEnemy: true,
                             buffs: {},
                             skills: (blueprint.name === 'ウィスプ') ? [{
@@ -8944,9 +8970,15 @@
                             case 'reaper_height_scaling':
                                 { // 影の一撃
                                     const heightDiff = Math.max(0, caster.initialHeight - caster.height);
-                                    const bonusDamage = Math.ceil(heightDiff * 2); // 1cmあたり2ダメージ追加
+                                    const bonusDamageFromSelf = Math.ceil(heightDiff * 2); // 自身の身長によるボーナス
+                                    let bonusDamageFromEnemy = 0;
+                                    // 敵の身長が自分より大きい場合、追加ボーナス
+                                    if (target.isEnemy && target.height > caster.height) {
+                                        const enemyHeightDiff = target.height - caster.height;
+                                        bonusDamageFromEnemy = Math.floor(enemyHeightDiff * 0.1); // 身長差1cmあたり0.1ダメージ追加
+                                    }
                                     const baseDamage = calculateDamage(caster, target, skill);
-                                    const totalDamage = baseDamage + bonusDamage;
+                                    const totalDamage = baseDamage + bonusDamageFromSelf + bonusDamageFromEnemy;
                                     log(`${caster.name}の${skill.name}！`);
                                     await dealDamage(target, totalDamage);
                                     log(`${target.name}に${totalDamage}のダメージ！`);
@@ -8971,7 +9003,13 @@
                                     const bonusDamageMulti = Math.ceil(heightDiffMulti * 1); // 全体攻撃なのでボーナスは少し控えめ
                                     const damagePromisesReaper = [];
                                     for (const t of target) {
-                                        const totalDamageMulti = calculateDamage(caster, t, skill) + bonusDamageMulti;
+                                        let bonusDamageFromEnemyMulti = 0;
+                                        // 敵の身長が自分より大きい場合、追加ボーナス
+                                        if (t.isEnemy && t.height > caster.height) {
+                                            const enemyHeightDiff = t.height - caster.height;
+                                            bonusDamageFromEnemyMulti = Math.floor(enemyHeightDiff * 0.05); // 全体攻撃なのでボーナスはさらに控えめ
+                                        }
+                                        const totalDamageMulti = calculateDamage(caster, t, skill) + bonusDamageMulti + bonusDamageFromEnemyMulti;
                                         damagePromisesReaper.push(dealDamage(t, totalDamageMulti));
                                     }
                                     await Promise.all(damagePromisesReaper);
@@ -9975,38 +10013,43 @@
                         enemy.turnCount = (enemy.turnCount || 0) + 1; // ターン数をカウント
 
                         // アークリッチの特殊AI (1ターン目に必ず「いたずら」)
-                        if (enemy.name === 'アークリッチ' && enemy.turnCount === 1) {
+                        if (enemy.name === 'アークリッチ' && enemy.turnCount === 1) { // ファイター, ソーサラー, ナイト, メディック
                             const archlichTarget = findTarget(enemy);
                             await inflictStrippedForArchlich(enemy, archlichTarget);
                             endEnemyTurn(enemy); // ターン終了
                             return;
                         }
 
+                        const target = findTarget(enemy);
+
                         // 星の観測者の特殊AI
                         if (enemy.specialAIType === 'star_observer') {
-                            if (enemy.turnCount === 1) {
-                                // 1ターン目は必ず「瞬き」
-                                await blinkSkill(enemy);
-                            } else if (enemy.buffs && enemy.buffs.omen) {
+                            if (enemy.buffs && enemy.buffs.omen) {
                                 // 奥義準備中の行動
-                                const roll = Math.random();
-                                if (roll < 0.4) { // 40%で全体縮小
-                                    log(`${enemy.name}は星屑のシャワーを降らせた！`);
-                                    for (const p of gameState.party.filter(p => p.currentHp > 0)) {
-                                        if (!p.heightLocked) await animateStatChange(p, 'height', -20, 'decrease');
+                                if (enemy.buffs.omen === 1) {
+                                    // 最終ターンにブラックホール
+                                    await blackholeSkill(enemy, target);
+                                } else {
+                                    // それ以外の準備ターン
+                                    const roll = Math.random();
+                                    if (roll < 0.4) { // 40%で全体縮小
+                                        log(`${enemy.name}は星屑のシャワーを降らせた！`);
+                                        for (const p of gameState.party.filter(p => p.currentHp > 0)) {
+                                            if (!p.heightLocked) await animateStatChange(p, 'height', -20, 'decrease');
+                                        }
+                                    } else if (roll < 0.7) { // 30%で単体ステータス吸収
+                                        log(`${enemy.name}は${target.name}の才能を盗み見た！`);
+                                        const statToSteal = ['atk', 'def', 'agi'][Math.floor(Math.random() * 3)];
+                                        target.buffs[`${statToSteal}_down`] = 3;
+                                        enemy.buffs[`${statToSteal}_up`] = 3;
+                                        log(`${target.name}の${statToSteal === 'atk' ? '攻撃力' : statToSteal === 'def' ? '防御力' : '素早さ'}が下がり、${enemy.name}の能力が上がった！`);
+                                    } else { // 30%で通常攻撃
+                                        await defaultEnemyAttack(enemy, target);
                                     }
-                                } else if (roll < 0.7) { // 30%で単体ステータス吸収
-                                    log(`${enemy.name}は${target.name}の才能を盗み見た！`);
-                                    const statToSteal = ['atk', 'def', 'agi'][Math.floor(Math.random() * 3)];
-                                    target.buffs[`${statToSteal}_down`] = 3;
-                                    enemy.buffs[`${statToSteal}_up`] = 3;
-                                    log(`${target.name}の${statToSteal === 'atk' ? '攻撃力' : statToSteal === 'def' ? '防御力' : '素早さ'}が下がり、${enemy.name}の能力が上がった！`);
-                                } else { // 30%で通常攻撃
-                                    await defaultEnemyAttack(enemy, target);
                                 }
                             } else {
-                                // 奥義準備中でない場合、「ブラックホール」を使用
-                                await blackholeSkill(enemy, target);
+                                // 1ターン目は必ず「瞬き」
+                                await blinkSkill(enemy);
                             }
                             endEnemyTurn(enemy);
                             return;
@@ -10062,8 +10105,7 @@
                             await defaultEnemyAttack(enemy, findTarget(enemy));
                             endEnemyTurn(enemy);
                             return; // 模倣体のターンを終了
-                        }
-                        const target = findTarget(enemy);
+                        } // ファイター, ソーサラー, ナイト, メディック
 
                         // ターゲットがゴーレムやウォールの場合、特殊行動はせず通常攻撃
                         const isDefensiveTarget = target.isWall || target === gameState.golem;
@@ -10620,9 +10662,8 @@
                     async function blackholeSkill(enemy, target) {
                         log(`${enemy.name}は${target.name}にブラックホールを放った！`);
                         const damage = 9999; // 耐えられないダメージ
-                        await dealDamage(target, damage);
                         log(`${target.name}は闇に飲み込まれてしまった…！`);
-                        await blinkSkill(enemy); // 再び奥義準備に入る
+                        await dealDamage(target, damage); // ログ表示の後にダメージ処理
                     }
 
                     async function finalBossSkill(enemy, target) {
