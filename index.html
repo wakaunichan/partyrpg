@@ -1055,13 +1055,13 @@
                             agi: 12,
                             height: 165,
                             description: '元気で前向きなパーティのムードメーカー。考えるより先に体が動くタイプで、巨大な剣を軽々と振り回す。',
-                            skills: [{
-                                name: '強攻撃',
+                            skills: [{ // グロウスラッシュ
+                                name: 'グロウスラッシュ',
                                 cost: 8,
-                                power: 1.8,
-                                type: 'physical',
+                                power: 1.2,
+                                type: 'growth_physical',
                                 targetType: 'enemy',
-                                description: '敵一体に物理ダメージを与える。'
+                                description: '敵一体に物理ダメージを与える。使うたびに威力が永続的に上昇する。'
                             }, {
                                 name: 'なぎ払い',
                                 cost: 12,
@@ -1145,12 +1145,12 @@
                                 type: 'utility',
                                 targetType: 'self',
                                 description: '敵の注意を自分に引きつけ、狙われやすくなる。'
-                            }, {
-                                name: 'ちからをためる',
+                            }, { // チャージ
+                                name: 'チャージ',
                                 cost: 0,
                                 type: 'charge',
                                 targetType: 'self',
-                                description: '次の物理攻撃の威力を2.5倍にする。'
+                                description: '次の物理攻撃の威力を溜める。重ねがけで効果が上昇する。'
                             }],
                             unlockableSkill: {
                                 name: 'かばう',
@@ -4508,6 +4508,7 @@
                             hate: 0, // ファイター, ソーサラー, ナイト, メディック
                             statusEffects: {}, // 状態異常
                             liberationCooldown: 0, // 解放イベント拒否クールダウン
+                            chargeCount: 0, // チャージ回数
                         }));
 
                         // ソロクリア特典を適用
@@ -8052,6 +8053,12 @@
                             animateStatChange(currentActor, 'mp', mpHeal, 'increase');
                         }
 
+                        // ターン開始時MP回復 (聖女と変身中のトレジャーハンターを除く)
+                        if (!currentActor.isEnemy && currentActor.role !== '聖女' && !currentActor.isTransformed && currentActor.currentMp < currentActor.maxMp) {
+                            animateStatChange(currentActor, 'mp', 1, 'increase');
+                        }
+
+
                         // バフのターン経過
                         if (currentActor.buffs) {
                             Object.keys(currentActor.buffs).forEach(key => {
@@ -8264,6 +8271,17 @@
 
                     let pendingAction = null;
 
+                    function cancelPlayerActionSelection(message = "対象が違います。") {
+                        log(message);
+                        pendingAction = null;
+                        document.querySelectorAll('.enemy-card, .character-card').forEach(c => c.classList.remove('targeted'));
+                        // 現在のキャラクターのターンに戻す
+                        const currentActor = gameState.turnOrder[gameState.currentTurnIndex];
+                        if (currentActor && !currentActor.isEnemy) {
+                            playerTurn(currentActor);
+                        }
+                    }
+
                     function playerAction(character, action) {
                         pendingAction = {
                             character,
@@ -8310,40 +8328,49 @@
                     }
 
                     function playerSelectTarget(targetIndex) {
-                        if (pendingAction && gameState.enemies[targetIndex].currentHp > 0) {
-                            if (pendingAction.action.type === 'scan') {
-                                showScanResult(gameState.enemies[targetIndex]);
-                            } else {
-                                pendingAction.target = gameState.enemies[targetIndex];
-                                executePlayerAction();
-                            }
+                        if (!pendingAction || gameState.enemies[targetIndex].currentHp <= 0) return;
+
+                        const action = pendingAction.action;
+                        const targetType = action.type === 'attack' ? 'enemy' : (action.skill ? action.skill.targetType : (action.item ? itemBlueprints[action.item.id].target : null));
+
+                        // 敵を対象とするアクションかチェック
+                        if (targetType === 'enemy' || targetType === 'enemies' || targetType === 'any' || (targetType === 'random_enemies' && action.type === 'skill')) {
+                            pendingAction.target = gameState.enemies[targetIndex];
+                            executePlayerAction();
+                        } else if (action.type === 'scan') {
+                            showScanResult(gameState.enemies[targetIndex]);
+                        } else {
+                            cancelPlayerActionSelection("そのアクションは敵には使えません。");
                         }
                     }
 
                     function playerSelectAlly(targetIndex) {
                         if (!pendingAction) return;
-                        if (pendingAction.action.type === 'scan') {
-                            showScanResult(gameState.party[targetIndex]);
-                        } else {
-                            const targetCharacter = gameState.party[targetIndex];
-                            const action = pendingAction.action;
-                            const skillInfo = action.skill;
-                            const itemInfo = action.item ? itemBlueprints[action.item.id] : null;
 
-                            // 復活アイテムの場合、戦闘不能の味方のみ対象
-                            if ((itemInfo && itemInfo.effect === 'revive') || (skillInfo && skillInfo.type === 'revive_full')) {
+                        const targetCharacter = gameState.party[targetIndex];
+                        const action = pendingAction.action;
+                        const targetType = action.skill ? action.skill.targetType : (action.item ? itemBlueprints[action.item.id].target : null);
+
+                        // 味方を対象とするアクションかチェック
+                        if (targetType === 'ally' || targetType === 'party' || targetType === 'self' || targetType === 'any') {
+                            // 復活スキル/アイテムの場合
+                            if ((action.skill && action.skill.type === 'revive_full') || (action.item && itemBlueprints[action.item.id].effect === 'revive')) {
                                 if (targetCharacter.currentHp <= 0) {
                                     pendingAction.target = targetCharacter;
                                     executePlayerAction();
                                 } else {
-                                    log(`${targetCharacter.name}は戦闘不能ではない！`);
+                                    cancelPlayerActionSelection(`${targetCharacter.name}は戦闘不能ではありません。`);
                                 }
-                            } else if (targetCharacter.currentHp > 0) { // それ以外の味方対象アクションの場合
+                            } else if (targetCharacter.currentHp > 0) { // 通常の味方対象アクション
                                 pendingAction.target = targetCharacter;
                                 executePlayerAction();
                             } else {
-                                log("その対象には使用できない！");
+                                cancelPlayerActionSelection("戦闘不能の仲間には使えません。");
                             }
+                        } else if (action.type === 'scan') {
+                            showScanResult(targetCharacter);
+                        } else {
+                            cancelPlayerActionSelection("そのアクションは味方には使えません。");
                         }
                     }
 
@@ -8373,10 +8400,11 @@
                         }
                         switch (action.type) {
                             case 'attack': // Player attack
+                                const aliveEnemies = gameState.enemies.filter(e => e.currentHp > 0);
                                 // 身長が500cmを超えている場合、全体攻撃になる
-                                if (character.height > 500) {
+                                // 敵が2体以上いる場合のみ全体攻撃
+                                if (character.height > 500 && aliveEnemies.length > 1) {
                                     log(`${character.name}はその巨体で敵全体をなぎ払った！`);
-                                    const aliveEnemies = gameState.enemies.filter(e => e.currentHp > 0);
                                     const damagePromises = [];
                                     for (const enemy of aliveEnemies) {
                                         // 全体攻撃なので威力を少し下げる (0.7倍)
@@ -8434,9 +8462,9 @@
                                     }
                                     // メイドのHP吸収
                                     if (character.buffs && character.buffs.hp_absorb) {
-                                        const absorbAmount = Math.ceil(damage * 0.2); // 与えたダメージの20%を吸収
-                                        await animateStatChange(character, 'hp', absorbAmount, 'increase');
-                                        log(`${character.name}は攻撃から生命力を吸収した！(HP+${absorbAmount})`);
+                                        const absorbAmount = Math.ceil(damage * 0.2);
+                                        log(`${character.name}は攻撃から生命力を吸収した！`);
+                                        await dealDamage(character, -absorbAmount, true); // isHealをtrueにしてdealDamageを呼び出す
                                     }
 
                                     await dealDamage(target, damage); // Await the damage animation
@@ -8532,6 +8560,16 @@
 
                     async function handleSkill(caster, target, skill) {
                         switch (skill.type) {
+                            case 'growth_physical':
+                                {
+                                    const skillDamage = calculateDamage(caster, target, skill);
+                                    await dealDamage(target, skillDamage);
+                                    log(`${caster.name}は${skill.name}を放った！ ${target.name}に${skillDamage}のダメージ！`);
+                                    // 永続的な威力上昇
+                                    skill.power = parseFloat((skill.power + 0.1).toFixed(2));
+                                    log(`${caster.name}の「${skill.name}」が少し強くなった！`);
+                                    break;
+                                }
                             case 'physical':
                             case 'magic':
                                 {
@@ -8633,10 +8671,16 @@
                                     break;
                                 }
                             case 'charge':
-                                {
-                                    caster.isCharging = true;
+                                { // チャージ
+                                    caster.chargeCount = (caster.chargeCount || 0) + 1;
                                     flashCard(caster, 'yellow');
-                                    log(`${caster.name}は${skill.name}！力を溜めている…！`);
+                                    // 挑発状態の場合、挑発ターンを1増やす
+                                    if (caster.buffs && caster.buffs.provoke > 0) {
+                                        caster.buffs.provoke++;
+                                        log(`${caster.name}は挑発を継続し、さらに力を溜める！ (${caster.chargeCount}回目)`);
+                                    } else {
+                                        log(`${caster.name}は${skill.name}！力を溜めている…！ (${caster.chargeCount}回目)`);
+                                    }
                                     break;
                                 }
                             case 'special_heal':
@@ -10243,38 +10287,43 @@
                                 const usableSkills = enemy.skills.filter(s => !unusableSkillTypes.includes(s.originalType));
 
                                 if (usableSkills.length > 0) {
-                                    const skill = usableSkills[Math.floor(Math.random() * usableSkills.length)];
-                                    log(`${enemy.name}は「${skill.name}」の構え！`);
+                                    const originalSkill = usableSkills[Math.floor(Math.random() * usableSkills.length)];
+                                    log(`${enemy.name}は「${originalSkill.name}」を模倣した！`);
                                     await new Promise(resolve => setTimeout(resolve, 1000));
 
-                                    // スキルタイプに応じて処理を分岐
-                                    switch (skill.originalType) {
-                                        case 'physical': // なぎ払いなど
-                                            if (skill.targetType === 'enemies') {
-                                                await sweepAttack(enemy);
-                                            } else {
-                                                await defaultEnemyAttack(enemy, target, skill.power);
-                                            }
-                                            break;
-                                        case 'magic': // ファイアなど
-                                            const magicDamage = calculateDamage(enemy, target, {
-                                                type: 'magic',
-                                                power: skill.power
+                                    // 模倣スキルの効果を簡略化
+                                    if (originalSkill.targetType === 'enemy') {
+                                        // 単体攻撃スキル
+                                        const isMagic = originalSkill.originalType.includes('magic');
+                                        const damage = calculateDamage(enemy, target, {
+                                            type: isMagic ? 'magic' : 'physical',
+                                            power: 2.0
+                                        });
+                                        await dealDamage(target, damage);
+                                        log(`${enemy.name}の強力な一撃！ ${target.name}に${damage}のダメージ！`);
+                                    } else if (originalSkill.targetType === 'enemies') {
+                                        // 全体攻撃スキル
+                                        const isMagic = originalSkill.originalType.includes('magic');
+                                        log(`${enemy.name}は全体攻撃を放った！`);
+                                        const damagePromises = [];
+                                        for (const p of gameState.party.filter(p => p.currentHp > 0)) {
+                                            const damage = calculateDamage(enemy, p, {
+                                                type: isMagic ? 'magic' : 'physical',
+                                                power: 1.2
                                             });
-                                            await dealDamage(target, magicDamage);
-                                            log(`${enemy.name}の${skill.name}！ ${target.name}に${magicDamage}のダメージ！`);
-                                            break;
-                                        case 'heal': // ヒールなど
-                                            const healAmount = Math.ceil(enemy.maxHp * 0.2); // 最大HPの20%回復
+                                            damagePromises.push(dealDamage(p, damage));
+                                        }
+                                        await Promise.all(damagePromises);
+                                    } else {
+                                        // 自己強化・回復スキル
+                                        if (Math.random() < 0.5) {
+                                            enemy.buffs.atk_up = 3;
+                                            log(`${enemy.name}は自身の攻撃力を上げた！`);
+                                        } else {
+                                            const healAmount = Math.ceil(enemy.maxHp * 0.2);
                                             await dealDamage(enemy, -healAmount, true);
-                                            log(`${enemy.name}は${skill.name}で自身のHPを${healAmount}回復した！`);
-                                            break;
-                                        case 'buff': // プロテクトなど
-                                            enemy.buffs.protect = 3;
-                                            log(`${enemy.name}は${skill.name}で自身の防御力を上げた！`);
-                                            break;
-                                        default:
-                                            await defaultEnemyAttack(enemy, target);
+                                            log(`${enemy.name}は自身のHPを${healAmount}回復した！`);
+                                        }
                                     }
                                     endEnemyTurn(enemy);
                                     return;
@@ -10482,9 +10531,9 @@
 
                         // HP吸収効果の処理
                         if (isHpAbsorb) {
-                            const absorbAmount = Math.ceil(counterDamage * 0.2); // 与えたダメージの20%を吸収
-                            await animateStatChange(counterAttacker, 'hp', absorbAmount, 'increase');
-                            log(`${counterAttacker.name}は反撃から生命力を吸収した！(HP+${absorbAmount})`);
+                            const absorbAmount = Math.ceil(counterDamage * 0.2);
+                            log(`${counterAttacker.name}は反撃から生命力を吸収した！`);
+                            await dealDamage(counterAttacker, -absorbAmount, true); // isHealをtrueにしてdealDamageを呼び出す
                         }
                     }
 
@@ -10665,9 +10714,10 @@
                         }
 
                         // 溜め攻撃の処理 (物理攻撃のみ)
-                        if (attacker.isCharging && (!skill || skill.type === 'physical')) {
-                            baseDamage *= 2.5;
-                            attacker.isCharging = false;
+                        if (attacker.chargeCount > 0 && (!skill || skill.type === 'physical' || skill.type === 'growth_physical' || skill.type === 'hp_cost_physical')) {
+                            const chargeMultiplier = 1 + (1.5 * attacker.chargeCount);
+                            baseDamage *= chargeMultiplier;
+                            attacker.chargeCount = 0;
                         }
 
                         // ダメージから防御力を減算
@@ -11991,6 +12041,29 @@
                             }
                         });
                         blessingHtml += '</div>';
+                    }
+
+                    // 先天性能力の表示
+                    const innateCriticalRoles = ['ファイター', 'ナイト', 'サムライ', 'ガーディアン', 'トラブルメーカー', 'アンドロイド'];
+                    const innateMpRecoveryRoles = ['ソーサラー', 'メディック', 'モンク', 'ギャンブラー', 'サモナー', 'アルケミスト', 'ダンサー', 'ネクロマンサー', 'ドクター'];
+
+                    let innateHtml = '';
+                    if (innateCriticalRoles.includes(target.role)) {
+                        innateHtml += `<div class="p-2 bg-gray-100 rounded-md"><p class="font-semibold text-gray-800">先天性：クリティカル</p><p class="text-sm text-gray-700">通常攻撃時、確率で会心の一撃になる。</p></div>`;
+                    }
+                    if (innateMpRecoveryRoles.includes(target.role)) {
+                        innateHtml += `<div class="p-2 bg-gray-100 rounded-md"><p class="font-semibold text-gray-800">先天性：MP回復</p><p class="text-sm text-gray-700">通常攻撃時、自身のMPが少し回復する。</p></div>`;
+                    }
+
+                    if (innateHtml) {
+                        // 祝福欄が既にあればその中に追加、なければ新しく作る
+                        if (blessingHtml) {
+                            // 閉じタグの直前に挿入
+                            blessingHtml = blessingHtml.slice(0, -6) + innateHtml + '</div>';
+                        } else {
+                            blessingHtml = '<div class="mt-3 pt-3 border-t border-gray-300 space-y-1">' +
+                                '<p class="font-bold text-amber-700">授かった祝福</p>' + innateHtml + '</div>';
+                        }
                     }
 
                     scanModalContent.innerHTML = `
