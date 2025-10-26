@@ -583,6 +583,29 @@
             </div>
         </div>
 
+        <!-- 調合イベントモーダル -->
+        <div id="alchemy-modal" class="hidden absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-lg p-8 shadow-2xl max-w-2xl w-full">
+                <h2 class="text-3xl font-bold mb-2 text-center text-purple-600">調合</h2>
+                <p class="mb-6 text-center">手持ちのアイテムを組み合わせて、新たなアイテムを作り出せそうだ。<br>何を作りますか？</p>
+                <div id="alchemy-options" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <!-- 調合選択肢がここに挿入される -->
+                </div>
+                <div class="text-center">
+                    <button id="alchemy-cancel-button" class="action-button bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg">やめる</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 身長固定確認モーダル -->
+        <div id="height-lock-confirm-modal" class="hidden absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-lg p-8 text-center shadow-2xl max-w-md w-full">
+                <p id="height-lock-confirm-text" class="mb-6"></p>
+                <button id="height-lock-confirm-button" class="action-button bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg mr-4">はい</button>
+                <button id="height-lock-cancel-button" class="action-button bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg">いいえ</button>
+            </div>
+        </div>
+
         <div id="item-modal" class="hidden absolute inset-0 bg-black/70 flex items-center justify-center z-40 p-4">
             <div class="bg-white rounded-lg p-6 text-left shadow-2xl max-w-md w-full">
                 <h2 class="text-2xl font-bold mb-4">アイテム</h2>
@@ -981,6 +1004,13 @@
                     const wishingStarModalPrompt = document.getElementById('wishing-star-modal-prompt');
                     const wishingStarCharSelect = document.getElementById('wishing-star-char-select');
                     const wishingStarOptions = document.getElementById('wishing-star-options');
+
+                    // 調合イベントモーダル
+                    const alchemyModal = document.getElementById('alchemy-modal');
+                    const alchemyOptions = document.getElementById('alchemy-options');
+                    const alchemyCancelButton = document.getElementById('alchemy-cancel-button');
+                    const heightLockConfirmModal = document.getElementById('height-lock-confirm-modal');
+
 
                     // ログ履歴ツールチップ
                     const logTooltip = document.getElementById('log-tooltip');
@@ -2084,6 +2114,30 @@
                             power: 50,
                             battleOnly: false,
                             special: true // 通常のイベントでは入手不可
+                        },
+                        'elixir': {
+                            name: 'エリクサー',
+                            description: '味方ひとりのHP、MP、状態異常を完全に回復する。',
+                            target: 'ally',
+                            effect: 'cure_all_and_restore',
+                            battleOnly: false,
+                            special: true // 調合専用
+                        },
+                        'gigant_syrup': {
+                            name: 'ギガントシロップ',
+                            description: '味方ひとりの身長を、現在の身長で固定する。',
+                            target: 'ally',
+                            effect: 'lock_height_current',
+                            battleOnly: false,
+                            special: true // 調合専用
+                        },
+                        'aura_sphere': {
+                            name: 'オーラスフィア',
+                            description: '味方全員の身長を30cm伸ばす。',
+                            target: 'party',
+                            effect: 'increase_height_party_30',
+                            battleOnly: false,
+                            special: true // 調合専用
                         },
                     };
 
@@ -5048,19 +5102,20 @@
                     }
 
                     async function advanceFloor() {
-                        // --- リトルパニック！モード専用会話 ---
-                        // クールダウン処理
-                        // 11階の固定イベント
-                        if (gameState.floor === 11 && gameState.gameMode === 'summer_live') {
-                            await triggerKanpaiJuiceEvent();
-                            return; // イベントを発生させてターン終了
-                        }
-
                         gameState.party.forEach(p => {
                             if (p.liberationCooldown > 0) {
                                 p.liberationCooldown--;
                             }
                         });
+
+                        gameState.floor++;
+                        updateFloorDisplay();
+
+                        // 11階の固定イベント
+                        if (gameState.floor === 11 && gameState.gameMode === 'summer_live') {
+                            await triggerKanpaiJuiceEvent();
+                            return; // イベントを発生させてターン終了
+                        }
                         if (gameState.gameMode === 'little_panic') {
                             if (gameState.floor === 0) { // 1階に到達した直後
                                 await playConversation(littlePanicConversations.floor1);
@@ -5095,9 +5150,6 @@
                             }
                         }
 
-
-                        gameState.floor++;
-                        updateFloorDisplay();
 
                         // --- 1階の導入イベント ---
                         if (gameState.floor === 1) {
@@ -5652,42 +5704,50 @@
                         }
 
                         const specialEvents = [{
-                            name: "怪しげな祭壇",
-                            func: foundAltar,
-                            weight: gameState.gameMode === 'endgame_plus' ? 3 : 2 // 終焉モードでは少し出やすい
-                        }, {
-                            name: "装備発見",
-                            func: foundEquipment,
-                            weight: remainingEquipment.length > 0 ? 3 : 0
-                        }, {
-                            name: "怪しい装置",
-                            func: foundSuspiciousDevice,
-                            weight: gameState.party.length >= 2 ? (gameState.gameMode === 'endgame_plus' ? 1 : 2) : 0
-                        }, {
-                            name: "迷いの石像",
-                            func: foundBewilderingStatue,
-                            weight: 2
-                        }, {
-                            name: "人形の家",
-                            func: foundDollhouse,
-                            weight: 2
-                        }, {
-                            name: "ひび割れた巨岩",
-                            func: foundCrackedRock,
-                            weight: 2
-                        }, {
-                            name: "高所のネズミ穴",
-                            func: foundHighMouseHole,
-                            weight: gameState.party.some(p => p.height >= 200) && gameState.party.some(p => p.height <= 10) ? 2 : 0 // 大きいキャラと小さいキャラがいる場合のみ
-                        }, {
-                            name: "願い星",
-                            func: foundWishingStar,
-                            weight: gameState.gameMode === 'endgame_plus' ? 0 : 1 // 終焉モードでは発生しない
-                        }, {
-                            name: "研ぎ澄まされた五感",
-                            func: foundLiberatedSenses,
-                            weight: gameState.party.some(p => p.isLiberatedStripped) ? 2 : 0 // 解放状態のキャラがいる場合のみ
-                        }];
+                                name: "怪しげな祭壇",
+                                func: foundAltar,
+                                weight: gameState.gameMode === 'endgame_plus' ? 3 : 2 // 終焉モードでは少し出やすい
+                            }, {
+                                name: "装備発見",
+                                func: foundEquipment,
+                                weight: remainingEquipment.length > 0 ? 3 : 0
+                            }, {
+                                name: "怪しい装置",
+                                func: foundSuspiciousDevice,
+                                weight: gameState.party.length >= 2 ? (gameState.gameMode === 'endgame_plus' ? 1 : 2) : 0
+                            }, {
+                                name: "迷いの石像",
+                                func: foundBewilderingStatue,
+                                weight: 2
+                            }, {
+                                name: "人形の家",
+                                func: foundDollhouse,
+                                weight: 2
+                            }, {
+                                name: "ひび割れた巨岩",
+                                func: foundCrackedRock,
+                                weight: 2
+                            }, {
+                                name: "高所のネズミ穴",
+                                func: foundHighMouseHole,
+                                weight: gameState.party.some(p => p.height >= 200) && gameState.party.some(p => p.height <= 10) ? 2 : 0 // 大きいキャラと小さいキャラがいる場合のみ
+                            }, {
+                                name: "願い星",
+                                func: foundWishingStar,
+                                weight: gameState.gameMode === 'endgame_plus' ? 0 : 1 // 終焉モードでは発生しない
+                            }, {
+                                name: "調合",
+                                func: foundAlchemyEvent,
+                                weight: gameState.party.some(p => p.role === 'アルケミスト' || p.role === 'ドクター') ? 2 : 0
+                            },
+
+
+                            {
+                                name: "研ぎ澄まされた五感",
+                                func: foundLiberatedSenses,
+                                weight: gameState.party.some(p => p.isLiberatedStripped) ? 2 : 0 // 解放状態のキャラがいる場合のみ
+                            }
+                        ];
 
                         const hasHolyCrystal = gameState.inventory.some(item => item.id === 'holy_crystal' && item.quantity > 0);
                         const hasEvilCrystal = gameState.inventory.some(item => item.id === 'evil_crystal' && item.quantity > 0);
@@ -9718,6 +9778,24 @@
                                 }
                                 log(`全員の身長が${itemInfo.power}cm伸びた！`);
                                 break;
+                            case 'cure_all_and_restore':
+                                await animateStatChange(target, 'hp', target.maxHp, 'increase');
+                                await animateStatChange(target, 'mp', target.maxMp, 'increase');
+                                target.statusEffects = {}; // 脱衣も治す
+                                flashCard(target, 'green');
+                                log(`${target.name}は完全に回復した！`);
+                                break;
+                            case 'lock_height_current':
+                                await confirmAndLockHeight(target, target.height);
+                                return true; // アイテム消費は確認後
+                            case 'increase_height_party_30':
+                                log(`パーティ全員に${itemInfo.name}の効果！`);
+                                for (const p of gameState.party.filter(p => p.currentHp > 0)) {
+                                    if (p.heightLocked) log(`${p.name}は体の変化を拒んだ！`);
+                                    else await animateStatChange(p, 'height', 30, 'increase');
+                                }
+                                log(`全員の身長が30cm伸びた！`);
+                                break;
                         }
                         // 献身の内部呼び出しではUIを更新しない
                         if (isInternalCall) {
@@ -9727,6 +9805,107 @@
                         updateEnemyStatus(); // Enemy status doesn't have number animation, so it can be updated immediately
                         return true; // アイテム使用成功
                     }
+
+                    function confirmAndLockHeight(target, height) {
+                        return new Promise((resolve) => {
+                            const modal = document.getElementById('height-lock-confirm-modal');
+                            const text = document.getElementById('height-lock-confirm-text');
+                            const confirmBtn = document.getElementById('height-lock-confirm-button');
+                            const cancelBtn = document.getElementById('height-lock-cancel-button');
+
+                            text.textContent = `${target.name}の身長を${height}cmで固定しますか？この冒険中、この効果は解除できません。`;
+                            modal.classList.remove('hidden');
+
+                            confirmBtn.onclick = () => {
+                                modal.classList.add('hidden');
+                                target.heightLocked = true;
+                                animateStatChange(target, 'height', height - target.height, height >= target.height ? 'increase' : 'decrease');
+                                log(`${target.name}の身長が${height}cmで固定された！`);
+                                resolve(true); // アイテム使用成功
+                            };
+
+                            cancelBtn.onclick = () => {
+                                modal.classList.add('hidden');
+                                log("アイテムの使用をやめた。");
+                                resolve(false); // アイテム使用失敗
+                            };
+                        });
+                    }
+
+                    function foundAlchemyEvent() {
+                        const recipes = [{
+                            name: 'エリクサー',
+                            itemId: 'elixir',
+                            ingredients: {
+                                'potion': 1,
+                                'mana_potion': 1,
+                                'milk': 1
+                            },
+                            description: 'HP/MP/状態異常を全回復 (ポーション+マナポーション+ミルク)'
+                        }, {
+                            name: 'ギガントシロップ',
+                            itemId: 'gigant_syrup',
+                            ingredients: {
+                                'pixie_gift': 1,
+                                'fairy_syrup': 1,
+                                'gigantes_ale': 1
+                            },
+                            description: '現在の身長で固定 (ピクシーギフト+フェアリーシロップ+ギガンテスエール)'
+                        }, {
+                            name: 'オーラスフィア',
+                            itemId: 'aura_sphere',
+                            ingredients: {
+                                'cure_mist': 1,
+                                'shrink_aroma': 1,
+                                'crazy_bomb': 1
+                            },
+                            description: '全員の身長+30cm (キュアミスト+シュリンクアロマ+クレイジーボム)'
+                        }];
+
+                        const checkIngredients = (ingredients) => {
+                            return Object.entries(ingredients).every(([itemId, requiredQty]) => {
+                                const itemInInventory = gameState.inventory.find(i => i.id === itemId);
+                                return itemInInventory && itemInInventory.quantity >= requiredQty;
+                            });
+                        };
+
+                        const craftableRecipes = recipes.filter(r => checkIngredients(r.ingredients));
+
+                        if (craftableRecipes.length === 0) {
+                            log("調合を試みたが、材料が足りず何も作れなかった…。");
+                            return;
+                        }
+
+                        alchemyOptions.innerHTML = '';
+                        craftableRecipes.forEach(recipe => {
+                            const button = document.createElement('button');
+                            button.className = 'action-button bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg text-left';
+                            button.innerHTML = `<strong class="text-lg">${recipe.name}</strong><span class="block text-sm text-purple-100 mt-1">${recipe.description}</span>`;
+                            button.onclick = () => {
+                                // 材料を消費
+                                Object.entries(recipe.ingredients).forEach(([itemId, requiredQty]) => {
+                                    const itemInInventory = gameState.inventory.find(i => i.id === itemId);
+                                    itemInInventory.quantity -= requiredQty;
+                                });
+                                // 完成品を追加
+                                addItemToInventory(recipe.itemId, 1);
+                                log(`調合に成功し、「${recipe.name}」を1個手に入れた！`);
+                                alchemyModal.classList.add('hidden');
+                                dungeonCommands.classList.remove('hidden');
+                            };
+                            alchemyOptions.appendChild(button);
+                        });
+
+                        alchemyModal.classList.remove('hidden');
+                        dungeonCommands.classList.add('hidden');
+                    }
+
+                    alchemyCancelButton.onclick = () => {
+                        alchemyModal.classList.add('hidden');
+                        log("調合をやめて、探索を続けることにした。");
+                        dungeonCommands.classList.remove('hidden');
+                    };
+
 
                     async function handleTreasureHunterAttack(character, target) {
                         log(`${character.name}は${target.name}からアイテムを盗もうとした！`);
