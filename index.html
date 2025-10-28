@@ -509,6 +509,28 @@
             opacity: 1;
             pointer-events: auto;
         }
+        /* もしもの物語モーダルのタブスタイル */
+        
+        .what-if-tab {
+            padding: 8px 16px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            color: #6b7280;
+            /* gray-500 */
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .what-if-tab:hover {
+            color: #111827;
+            /* gray-900 */
+        }
+        
+        .what-if-tab.active-tab {
+            color: #3b82f6;
+            /* blue-500 */
+            border-bottom-color: #3b82f6;
+            /* blue-500 */
+        }
     </style>
 </head>
 
@@ -667,33 +689,49 @@
                         <label for="toggle-select-team" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
                     </div>
                 </div>
-                <div class="mb-3 p-2 bg-orange-50 border border-orange-200 rounded-lg flex items-center justify-between">
-                    <label for="toggle-endless-version" class="font-bold text-orange-700 cursor-pointer">クリア後も続ける (無限版)</label>
-                    <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
-                        <input type="checkbox" name="toggle-endless-version" id="toggle-endless-version" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" />
-                        <label for="toggle-endless-version" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
-                    </div>
+                <!-- タブコンテナ -->
+                <div id="what-if-tabs" class="flex border-b mb-4">
+                    <button class="what-if-tab active-tab" data-tab="basic">基本</button>
+                    <button class="what-if-tab" data-tab="challenge">挑戦</button>
+                    <button class="what-if-tab" data-tab="story">物語</button>
+                    <button class="what-if-tab" data-tab="endgame">終焉</button>
                 </div>
-                <div id="what-if-list" class="space-y-3 max-h-60 overflow-y-auto pr-2">
-                    <button data-mode="enjoy" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-sky-700">エンジョイ</strong><span class="block text-sm text-gray-600">味方が戦闘不能になっても、即座にHPが全回復する。ゲームオーバーにならずに最後まで遊べる。</span></button>
-                    <button data-mode="trial" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-blue-700">腕試し</strong><span class="block text-sm text-gray-600">通常ルールで冒険を開始する。</span></button>
-                    <button data-mode="random_party" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-teal-700">運命の出会い</strong><span class="block text-sm text-gray-600">共に冒険する仲間がランダムに4人選ばれる。誰と出会うかは運命次第。</span></button>
-                    <button data-mode="indecent" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-pink-700">痴態騒ぎ</strong><span class="block text-sm text-gray-600">全員が脱衣状態で開始。服は手に入らず、恥ずかしさに慣れることもない。ナイトとサムライは参加不可。</span></button>
-                    <button data-mode="dwarves" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-green-700">小人族の戦い</strong><span class="block text-sm text-gray-600">全員の身長が10cmの状態で冒険を開始する。</span></button>
-                    <button data-mode="unstable_bodies" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-cyan-700">流転の体躯</strong><span class="block text-sm text-gray-600">戦闘に勝利するたび、生存者全員の身長が-50cm～+50cmの範囲でランダムに変動する。</span></button>
-                    <button data-mode="veterans" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-purple-700">歴戦の勇者たち</strong><span class="block text-sm text-gray-600">全員レベル4の状態で冒険を開始する。</span></button>
-                    <button data-mode="saint_march" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-yellow-500">聖女の行進</strong><span class="block text-sm text-gray-600">特別なジョブ「聖女」ひとりで30階の踏破を目指す。彼女はターン開始時にHPとMPが回復し、脱衣を無効化する。</span></button>
-                    <button data-mode="treasure_map" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-lime-700">秘宝の地図</strong><span class="block text-sm text-gray-600">特別なジョブ「トレジャーハンター」ひとりで30階の踏破を目指す。彼女は魔物に変身する能力を持つ。</span></button>
-                    <button data-mode="solo" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-yellow-700">孤独な闘い</strong><span class="block text-sm text-gray-600">好きな仲間を一人選び、強化された状態で冒険に出る。</span></button>
-                    <button data-mode="brawl" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-red-700">武闘の宴</strong><span class="block text-sm text-gray-600">2フロアごとに必ず戦闘が発生する。</span></button>
-                    <button data-mode="monster_march" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-red-800">魔物の行軍</strong><span class="block text-sm text-gray-600">全てのフロアで戦闘が発生する。勝利する度にレベルアップし、アイテムを獲得する。50階踏破を目指せ。</span></button>
-                    <button data-mode="endless" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-slate-700">無限への挑戦</strong><span class="block text-sm text-gray-600">全滅するまでダンジョンを進み続ける。30階ごとにボスが出現し、倒すと試練が訪れる。</span></button>
-                    <button data-mode="little_panic" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-yellow-600">リトルパニック！</strong><span class="block text-sm text-gray-600">ソーサラー、アルケミスト、トラブルメーカーが幼い姿に！彼女たちを守るため、シスターが本気を出す。</span></button>
-                    <button data-mode="brawling_belles" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-rose-500">闘争令嬢</strong><span class="block text-sm text-gray-600">特別なジョブ「アンドロイド」と「メイド」の2人で30階の踏破を目指す。クリアすると選抜チームに2人が追加される。</span></button>
-                    <button data-mode="summer_live" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-sky-500">サマータイム・スペシャルライブ！</strong><span class="block text-sm text-gray-600">リリカ、ユイ、ミコ、リリィの4人で、ビーチと温泉を巡る特別な冒険に出る。60階踏破を目指せ。</span></button>
-                    <button data-mode="uninhibited_souls" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-orange-700">奔放な魂</strong><span class="block text-sm text-gray-600">探索中、コマンドで味方を「脱衣」させたり、身長を自由に操作したりできる。</span></button>
-                    <button id="endgame-plus-button" data-mode="endgame_plus" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition hidden"><strong class="text-red-900">終焉の呼び声</strong><span class="block text-sm text-gray-600">超高難易度モード。選ばれし者のみが挑戦できる。90階に潜む「終刻の魔王」を討伐せよ。</span></button>
-                    <button data-mode="endgame" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-gray-700">おわりから</strong><span class="block text-sm text-gray-600">1フロア目に最終ボスが登場する。</span></button>
+
+                <!-- コンテンツコンテナ -->
+                <div id="what-if-contents" class="max-h-60 overflow-y-auto pr-2">
+                    <!-- 基本タブ -->
+                    <div id="what-if-content-basic" class="what-if-content space-y-3">
+                        <button data-mode="enjoy" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-sky-700">エンジョイ</strong><span class="block text-sm text-gray-600">味方が戦闘不能になっても、即座にHPが全回復する。ゲームオーバーにならずに最後まで遊べる。</span></button>
+                        <button data-mode="trial" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-blue-700">腕試し</strong><span class="block text-sm text-gray-600">通常ルールで冒険を開始する。</span></button>
+                        <button data-mode="random_party" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-teal-700">運命の出会い</strong><span class="block text-sm text-gray-600">共に冒険する仲間がランダムに4人選ばれる。誰と出会うかは運命次第。</span></button>
+                    </div>
+                    <!-- 挑戦タブ -->
+                    <div id="what-if-content-challenge" class="what-if-content space-y-3 hidden">
+                        <button data-mode="indecent" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-pink-700">痴態騒ぎ</strong><span class="block text-sm text-gray-600">全員が脱衣状態で開始。服は手に入らず、恥ずかしさに慣れることもない。ナイトとサムライは参加不可。</span></button>
+                        <button data-mode="dwarves" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-green-700">小人族の戦い</strong><span class="block text-sm text-gray-600">全員の身長が10cmの状態で冒険を開始する。</span></button>
+                        <button data-mode="unstable_bodies" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-cyan-700">流転の体躯</strong><span class="block text-sm text-gray-600">戦闘に勝利するたび、生存者全員の身長が-50cm～+50cmの範囲でランダムに変動する。</span></button>
+                        <button data-mode="veterans" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-purple-700">歴戦の勇者たち</strong><span class="block text-sm text-gray-600">全員レベル4の状態で冒険を開始する。</span></button>
+                        <button data-mode="solo" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-yellow-700">孤独な闘い</strong><span class="block text-sm text-gray-600">好きな仲間を一人選び、強化された状態で冒険に出る。</span></button>
+                        <button data-mode="brawl" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-red-700">武闘の宴</strong><span class="block text-sm text-gray-600">2フロアごとに必ず戦闘が発生する。</span></button>
+                        <button data-mode="monster_march" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-red-800">魔物の行軍</strong><span class="block text-sm text-gray-600">全てのフロアで戦闘が発生する。勝利する度にレベルアップし、アイテムを獲得する。50階踏破を目指せ。</span></button>
+                        <button data-mode="endless" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-slate-700">無限への挑戦</strong><span class="block text-sm text-gray-600">全滅するまでダンジョンを進み続ける。30階ごとにボスが出現し、倒すと試練が訪れる。</span></button>
+                        <button data-mode="uninhibited_souls" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-orange-700">奔放な魂</strong><span class="block text-sm text-gray-600">探索中、コマンドで味方を「脱衣」させたり、身長を自由に操作したりできる。</span></button>
+                        <button data-mode="peaceful_dungeon" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-lime-700">平和？なダンジョン</strong><span class="block text-sm text-gray-600">全員の身長が初期身長で固定され、変動しない。</span></button>
+                    </div>
+                    <!-- 物語タブ -->
+                    <div id="what-if-content-story" class="what-if-content space-y-3 hidden">
+                        <button data-mode="saint_march" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-yellow-500">聖女の行進</strong><span class="block text-sm text-gray-600">特別なジョブ「聖女」ひとりで30階の踏破を目指す。彼女はターン開始時にHPとMPが回復し、脱衣を無効化する。</span></button>
+                        <button data-mode="treasure_map" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-lime-700">秘宝の地図</strong><span class="block text-sm text-gray-600">特別なジョブ「トレジャーハンター」ひとりで30階の踏破を目指す。彼女は魔物に変身する能力を持つ。</span></button>
+                        <button data-mode="little_panic" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-yellow-600">リトルパニック！</strong><span class="block text-sm text-gray-600">ソーサラー、アルケミスト、トラブルメーカーが幼い姿に！彼女たちを守るため、シスターが本気を出す。</span></button>
+                        <button data-mode="brawling_belles" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-rose-500">闘争令嬢</strong><span class="block text-sm text-gray-600">特別なジョブ「アンドロイド」と「メイド」の2人で30階の踏破を目指す。クリアすると選抜チームに2人が追加される。</span></button>
+                        <button data-mode="summer_live" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-sky-500">サマータイム・スペシャルライブ！</strong><span class="block text-sm text-gray-600">リリカ、ユイ、ミコ、リリィの4人で、ビーチと温泉を巡る特別な冒険に出る。60階踏破を目指せ。</span></button>
+                        <button data-mode="secret_night" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-indigo-700">ヒミツの夜</strong><span class="block text-sm text-gray-600">リリカ、ユイ、ミコ、リリィ、フローラの誰かひとりで、静まったダンジョンを裸で歩く。物語重視のモード。</span></button>
+                    </div>
+                    <!-- 終焉タブ -->
+                    <div id="what-if-content-endgame" class="what-if-content space-y-3 hidden">
+                        <button id="endgame-plus-button" data-mode="endgame_plus" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition hidden"><strong class="text-red-900">終焉の呼び声</strong><span class="block text-sm text-gray-600">超高難易度モード。選ばれし者のみが挑戦できる。90階に潜む「終刻の魔王」を討伐せよ。</span></button>
+                        <button data-mode="endgame" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-gray-700">おわりから</strong><span class="block text-sm text-gray-600">1フロア目に最終ボスが登場する。</span></button>
+                    </div>
                 </div>
                 <div class="text-right mt-6">
                     <button id="what-if-modal-close" class="action-button bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded-lg shadow-lg">戻る</button></div>
@@ -931,8 +969,6 @@
                     const startSelectionButton = document.getElementById('start-selection-button');
                     const selectTeamBackButton = document.getElementById('select-team-back-button');
                     const randomSelectButton = document.getElementById('random-select-button');
-                    const toggleSelectTeam = document.getElementById('toggle-select-team');
-                    const toggleEndlessVersion = document.getElementById('toggle-endless-version');
                     const floorDisplay = document.getElementById('floor-display');
                     const scanModal = document.getElementById('scan-modal');
                     const scanModalClose = document.getElementById('scan-modal-close');
@@ -1032,9 +1068,8 @@
                         golem: null, // ファイター, ソーサラー, ナイト, メディック
                         foundEquipment: [],
                         killCount: 0, // ネクロマンサー用
-                        walls: [], // ガーディアン用
-                        isEndlessVersion: false, // 無限版フラグ
-                        gameMode: 'normal', // normal, veterans, dwarves, brawl, solo, endgame, endless, indecent, enjoy, saint_march, fixed_path, uninhibited_souls, random_party, divine_trial, treasure_map
+                        walls: [], // ガーディアン用 
+                        gameMode: 'normal', // normal, veterans, dwarves, brawl, solo, endgame, endless, indecent, enjoy, saint_march, fixed_path, uninhibited_souls, random_party, divine_trial, treasure_map, secret_night
                         triggeredSpecialConvos: [],
                         dungeonBackground: DEFAULT_DUNGEON_BG, // 背景画像をgameStateで管理
                         bellesPrivateCostumeEventTriggered: false, // 闘争令嬢プライベート衣装イベント用フラグ
@@ -3441,6 +3476,30 @@
                             summer_onsen_costume_grown: ["わーい、タオルのまま大きくなった！これなら、どんな温泉も貸し切り状態だね！", "この格好で大きいと、タオルがただのハンカチみたいに見えちゃうかも！"],
                             liberated_beach: ["太陽の光が気持ちいいね！このまま一日中、探検してたいな！", "水着なんて、ただの飾りだよ！これが一番動きやすい！"],
                             liberated_onsen: ["温泉の湯気と一体になった気分！もう何も怖くないよ！", "ふぅ、極楽極楽…。このままお宝のこと、考えちゃおうかな。"],
+                            secret_night_1: [
+                                "（誰もいないよね…？よし！）",
+                                "（慣れた手つきで服を脱ぎ捨て、にぱっと笑う）",
+                                "ふぅー！やっぱり、身軽なのが一番だよね！",
+                                "この方が探検しやすいし、罠も見つけやすいんだから！…たぶん！"
+                            ],
+                            secret_night_6: [
+                                "わ、風が気持ちいいー！",
+                                "なんだか、空も飛べちゃいそうな気分！",
+                                "全身で風を感じるのって、すっごく楽しい！冒険って感じ！",
+                                "（両手を広げ、くるくると回りながら風を楽しむ）"
+                            ],
+                            secret_night_16: [
+                                "うーん、なんだか体が火照ってきたかも…。",
+                                "ちょっとだけ、休憩しよっかな…。誰も見てないし…。",
+                                "んっ…ふぅ…。ちょっとだけ、気持ちよくなっちゃった…。",
+                                "（壁に寄りかかり、少しだけ息を弾ませる）"
+                            ],
+                            secret_night_29: [
+                                "このヒミツの冒険も、もうすぐおしまいかー。",
+                                "すっごくドキドキしたけど、楽しかったな！",
+                                "みんなには、絶対ナイショだよ？私だけの、特別な夜なんだから！",
+                                "よし、最後のお宝、見つけに行こっ！"
+                            ],
                         },
                         summer_all_tiny_play: [], // リリィは専用の会話を持たない
                         summer_all_grown_play: [], // リリィは専用の会話を持たない
@@ -3565,6 +3624,31 @@
                             pair_セレスティア: ["セレスティア様、そのお姿、まるで絵画のようですわ。とてもお美しい…。", "わたくしに、何かできることはございませんか？何なりとお申し付けください。"],
                             // プライベート衣装時のセリフ
                             private_costume: ["このお洋服、いかがかしら？ノエル様とお揃いで選んだものですの。", "たまにはこうして羽を伸ばすのも、悪くありませんわね。ふふっ。", "この格好ですと、少しだけおしとやかになれる気がいたしますわ。"],
+                            // ヒミツの夜
+                            secret_night_1: [
+                                "（…誰も、見ていませんわよね？）",
+                                "（そっとドレスの紐を解き、清らかな肌を夜の空気に晒す）",
+                                "ふぅ…なんて、はしたないのでしょう、わたくし…。でも、この背徳感…。",
+                                "この静かな闇の中なら、本当の自分を解放できる気がして…。"
+                            ],
+                            secret_night_6: [
+                                "（ひんやりとした風が、素肌を撫でていく…）",
+                                "きゃっ…！少し、肌寒いですわね。でも、この感覚…。",
+                                "まるで、風と一体になったよう…。普段は決して味わえない、不思議な心地よさですわ。",
+                                "（目を閉じ、全身で風を感じる）"
+                            ],
+                            secret_night_16: [
+                                "（体の奥から、熱いものがこみ上げてくるのを感じる）",
+                                "はぁ…はぁ…。いけませんわ、フローラ。したない子ですわ…。",
+                                "でも、誰も見ていないのですもの。少しだけ…ほんの少しだけなら、許されますわよね…？",
+                                "（壁に体を預け、小さく喘いだ）"
+                            ],
+                            secret_night_29: [
+                                "この冒険も、もうすぐ終わりですのね…。",
+                                "ノエル様は、わたくしがこのようなことをしているなんて、夢にも思わないでしょうね…。",
+                                "ふふっ、これはわたくしだけの、甘いヒミツですわ。",
+                                "さあ、お嬢様の顔に戻りましょう。夜が明ける前に。"
+                            ],
                             private_costume_lowHp: ["きゃっ！お気に入りのドレスが汚れてしまいましたわ…！", "ふぅ…この格好ですと、少し動きづらいですわね…。", "大丈夫ですわ。これくらい、はしたなくなんてありませんもの。"],
                             private_costume_shrunk: ["まあ、このお洋服のまま小さくなってしまいましたわ。まるでお人形さんのお洋服ですわね。", "ふふ、この姿でノエル様とお茶会をしたら、きっと楽しいですわ。", "ドレスの裾が長すぎて、歩くたびに踏んでしまいますわ。"],
                             private_costume_grown: ["まあ！こんなに大きくなっては、この可愛らしいドレスが台無しですわ！", "は、はしたないですわ…！スカートが短すぎます…！", "このお姿、ノエル様には見せられませんわ…！"],
@@ -3572,12 +3656,217 @@
                         },
                     };
 
+                    // ヒミツの夜用のセリフを追加
+                    conversations['リリカ'].secret_night_1 = [
+                        "（ふふっ、誰も見てないよね？リリカだけの、ヒミツのステージ、始めちゃおっかな！）",
+                        "（手際よく水着を脱ぎ捨て、大胆なポーズを決める）",
+                        "んー、やっぱりこの開放感がたまらない！",
+                        "これぞ究極のファンサービス！…って、ファンはいないけどね！"
+                    ];
+                    conversations['リリカ'].secret_night_6 = [
+                        "きゃっ！風が…！でも、気持ちいい！",
+                        "全身でステージの空気を感じてるみたい！",
+                        "このまま踊り続けたら、風の精霊になっちゃうかも！",
+                        "（風を感じながら、軽やかにステップを踏む）"
+                    ];
+                    conversations['リリカ'].secret_night_16 = [
+                        "なんだか、体の中から熱くなってきた…。ステージの熱気とは違う、変な感じ…。",
+                        "はぁ…はぁ…。ちょっと、休憩…。こんな姿、誰かに見られたら…。",
+                        "でも…このドキドキ、嫌いじゃないかも…。もっと、感じてみたい…なんてね。",
+                        "（壁に背中を預け、火照った頬を隠すように俯いた）"
+                    ];
+                    conversations['リリカ'].secret_night_29 = [
+                        "このヒミツのステージも、もうすぐフィナーレかぁ…。",
+                        "すっごくドキドキしたけど、最高のステージだったな！",
+                        "みんなには、絶対ナイショだよ？トップアイドルの、小さなヒミツなんだから！",
+                        "さ、アンコールに応えなくっちゃ！"
+                    ];
+
+                    conversations['リリカ'].summer_live_29_normal = [{
+                        char: 'リリカ',
+                        line: 'みんな、見てて！ビーチでの最後のステージ、最高に盛り上げちゃうんだから！'
+                    }, {
+                        char: 'リリカ',
+                        line: '（リリカは砂浜をステージに、夕日に照らされながら歌い始めた）'
+                    }, {
+                        char: 'ユイ',
+                        line: 'リリカさん…とっても綺麗です…！'
+                    }, {
+                        char: 'ミコ',
+                        line: 'キラキラしてる…！モコも応援してるよ！'
+                    }, {
+                        char: 'リリィ',
+                        line: 'うん、最高のライブだね！'
+                    }, {
+                        char: 'リリカ',
+                        line: 'みんな、ありがとう！この歌が、みんなの力になりますように！'
+                    }];
+                    conversations['リリカ'].summer_live_29_stripped = [{
+                        char: 'リリカ',
+                        line: 'きゃっ…！こ、こんな格好だけど…でも、これが今のリリカの全部！受け止めて！'
+                    }, {
+                        char: 'リリカ',
+                        line: '（リリカは恥じらいを振り切るように、より一層情熱的に歌い始めた）'
+                    }, {
+                        char: 'ユイ',
+                        line: 'リリカさん…！その姿でも、なんて力強い歌声…！'
+                    }, {
+                        char: 'ミコ',
+                        line: 'リリカちゃん、すごい！ミコ、感動しちゃった！'
+                    }, {
+                        char: 'リリィ',
+                        line: '…プロだね。どんな状況でも、最高のパフォーマンスをするなんて。'
+                    }, {
+                        char: 'リリカ',
+                        line: 'みんなに、この想い、届け…！'
+                    }];
+                    conversations['リリカ'].summer_live_29_liberated = [{
+                        char: 'リリカ',
+                        line: '見て、太陽も海も、みんなリリカのために輝いてる！もう何も隠さない！これが、ありのままのリリカだよ！'
+                    }, {
+                        char: 'リリカ',
+                        line: '（リリカは全てを解き放ったように、女神のような輝きを放ちながら歌う）'
+                    }, {
+                        char: 'ユイ',
+                        line: 'はぅぅ…！神々しいです…！これが、アイドルの究極の姿…！'
+                    }, {
+                        char: 'ミコ',
+                        line: 'リリカちゃん、女神様みたい…！モコもひれ伏してるよ！'
+                    }, {
+                        char: 'リリィ',
+                        line: '…ヤバい。これは伝説になるよ、絶対。'
+                    }, {
+                        char: 'リリカ',
+                        line: 'みんな、愛してるー！'
+                    }];
+
+
+
+                    conversations['リリカ'].secret_night_11 = [
+                        "（静かだな…。いつもはみんなの声が聞こえるのに）",
+                        "（一人だと、ちょっとだけ寂しいかも…）",
+                        "ううん、リリカはアイドルだもん！どんなステージでも、一人で輝いてみせるんだから！",
+                        "（ぎゅっと拳を握り、自分を奮い立たせる）"
+                    ];
+                    conversations['リリカ'].secret_night_21 = [
+                        "（この格好、だんだん慣れてきちゃったかも…）",
+                        "（ふふっ、なんだか悪い子になった気分。これも、新しいリリカの魅力ってことで！）",
+                        "このドキドキ、ファンのみんなにもおすそ分けしてあげたいな！",
+                        "（ウィンクしながら、軽やかなステップで先へ進む）"
+                    ];
+                    conversations['リリカ'].secret_night_16_shrunk = [
+                        "（うぅ…こんなに小さくて、服もないなんて…）",
+                        "（敵に見つかったら、一瞬で踏み潰されちゃうかも…）",
+                        "でも、リリカは負けない！このサイズだからこそできる、最高のパフォーマンスを見せてやるんだから！",
+                        "（小さな体で精一杯胸を張る）"
+                    ];
+
+
+                    conversations['ユイ'].secret_night_1 = [
+                        "（だ、誰もいませんよね…？神様、お許しください…）",
+                        "（おずおずと水着の紐を解き、小さな体で身を縮こませる）",
+                        "ひゃっ…！は、恥ずかしいですぅ…。でも、なんだか…。",
+                        "いけないことだってわかってるのに…心が、体が、言うことを聞いてくれません…。"
+                    ];
+                    conversations['ユイ'].secret_night_6 = [
+                        "ひゃぅっ…！風が、直接…！",
+                        "すーすーします…。でも、なんだか、悪い気はしなくて…。",
+                        "まるで、ダンジョンの息遣いを、肌で感じているみたいです…。",
+                        "（自分の体を抱きしめ、初めての感覚に戸惑いながらも、どこか心地よさを感じている）"
+                    ];
+                    conversations['ユイ'].secret_night_16 = [
+                        "はぅ…はぅ…。なんだか、体がおかしくなっちゃいそうですぅ…。",
+                        "こんな気持ち、初めてです…。どうしたらいいのか、わかりません…。",
+                        "だめ…だめです、ユイ…。でも、体が勝手に…んんっ…。",
+                        "（壁に手をつき、小さく喘ぎながら、込み上げる快感に耐えている）"
+                    ];
+                    conversations['ユイ'].secret_night_29 = [
+                        "この、ヒミツの時間も、もうすぐ終わりなんですね…。",
+                        "とっても恥ずかしかったですけど…少しだけ、大人になれた気がします…。",
+                        "このことは、誰にも言えません。私だけの、大切なヒミツです。",
+                        "さあ、いつもの私に戻らないと。みんなが、心配してしまいますから。"
+                    ];
+                    conversations['ユイ'].secret_night_11 = [
+                        "（しいん…としてて、なんだか怖いです…）",
+                        "（いつもなら、アカリさんやシズカさんがいてくれるのに…）",
+                        "ううん、しっかりしないと！私だって、みんなの役に立ちたいんですから！",
+                        "（ぎゅっと自分の体を抱きしめる）"
+                    ];
+                    conversations['ユイ'].secret_night_21 = [
+                        "（この格好…最初は恥ずかしかったですけど…）",
+                        "（なんだか、悪いことをしているみたいで、ドキドキします…）",
+                        "こ、こんな私、みんなが見たら、なんて思うでしょうか…？",
+                        "（顔を赤らめながら、そわそわと辺りを見回す）"
+                    ];
+                    conversations['ユイ'].secret_night_16_shrunk = [
+                        "（ふぇぇ…小さくて、寒くて、恥ずかしいですぅ…）",
+                        "（敵に見つかったら、どうしよう…！もう、泣いちゃいそうです…）",
+                        "でも、ここで諦めたら、みんなに顔向けできません…！",
+                        "（涙をこらえ、小さな一歩を踏み出す）"
+                    ];
+
+
+                    conversations['ミコ'].secret_night_1 = conversations['リリカ'].secret_night_1.slice(); // リリカと同じ
+                    conversations['ミコ'].secret_night_6 = conversations['リリカ'].secret_night_6.slice(); // リリカと同じ
+                    conversations['ミコ'].secret_night_16 = conversations['リリカ'].secret_night_16.slice(); // リリカと同じ
+                    conversations['ミコ'].secret_night_29 = conversations['リリカ'].secret_night_29.slice(); // リリカと同じ
+
                     const specialConversations = {
+                        'ミコ': { // この部分はconversationsオブジェクトに移動・統合します
+                            secret_night_1: [
+                                "（みんな、ぐっすりだね。モコ、しーっだよ）",
+                                "（そーっと服を脱いで…わ、なんだかモコとおんなじになった気分！）",
+                                "ふふっ、これなら夜のモンスターさんたちも、ミコを仲間だって思ってくれるかな？",
+                                "よし、モコ！ヒミツの探検にしゅっぱーつ！"
+                            ],
+                            secret_night_6: [
+                                "わ、風がすずしいね、モコ！",
+                                "なんだか、ミコもモンスターになったみたいで、飛べちゃいそう！",
+                                "（両手を広げて、くるくる回りながら）夜のお散歩、楽しいね！",
+                                "（モコが心配そうに見ている）大丈夫だよ、ちゃんとついてきてね！"
+                            ],
+                            secret_night_11: [ // 11階のセリフ
+                                "（モコ、静かだね。みんな寝ちゃったのかな？）",
+                                "（一人と一匹だと、ちょっとだけ心細いかも…）",
+                                "でも、ミコは召喚士だもん！モコと一緒なら、どんな敵だって怖くないよ！",
+                                "（モコをぎゅっと抱きしめる）"
+                            ],
+                            secret_night_16: [
+                                "（なんだか、体がぽかぽかする…モコ、ミコ、変じゃないかな？）",
+                                "（はぅ…ちょっと、ドキドキする…。悪いモンスターさんになった気分…）",
+                                "でも、この気持ち…なんだろう。嫌じゃないかも…。",
+                                "（火照った顔を隠すように、モコに顔をうずめる）"
+                            ],
+                            secret_night_21: [
+                                "（この格好、モコとおんなじだね！なんだか嬉しいな！）",
+                                "（ふふっ、ミコもモンスターになった気分だよ！）",
+                                "このまま、モンスターさんたちとお友達になれないかな？",
+                                "（わくわくしながら、辺りを見回す）"
+                            ],
+                            secret_night_16_shrunk: [
+                                "（わわっ、こんなにちっちゃくなっちゃった…！モコ、見て！）",
+                                "（モコより小さいかも…！敵に見つかったら、一口で食べられちゃうよぉ…）",
+                                "でも、モコが守ってくれるもんね！ミコ、頑張る！",
+                                "（モコの後ろに隠れながら、そろそろと進む）"
+                            ],
+                            secret_night_29: [
+                                "ヒミツの探検、もうすぐおしまいだね、モコ。",
+                                "すっごくドキドキしたけど、楽しかった！モンスターさんとはお友達になれなかったけど…。",
+                                "このことは、みんなにはナイショだよ？ミコとモコだけの、特別なヒミツ！",
+                                "よし、朝になる前に、お布団に戻らなきゃ！"
+                            ]
+                        },
                         initial_party: [{
                             chars: ['アカリ', 'ヒカリ', 'シズカ', 'ユイ'],
                             lines: ["なんだか、この4人だと一番最初の冒険を思い出すね！", "…そうね。あの頃よりは、少しはマシになった。", "はは、違いない。みんな頼もしくなったよ。", "えへへ。これからも、みんなで頑張りましょうね！"]
                         }, {
                             chars: ['シズカ', 'アカリ', 'ヒカリ', 'ユイ'],
+                            lines: ["アカリ、あんまり前に出過ぎるんじゃないよ。", "大丈夫だって！シズカが守ってくれるでしょ？", "…過信は禁物。", "私も、ちゃんとヒールしますから！"]
+                        }, {
+                            chars: ['ユイ', 'シャオメイ', 'ルナ', 'オリビア'],
+                            lines: ["なんだか、このパーティは安心感がありますね！", "おう！回復なら任せとけ！", "回復役がこんなにいて負けたら、逆に面白いわね。", "ええ、神の慈悲は常に我らと共にあります。"]
+                        }, {
+                            chars: ['シズカ', 'リリカ', 'ミコ', 'イオリ'],
                             lines: ["アカリ、あんまり前に出過ぎるんじゃないよ。", "大丈夫だって！シズカが守ってくれるでしょ？", "…過信は禁物。", "私も、ちゃんとヒールしますから！"]
                         }, {
                             chars: ['ユイ', 'シャオメイ', 'ルナ', 'オリビア'],
@@ -4042,6 +4331,42 @@
                             char.blessings.giant_grounding = true;
                         }
                     };
+
+                    // イベント限定の祝福
+                    blessings.fairy_grace = {
+                        name: "妖精の加護",
+                        description: "身長が1cmのとき、スキルダメージが3倍になる。",
+                        type: 'special',
+                        effect: (char) => {
+                            char.blessings.fairy_grace = true;
+                        }
+                    };
+                    blessings.dragon_god_grace = {
+                        name: "龍神の加護",
+                        description: "身長が1000cmを超えているとき、毒、麻痺、鈍化にかからない。",
+                        type: 'special',
+                        effect: (char) => {
+                            char.blessings.dragon_god_grace = true;
+                        }
+                    };
+                    blessings.swelling_body = {
+                        name: "肥大する心身",
+                        description: "ターンが回ってきたとき、身長が倍になる。",
+                        type: 'special',
+                        effect: (char) => {
+                            char.blessings.swelling_body = true;
+                        }
+                    };
+                    blessings.twisted_memory = {
+                        name: "捻じ曲がった記憶",
+                        description: "ターンが回ってきたとき、身長が半分(小数点切り捨て)になる。「肥大する心身」と同時に取得した場合、こちらが優先される。",
+                        type: 'special',
+                        effect: (char) => {
+                            char.blessings.twisted_memory = true;
+                        }
+                    };
+
+
 
 
                     function applyLevelUp(character, levels) {
@@ -4579,6 +4904,11 @@
                             gameState.party.forEach(char => {
                                 char.height = 10;
                             });
+                        } else if (gameState.gameMode === 'peaceful_dungeon') {
+                            gameState.party.forEach(char => {
+                                char.height = char.initialHeight;
+                                char.heightLocked = true;
+                            });
                         }
 
                         // HP/MPを全快させる
@@ -4615,6 +4945,27 @@
                                 delete char.isLiberatedStripped;
                             }
                         });
+                        // ヒミツの夜モードの初期設定
+                        if (gameState.gameMode === 'secret_night' && gameState.party.length === 1) {
+                            const char = gameState.party[0];
+                            char.statusEffects.stripped = {
+                                turns: 0
+                            }; // 脱衣状態で開始
+                            // 衣装設定
+                            if (char.name === 'フローラ') {
+                                char.bgClass = 'bg-char-flora-a';
+                            } else if (char.name === 'リリカ') {
+                                char.bgClass = 'bg-char-ririka-a';
+                            } else if (char.name === 'ユイ') {
+                                char.bgClass = 'bg-char-yui-a';
+                            } else if (char.name === 'ミコ') {
+                                char.bgClass = 'bg-char-miko-a';
+                            } else if (char.name === 'リリィ') {
+                                char.bgClass = 'bg-char-lily-a';
+                            }
+                        }
+
+
 
                     }
 
@@ -5047,6 +5398,11 @@
                         let def = char.def;
                         let agi = char.agi; // リーパーのみ、身長が縮んでも攻撃力が低下しない
                         // テンションアップ効果
+                        // 戦闘中のみ身長を1cmにするデバフ
+                        if (char.statusEffects && char.statusEffects.shrunkToOne) {
+                            char.height = 1;
+                        }
+
                         if (char.buffs && char.buffs.tension_up) {
                             atk += 10;
                         }
@@ -5155,37 +5511,40 @@
                             await triggerKanpaiJuiceEvent();
                             return; // イベントを発生させてターン終了
                         }
+
+                        // --- little_panic モードの会話イベント ---
                         if (gameState.gameMode === 'little_panic') {
                             if (gameState.floor === 0) { // 1階に到達した直後
                                 await playConversation(littlePanicConversations.floor1);
                                 // この会話の後、通常のフロア進行処理に進む
-                            } else if (gameState.gameMode === 'saint_march') {
-                                if (gameState.floor === 0) {
-                                    await playConversation(saintMarchConversations.floor1);
-                                }
-                            } else if (gameState.gameMode === 'treasure_map') {
-                                if (gameState.floor === 0) {
-                                    await playConversation(treasureMapConversations.floor1);
-                                }
-                            }
-                            if (gameState.floor === 5) { // 6階に到達する前
-                                if (gameState.gameMode === 'little_panic') {
-                                    await playConversation(littlePanicConversations.floor6);
-                                } else if (gameState.gameMode === 'treasure_map') {
-                                    const lily = gameState.party[0]; // リリィは常にパーティの0番目
-                                    const conversationKey = lily.isTransformed ?
-                                        `floor6_${lily.role.toLowerCase()}` :
-                                        'floor6_normal';
-                                    if (treasureMapConversations[conversationKey]) {
-                                        await playConversation(treasureMapConversations[conversationKey]);
-                                    }
-                                }
+                            } else if (gameState.floor === 5) { // 6階に到達する前
+                                await playConversation(littlePanicConversations.floor6);
                             } else if (gameState.floor === 11) { // 12階に到達する前 // ファイター, ソーサラー, ナイト, メディック
                                 await playConversation(littlePanicConversations.floor12);
                             } else if (gameState.floor === 23) { // 24階に到達する前 // ファイター, ソーサラー, ナイト, メディック
                                 await playConversation(littlePanicConversations.floor24);
                             } else if (gameState.floor === 28) { // 29階に到達する前 // ファイター, ソーサラー, ナイト, メディック
                                 await playConversation(littlePanicConversations.floor29);
+                            }
+                        }
+
+                        // --- saint_march モードの会話イベント ---
+                        if (gameState.gameMode === 'saint_march' && gameState.floor === 0) {
+                            await playConversation(saintMarchConversations.floor1);
+                        }
+
+                        // --- treasure_map モードの会話イベント ---
+                        if (gameState.gameMode === 'treasure_map') {
+                            if (gameState.floor === 0) {
+                                await playConversation(treasureMapConversations.floor1);
+                            } else if (gameState.floor === 5) { // 6階に到達する前
+                                const lily = gameState.party[0]; // リリィは常にパーティの0番目
+                                const conversationKey = lily.isTransformed ?
+                                    `floor6_${lily.role.toLowerCase()}` :
+                                    'floor6_normal';
+                                if (treasureMapConversations[conversationKey]) {
+                                    await playConversation(treasureMapConversations[conversationKey]);
+                                }
                             }
                         }
 
@@ -5217,6 +5576,45 @@
                             return;
                         }
 
+                        // --- ヒミツの夜 独り言イベント ---
+                        if (gameState.gameMode === 'secret_night') {
+                            const secretNightFloors = [1, 6, 11, 16, 21, 29]; // イベント発生階層
+                            if (secretNightFloors.includes(gameState.floor)) {
+                                const char = gameState.party[0];
+                                let conversationKey = `secret_night_${gameState.floor}`; // 基本のキー
+
+                                // ミコの場合、specialConversationsから会話データを取得してconversationsオブジェクトにマージする
+                                if (char.name === 'ミコ' && specialConversations['ミコ']) {
+                                    if (!conversations['ミコ']) {
+                                        conversations['ミコ'] = {};
+                                    }
+                                    // specialConversationsの内容をconversations['ミコ']にコピー
+                                    Object.assign(conversations['ミコ'], specialConversations['ミコ']);
+                                    // specialConversationsからミコのデータを削除して、二重処理を防ぐ
+                                    delete specialConversations['ミコ'];
+                                }
+
+                                // 16階以降で身長が半分以下の場合、会話を分岐
+                                if (gameState.floor >= 16 && char.height <= char.initialHeight / 2) {
+                                    const shrunkConversationKey = `secret_night_${gameState.floor}_shrunk`;
+                                    // 専用の会話が存在するかチェック
+                                    if (conversations[char.name] && conversations[char.name][shrunkConversationKey]) {
+                                        conversationKey = shrunkConversationKey;
+                                    } else if (conversations[char.name] && conversations[char.name]['secret_night_16_shrunk']) {
+                                        // 16階以降で共通の縮小会話があればそれを使う
+                                        conversationKey = 'secret_night_16_shrunk';
+                                    }
+                                }
+                                const conversation = conversations[char.name][conversationKey];
+                                if (conversation) {
+                                    await playConversation(conversation.map(line => ({
+                                        char: char.name,
+                                        line
+                                    })));
+                                    return; // 専用イベントを発生させたら、以降の処理は行わない
+                                }
+                            }
+                        }
                         // --- 闘争令嬢 復活イベント ---
                         if (gameState.gameMode === 'brawling_belles' && !gameState.bellesReviveEventTriggered) {
                             const noel = gameState.party.find(p => p.name === 'ノエル');
@@ -5246,6 +5644,12 @@
                         // --- 闘争令嬢 29階イベント ---
                         if (gameState.floor === 29 && gameState.gameMode === 'brawling_belles') {
                             triggerBellesFloor29Event();
+                            return; // 専用イベントを発生させたら、以降の処理は行わない
+                        }
+
+                        // --- サマータイム・スペシャルライブ！ 29階イベント ---
+                        if (gameState.floor === 29 && gameState.gameMode === 'summer_live') {
+                            triggerSummerLiveRirikaEvent();
                             return; // 専用イベントを発生させたら、以降の処理は行わない
                         }
 
@@ -5326,8 +5730,7 @@
 
                         // --- 通常戦闘の判定 ---
                         if ((mode === 'monster_march') ||
-                            (mode === 'brawl' && floor % 2 === 0) ||
-                            (floor % 5 === 0)) {
+                            (mode === 'brawl' && floor % 2 === 0) || (mode !== 'secret_night' && floor % 5 === 0)) {
                             startBattle();
                             return;
                         }
@@ -5669,9 +6072,45 @@
                         dungeonCommands.classList.remove('hidden');
                     }
 
+                    async function triggerSummerLiveRirikaEvent() {
+                        dungeonCommands.classList.add('hidden');
+                        const ririka = gameState.party.find(p => p.name === 'リリカ');
+
+                        if (!ririka || ririka.currentHp <= 0) {
+                            log("決戦を前に、リリカは倒れてしまっていた…。");
+                            dungeonCommands.classList.remove('hidden');
+                            return;
+                        }
+
+                        let conversationKey;
+                        if (ririka.isLiberatedStripped) {
+                            conversationKey = 'summer_live_29_liberated';
+                        } else if (ririka.statusEffects.stripped) {
+                            conversationKey = 'summer_live_29_stripped';
+                        } else {
+                            conversationKey = 'summer_live_29_normal';
+                        }
+
+                        const conversation = conversations['リリカ'][conversationKey];
+                        if (conversation) {
+                            await playConversation(conversation);
+                        }
+
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        log("リリカの歌声がパーティの心に響き渡り、力がみなぎる！");
+                        for (const p of gameState.party.filter(p => p.currentHp > 0)) {
+                            await animateStatChange(p, 'hp', Math.ceil(p.maxHp * 0.5), 'increase');
+                            await animateStatChange(p, 'mp', Math.ceil(p.maxMp * 0.5), 'increase');
+                            p.buffs.atk_up = 3;
+                        }
+                        log("全員のHPとMPが回復し、攻撃力が上昇した！");
+
+                        dungeonCommands.classList.remove('hidden');
+                    }
+
                     function triggerSelectableEvent() {
-                        // 3つのグループからランダムに1つを選ぶ
-                        const groups = ['merit', 'special', 'demerit'];
+                        // 4つのグループからランダムに1つを選ぶ（神々の試練はここでは発生しないようにする）
+                        const groups = ['merit', 'random_special', 'demerit'];
                         const selectedGroup = groups[Math.floor(Math.random() * groups.length)];
 
                         // 選ばれたグループから、重み付け抽選で2つの異なるイベントを選ぶ
@@ -5703,6 +6142,14 @@
 
                     function getEventPool(group) {
                         const isAnyoneStripped = gameState.party.some(p => p.statusEffects.stripped);
+                        const remainingEquipment = getRemainingEquipment();
+
+                        // 「神々の試練」を別のプールに分離
+                        const divineTrialEvent = {
+                            name: "神々の試練",
+                            func: foundDivineTrial,
+                            weight: 1 // レアイベント
+                        };
                         const meritEvents = [{
                             name: "宝箱",
                             func: foundTreasure,
@@ -5733,7 +6180,6 @@
                             weight: 3
                         }];
 
-                        const remainingEquipment = getRemainingEquipment();
                         if (remainingEquipment.length > 0) {
                             meritEvents.push({
                                 name: "装備発見",
@@ -5742,7 +6188,7 @@
                             });
                         }
 
-                        const specialEvents = [{
+                        const baseSpecialEvents = [{
                                 name: "怪しげな祭壇",
                                 func: foundAltar,
                                 weight: gameState.gameMode === 'endgame_plus' ? 3 : 2 // 終焉モードでは少し出やすい
@@ -5839,8 +6285,14 @@
                             });
                         }
 
+                        if (gameState.gameMode === 'secret_night') {
+                            meritEvents.find(e => e.name === '服を発見').weight = 0;
+                        }
 
 
+
+                        // 2択イベント用のスペシャルイベントプール
+                        const specialEvents = [...baseSpecialEvents, divineTrialEvent];
 
                         const demeritEvents = [{
                             name: "身長が縮む罠",
@@ -5938,12 +6390,15 @@
                         switch (group) {
                             case 'merit':
                                 return meritEvents.filter(e => e.weight > 0);
+                            case 'random_special': // ランダムイベント用のスペシャルプール
+                                return baseSpecialEvents.filter(e => e.weight > 0);
                             case 'special':
                                 return specialEvents.filter(e => e.weight > 0);
                             case 'demerit':
                                 return demeritEvents.filter(e => e.weight > 0);
                             default: // 全てのイベントを結合
-                                return [...meritEvents, ...specialEvents, ...demeritEvents].filter(e => e.weight > 0);
+                                // ランダムイベントでは神々の試練は発生しない
+                                return [...meritEvents, ...baseSpecialEvents, ...demeritEvents].filter(e => e.weight > 0);
                         }
                     }
 
@@ -7124,6 +7579,30 @@
                         flashCard(explorer, 'green');
                     }
 
+                    function foundDivineTrial() {
+                        log("目の前に荘厳な祭壇が現れ、神々しい声が響き渡る…\n「汝らに試練と、祝福を与えん…」");
+
+                        const aliveParty = gameState.party.filter(p => p.currentHp > 0);
+                        if (aliveParty.length === 0) {
+                            log("しかし、誰もいなかったため声は消えていった。");
+                            return;
+                        }
+
+                        const target = aliveParty[Math.floor(Math.random() * aliveParty.length)];
+                        const specialBlessings = ['fairy_grace', 'dragon_god_grace', 'swelling_body', 'twisted_memory'];
+                        const chosenBlessingId = specialBlessings[Math.floor(Math.random() * specialBlessings.length)];
+                        const chosenBlessing = blessings[chosenBlessingId];
+
+                        setTimeout(() => {
+                            log(`声は${target.name}を選び、その身に大いなる力を注ぎ込んだ！`);
+                            chosenBlessing.effect(target);
+                            flashCard(target, 'green');
+                            log(`${target.name}は祝福「${chosenBlessing.name}」を授かった！`);
+                            dungeonCommands.classList.remove('hidden');
+                        }, 2000);
+                    }
+
+
                     function foundWishingStar() {
                         log("壁に空いた穴から、綺麗な光が差し込んでいる…\n「あなたの願い事、聞いてあげる」という声が響いた。");
 
@@ -7726,7 +8205,10 @@
                         let maxEnemyCount = gameState.party.length + 2; // 味方の数 + 2 を上限とする
                         if (gameState.gameMode === 'summer_live') maxEnemyCount = 3;
                         const baseEnemyCount = Math.floor(Math.random() * 2) + 1 + Math.floor(gameState.floor / 10); // 敵の数を計算
-                        const enemyCount = enemyCountOverride ? enemyCountOverride : (isBoss ? 1 : Math.min(baseEnemyCount, maxEnemyCount));
+                        let enemyCount = enemyCountOverride ? enemyCountOverride : (isBoss ? 1 : Math.min(baseEnemyCount, maxEnemyCount));
+                        if (gameState.gameMode === 'secret_night') {
+                            enemyCount = 1; // ヒミツの夜モードでは敵は常に1体
+                        }
 
                         gameState.enemies = [];
                         if (isBoss && isEnhancedBoss === 'phantom_hero') {
@@ -7819,6 +8301,11 @@
                             // ボス階層の判定を正しく行うため、gameState.floorを直接参照する
                             // 通常敵の強さ調整は、この後の処理で行う
                             floor = gameState.floor;
+                        }
+
+                        // ヒミツの夜モードでの敵ステータス弱体化
+                        if (gameState.gameMode === 'secret_night') {
+                            statMultiplier *= 0.3;
                         }
 
                         if (isBoss && isEnhanced === 'phantom_hero') {
@@ -8116,6 +8603,16 @@
                                 mDefRatio: 1.1,
                                 baseAgi: 18, // 速い
                                 height: 80
+                            }, {
+                                name: 'リトルデーモン',
+                                pDefRatio: 1.1,
+                                mDefRatio: 1.1,
+                                baseAgi: 16, // 少し速め
+                                height: 60,
+                                skills: [{
+                                    name: 'ミニマムレイ',
+                                    func: shrinkToOneSkill
+                                }]
                             },
                         ];
 
@@ -8251,6 +8748,12 @@
                     }
 
                     async function chainLockSkill(enemy) {
+                        // 龍神の加護チェック (全体)
+                        if (gameState.party.every(p => p.blessings && p.blessings.dragon_god_grace && p.height > 1000)) {
+                            log(`${enemy.name}はチェインロックを放ったが、龍神の加護によって全員が鎖を弾き返した！`);
+                            return;
+                        }
+
                         const target = findTarget(enemy);
                         if (target.isWall || target === gameState.golem) {
                             log(`${enemy.name}はチェインロックを放ったが、無機物には効果がなかった！`);
@@ -8258,6 +8761,10 @@
                         }
                         log(`${enemy.name}は${enemy.skills[1].name}を放った！`);
                         for (const target of gameState.party.filter(p => p.currentHp > 0)) {
+                            if (target.blessings && target.blessings.dragon_god_grace && target.height > 1000) {
+                                log(`${target.name}は龍神の加護によって鎖を弾き返した！`);
+                                continue;
+                            }
                             if (Math.random() < 0.5) { // 50%の確率で鈍化
                                 target.statusEffects.slow = {
                                     turns: 3
@@ -8269,6 +8776,12 @@
 
                     async function inflictStripped(enemy, target) {
                         // 対象がナイト、サムライ、聖女、または防御中の場合、スキルは失敗
+                        // 龍神の加護チェック
+                        if (target.blessings && target.blessings.dragon_god_grace && target.height > 1000) {
+                            log(`${enemy.name}は${target.name}にいたずらを仕掛けたが、龍神の加護によって防がれた！`);
+                            return false;
+                        }
+
                         const immuneRoles = ['ナイト', 'サムライ', '聖女', 'アンドロイド'];
                         if (immuneRoles.includes(target.role) || target.isDefending || target.isWall || target === gameState.golem) {
                             const targetDisplayName = target.isWall ? '防壁' : target.name;
@@ -8306,6 +8819,12 @@
 
                     async function inflictStrippedForArchlich(enemy, target) {
                         // 対象がナイト、サムライ、聖女、または防御中の場合、スキルは失敗
+                        // 龍神の加護チェック
+                        if (target.blessings && target.blessings.dragon_god_grace && target.height > 1000) {
+                            log(`${enemy.name}は${target.name}にいたずらを仕掛けたが、龍神の加護によって防がれた！`);
+                            return;
+                        }
+
                         const immuneRoles = ['ナイト', 'サムライ', '聖女', 'アンドロイド'];
                         if (immuneRoles.includes(target.role) || target.isDefending || target.isWall || target === gameState.golem) {
                             const targetDisplayName = target.isWall ? '防壁' : target.name;
@@ -8336,6 +8855,25 @@
                         updatePartyStatus();
                     }
 
+                    async function shrinkToOneSkill(enemy, target) {
+                        if (target.isWall || target === gameState.golem) {
+                            log(`${enemy.name}は${target.name}にミニマムレイを放ったが、効果がなかった！`);
+                            return;
+                        }
+                        if (target.heightLocked) {
+                            log(`${enemy.name}は${target.name}にミニマムレイを放ったが、不思議な力で防がれた！`);
+                            return;
+                        }
+
+                        log(`${enemy.name}は${target.name}にミニマムレイを放った！`);
+
+                        // 戦闘中のみ有効な身長変更デバフを付与
+                        target.statusEffects.shrunkToOne = true;
+
+                        flashCard(target, 'yellow');
+                        log(`${target.name}の体がみるみる縮んで、身長が1cmになってしまった！`);
+                    }
+
                     async function minimumShower(enemy) {
                         log(`${enemy.name}はミニマムシャワーを放った！パーティ全員の体が縮んでしまった！`);
                         const shrinkAmount = 50;
@@ -8349,6 +8887,12 @@
                     }
 
                     function inflictStatusEffect(enemy, target) {
+                        // 龍神の加護チェック
+                        if (target.blessings && target.blessings.dragon_god_grace && target.height > 1000) {
+                            log(`${target.name}は龍神の加護によって状態異常を弾いた！`);
+                            return;
+                        }
+
                         const effect = ['poison', 'paralysis', 'slow'][Math.floor(Math.random() * 3)];
                         let effectName = '',
                             duration = 0;
@@ -8415,6 +8959,33 @@
                             nextTurn();
                             return;
                         }
+
+                        // 祝福「肥大する心身」「捻じ曲がった記憶」の効果
+                        if (!currentActor.isEnemy && currentActor.currentHp > 0 && !currentActor.heightLocked) {
+                            if (currentActor.blessings && currentActor.blessings.twisted_memory) {
+                                const newHeight = Math.max(1, Math.floor(currentActor.height / 2));
+                                const change = newHeight - currentActor.height;
+                                if (change !== 0) {
+                                    log(`${currentActor.name}の捻じ曲がった記憶が、その体を蝕む…！`);
+                                    await animateStatChange(currentActor, 'height', change, 'decrease');
+                                }
+                            } else if (currentActor.blessings && currentActor.blessings.swelling_body) {
+                                const change = currentActor.height;
+                                // 上限2000cm
+                                if (currentActor.height + change > 2000) {
+                                    const cappedChange = 2000 - currentActor.height;
+                                    if (cappedChange > 0) {
+                                        log(`${currentActor.name}の心身が肥大し、成長の限界に達した！`);
+                                        await animateStatChange(currentActor, 'height', cappedChange, 'increase');
+                                    }
+                                } else {
+                                    log(`${currentActor.name}の心身が肥大し、体が膨れ上がっていく…！`);
+                                    await animateStatChange(currentActor, 'height', change, 'increase');
+                                }
+                            }
+                        }
+
+
                         // テンションアップのダメージ
                         if (currentActor.buffs && currentActor.buffs.tension_up && currentActor.currentHp > 0) {
                             const damage = Math.max(1, Math.floor(currentActor.maxHp * 0.05));
@@ -10979,13 +11550,10 @@
                     async function heroicEndSkill(enemy, target) {
                         log(`${enemy.name}は${enemy.skills[2].name}を放つ！`);
                         const damage = calculateDamage(enemy, target, {
-                            power: 2.8
+                            power: 3.5
                         }); // 高威力
                         await dealDamage(target, damage);
-                        if (target.currentHp > 0 && !target.isWall && target !== gameState.golem && Math.random() < 0.7) { // 70%で麻痺
-                            target.statusEffects.paralysis = true;
-                            log(`${target.name}は強烈な一撃を受け、体が痺れてしまった！`);
-                        }
+                        log(`${enemy.name}の${enemy.skills[2].name}！ ${target.name}に${damage}の特大ダメージ！`);
                     }
 
 
@@ -11115,6 +11683,11 @@
                             if (attacker.blessings && attacker.blessings.height_power) {
                                 const heightBonus = Math.max(0, (attacker.height - 150) / 150); // 150cmを基準に、150cmごとに100%ボーナス
                                 baseDamage *= (1 + heightBonus);
+                            }
+                            // 祝福: 妖精の加護
+                            if (attacker.blessings && attacker.blessings.fairy_grace && attacker.height === 1 && skill) {
+                                log(`${attacker.name}の妖精の加護がスキルを強化する！`);
+                                baseDamage *= 3;
                             }
                             // 祝福: 絶対零度
                             if (attacker.blessings && attacker.blessings.absolute_zero && Math.random() < 0.1) {
@@ -11413,6 +11986,11 @@
                         dungeonCommands.classList.remove('hidden');
                         updateFloorDisplay();
                         battleCommands.classList.add('hidden');
+                        // 戦闘終了時に身長を元に戻す処理
+                        gameState.party.forEach(p => {
+                            if (p.statusEffects.shrunkToOne) delete p.statusEffects.shrunkToOne;
+                        });
+
                         gameState.party.forEach(p => {
                             p.buffs = {};
                             p.isDefending = false;
@@ -11459,7 +12037,7 @@
                             }
 
                             if (gameState.gameMode === 'monster_march') {
-                                if (gameState.floor === 50 && !gameState.isEndlessVersion) {
+                                if (gameState.floor === 50) {
                                     showModal("完全踏破", "絶え間ない戦いの果てに、あなたはついにダンジョンの最奥に到達し、元凶を打ち破りました。その行軍は、伝説として語り継がれるでしょう。");
                                     gameState.gameOver = true;
                                     return; // ファイター, ソーサラー, ナイト, メディック
@@ -11491,7 +12069,7 @@
                             } else if (gameState.gameMode === 'endgame' && gameState.floor === 1) {
                                 showModal("ゲームクリア？", "あなたはダンジョンの入り口で待ち構えていたボスを打ち破りました！…これでよかったのでしょうか？");
                                 gameState.gameOver = true;
-                            } else if ((gameState.floor === 30 && gameState.gameMode !== 'endless' && gameState.gameMode !== 'monster_march' && !gameState.isEndlessVersion) || (gameState.gameMode === 'endgame_plus' && gameState.floor === 90)) {
+                            } else if ((gameState.floor === 30 && gameState.gameMode !== 'endless' && gameState.gameMode !== 'monster_march') || (gameState.gameMode === 'endgame_plus' && gameState.floor === 90)) {
                                 let title = "ゲームクリア！";
                                 let text = "おめでとう！あなたはダンジョンの最深部に到達し、ボスを打ち破りました！";
                                 switch (gameState.gameMode) {
@@ -11565,6 +12143,23 @@
                                     case 'random_party':
                                         title = "運命の勝利";
                                         text = "偶然出会った仲間たちと共に、あなたはついにダンジョンを制覇しました。この出会いは運命だったのかもしれません。彼女たちとの絆は、これからも続いていくでしょう。";
+                                        break;
+                                    case 'secret_night':
+                                        title = "ヒミツの夜明け";
+                                        const charName = gameState.party[0].name;
+                                        if (charName === 'リリカ') {
+                                            text = "リリカは、ドキドキの夜の冒険を終えた。誰にも言えないヒミツのステージは、彼女を少しだけ大人にしたのかもしれない。";
+                                        } else if (charName === 'ユイ') {
+                                            text = "ユイは、恥ずかしくてドキドキの冒険を終えた。このヒミツの経験は、彼女の心に小さな勇気の種を植え付けた。";
+                                        } else if (charName === 'ミコ') {
+                                            text = "ミコは、モコと一緒に夜の冒険を終えた。いつもと違うダンジョンは、彼女の冒険心をさらに掻き立てたようだ。";
+                                        } else if (charName === 'リリィ') {
+                                            text = "リリィは、静かな夜のダンジョン探索を終えた。お宝は見つからなかったが、スリリングな一夜は彼女を満足させた。";
+                                        } else if (charName === 'フローラ') {
+                                            text = "フローラは、背徳感に満ちた夜の冒険を終えた。このヒミツは、彼女の心に甘い棘となって残り続けるだろう。";
+                                        } else {
+                                            text = "ヒミツの夜は明けた。この冒険のことは、あなたと彼女だけのヒミツだ。";
+                                        }
                                         break;
                                 }
                                 showModal(title, text);
@@ -12675,14 +13270,6 @@
 
             function startGame(mode = 'normal', selectedMembers = null, fromSave = false) {
                 gameState.gameMode = mode;
-                gameState.isEndlessVersion = false; // 初期化
-
-                // 無限版チェックボックスの状態を確認
-                const endlessTargetModes = ['monster_march', 'brawl', 'solo', 'random_party', 'trial', 'enjoy', 'uninhibited_souls', 'dwarves', 'unstable_bodies', 'veterans', 'indecent'];
-                if (toggleEndlessVersion.checked && endlessTargetModes.includes(mode)) {
-                    gameState.isEndlessVersion = true;
-                }
-
 
                 // 新しいモード「運命の出会い」の処理
                 if (mode === 'random_party') {
@@ -12711,10 +13298,11 @@
                 }
 
                 // メンバー選択が必要なモードで、まだメンバーが選ばれていない場合 (聖女の行進は除く)
+                const toggleSelectTeam = document.getElementById('toggle-select-team');
                 const fixedPartyModes = ['normal', 'saint_march', 'treasure_map', 'summer_live', 'random_party', 'little_panic', 'brawling_belles'];
                 const teamSelectionRequired = toggleSelectTeam.checked && !fixedPartyModes.includes(mode);
 
-                if ((mode === 'solo' || mode === 'indecent' || teamSelectionRequired) && !selectedMembers) {
+                if ((mode === 'solo' || mode === 'indecent' || mode === 'secret_night' || teamSelectionRequired) && !selectedMembers) {
                     whatIfModal.classList.add('hidden');
                     showSelectTeamModal(mode); // モードを引き継いで選択画面へ
                     return;
@@ -12912,13 +13500,33 @@
                 whatIfModal.classList.remove('hidden');
             });
 
-            document.querySelectorAll('#what-if-list button').forEach(button => {
+            // 「もしもの物語」のタブ切り替え処理
+            const whatIfTabs = document.querySelectorAll('.what-if-tab');
+            const whatIfContents = document.querySelectorAll('.what-if-content');
+
+            whatIfTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // すべてのタブとコンテンツを非アクティブ/非表示にする
+                    whatIfTabs.forEach(t => t.classList.remove('active-tab'));
+                    whatIfContents.forEach(c => c.classList.add('hidden'));
+
+                    // クリックされたタブと対応するコンテンツをアクティブ/表示にする
+                    tab.classList.add('active-tab');
+                    const tabName = tab.dataset.tab;
+                    document.getElementById(`what-if-content-${tabName}`).classList.remove('hidden');
+                });
+            });
+
+            // 各モード選択ボタンにイベントリスナーを設定
+            document.querySelectorAll('.what-if-content button').forEach(button => {
                 button.addEventListener('click', (e) => {
                     const mode = e.currentTarget.dataset.mode;
+                    whatIfModal.classList.add('hidden'); // モーダルを閉じる処理を追加
                     // startGameを呼び出す。メンバー選択が必要なら中で処理される
                     startGame(mode);
                 });
             });
+
             // リトルパニックモードのスキル定義
             const littlePanicSkills = {
                 holySphere: {
@@ -13016,6 +13624,8 @@
                 const isSolo = mode === 'solo';
                 const isIndecent = mode === 'indecent';
                 const isTrial = mode === 'trial' || mode === 'enjoy' || mode === 'uninhibited_souls';
+                const isSecretNight = mode === 'secret_night';
+
 
                 // モードに応じてプロンプトと選択上限を変更 (enjoy, uninhibited_souls も trial と同じ扱い)
                 if (isSolo) {
@@ -13024,6 +13634,8 @@
                     selectionPrompt.textContent = '共に冒険する仲間を2～4人選んでください。(ナイト、サムライは選択不可)';
                 } else if (isTrial) {
                     selectionPrompt.textContent = '共に冒険する仲間を2～4人選んでください。(このモードはチーム選択が可能です)';
+                } else if (isSecretNight) {
+                    selectionPrompt.textContent = 'ヒミツの夜を過ごす仲間を1人選んでください。';
                 } else {
                     selectionPrompt.textContent = '共に冒険する仲間を2～4人選んでください。';
                 }
@@ -13034,6 +13646,10 @@
                     if (char.role === '聖女' && !clearFlags.saintMarchCleared) return false;
                     if (char.role === 'トレジャーハンター' && !clearFlags.treasureMapCleared) return false;
                     if (char.role === 'アンドロイド' && !clearFlags.brawlingBellesCleared) return false;
+                    if (isSecretNight) {
+                        const secretNightChars = ['リリカ', 'ユイ', 'ミコ', 'リリィ', 'フローラ'];
+                        return secretNightChars.includes(char.name);
+                    }
                     if (char.role === 'メイド' && !clearFlags.brawlingBellesCleared) return false;
                     return true; // ファイター, ソーサラー, ナイト, メディック
                 }); // ファイター, ソーサラー, ナイト, メディック
@@ -13077,10 +13693,10 @@
                         if (selectedNames.includes(char.name)) {
                             selectedNames = selectedNames.filter(name => name !== char.name);
                             card.classList.remove('border-indigo-500', 'bg-indigo-50');
-                        } else if (isSolo && selectedNames.length < 1) {
+                        } else if ((isSolo || isSecretNight) && selectedNames.length < 1) {
                             selectedNames.push(char.name);
                             card.classList.add('border-indigo-500', 'bg-indigo-50');
-                        } else if (!isSolo && selectedNames.length < 4) {
+                        } else if (!isSolo && !isSecretNight && selectedNames.length < 4) {
                             selectedNames.push(char.name);
                             card.classList.add('border-indigo-500', 'bg-indigo-50');
                         }
@@ -13091,13 +13707,10 @@
 
                 function updateSelectionUI() {
                     let isValid;
-                    if (isSolo) {
+                    if (isSolo || isSecretNight) { // 1人選択モード
                         selectionCounter.textContent = `${selectedNames.length} / 1 人選択中`;
                         isValid = selectedNames.length === 1;
-                    } else if (isIndecent || isTrial) {
-                        selectionCounter.textContent = `${selectedNames.length} 人選択中`;
-                        isValid = selectedNames.length >= 2 && selectedNames.length <= 4;
-                    } else {
+                    } else { // 2〜4人選択モード
                         selectionCounter.textContent = `${selectedNames.length} 人選択中`;
                         isValid = selectedNames.length >= 2 && selectedNames.length <= 4;
                     }
@@ -13108,12 +13721,14 @@
 
                 startSelectionButton.onclick = () => {
                     const count = selectedNames.length;
-                    const validSolo = isSolo && count === 1;
-                    const validTrial = isTrial && count >= 2 && count <= 4;
-                    const validIndecent = isIndecent && count >= 2 && count <= 4; // enjoy, uninhibited_souls もこの条件に含まれる
-                    const validTeam = !isSolo && !isIndecent && !isTrial && count >= 2 && count <= 4;
+                    const validSolo = isSolo && count === 1; // soloモードは1人
+                    const validSecretNight = isSecretNight && count === 1; // secret_nightモードは1人
+                    const validTrial = isTrial && count >= 2 && count <= 4; // trial, enjoy, uninhibited_soulsモードは2-4人
+                    const validIndecent = isIndecent && count >= 2 && count <= 4; // indecentモードは2-4人
+                    // 上記以外のモード（endgame_plusなど）でチーム選択が有効な場合
+                    const validTeam = !isSolo && !isSecretNight && !isIndecent && !isTrial && count >= 2 && count <= 4;
 
-                    if (validSolo || validIndecent || validTrial || validTeam) startGame(gameState.gameMode, selectedNames);
+                    if (validSolo || validSecretNight || validIndecent || validTrial || validTeam) startGame(mode, selectedNames);
                 };
 
                 selectTeamModal.classList.remove('hidden');
@@ -13139,27 +13754,6 @@
                     const shouldBeSelected = randomSelection.includes(card.dataset.name);
                     const isCurrentlySelected = card.classList.contains('border-indigo-500');
                     if (shouldBeSelected !== isCurrentlySelected) card.click();
-                });
-            });
-
-            toggleEndlessVersion.addEventListener('change', () => {
-                const isEndless = toggleEndlessVersion.checked;
-                const endlessTargetModes = ['monster_march', 'brawl', 'solo'];
-
-                endlessTargetModes.forEach(mode => {
-                    const button = document.querySelector(`#what-if-list button[data-mode="${mode}"]`);
-                    if (button) {
-                        const strongTag = button.querySelector('strong');
-                        if (strongTag) {
-                            if (isEndless) {
-                                if (!strongTag.textContent.includes('(無限版)')) {
-                                    strongTag.textContent += ' (無限版)';
-                                }
-                            } else {
-                                strongTag.textContent = strongTag.textContent.replace(' (無限版)', '');
-                            }
-                        }
-                    }
                 });
             });
 
