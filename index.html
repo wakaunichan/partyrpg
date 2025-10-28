@@ -1042,7 +1042,12 @@
                         summerOnsenAllLiberatedTriggered: false, // サマーライブ温泉全員解放イベント用フラグ
                         bellesReviveEventTriggered: false, // 闘争令嬢復活イベント用フラグ
                         wishingStarNoClothes: false, // 願い星イベントで服発見を無効化するフラグ
+                        greatHoleEventTriggered: false, // 「大穴になあれ」イベント発生フラグ
+                        greatHoleEventFloor: 0, // 「大穴になあれ」発生階層
+                        wishPrayEventTriggered: false, // 「願い/祈りの少女」イベント発生フラグ
                         nextBattleIsImitation: false, // 模倣の呪いフラグ
+                        drunkenMonsterEventTriggered: false, // 「酒豪の怪物」イベント発生フラグ
+                        mazeOfShadeEventTriggered: false, // 「木陰の迷宮」イベント発生フラグ
                     };
 
                     const allCharacterBlueprints = [{
@@ -4004,7 +4009,40 @@
                                 char.blessings.size_master = true;
                             }
                         },
+                        pray_girl: {
+                            name: "祈りの少女",
+                            description: "ターン開始時、身長が低いほど威力が上がる全体魔法攻撃を行う。",
+                            type: 'special',
+                            effect: (char) => {
+                                char.blessings.pray_girl = {
+                                    name: "祈りの少女",
+                                    description: "ターン開始時、身長が低いほど威力が上がる全体魔法攻撃を行う。"
+                                };
+                            }
+                        },
+                        wish_girl: {
+                            name: "願いの少女",
+                            description: "ターン開始時、身長が高いほど威力が上がる全体物理攻撃を行う。",
+                            type: 'special',
+                            effect: (char) => {
+                                char.blessings.wish_girl = {
+                                    name: "願いの少女",
+                                    description: "ターン開始時、身長が高いほど威力が上がる全体物理攻撃を行う。"
+                                };
+                            }
+                        },
                     };
+
+                    // 新しい祝福: 巨躯の地ならし
+                    blessings.giant_grounding = {
+                        name: "巨躯の地ならし",
+                        description: "通常攻撃時、自分より身長の低い敵の防御力を無視する。",
+                        type: 'attack',
+                        effect: (char) => {
+                            char.blessings.giant_grounding = true;
+                        }
+                    };
+
 
                     function applyLevelUp(character, levels) {
                         for (let i = 0; i < levels; i++) {
@@ -5759,6 +5797,50 @@
                                 weight: 5
                             });
                         }
+                        // 「大穴になあれ」イベントの条件チェック
+                        const hasFairySyrupForHole = gameState.inventory.some(item => item.id === 'fairy_syrup' && item.quantity >= 2);
+                        const hasNoAlchemistOrDoctor = !gameState.party.some(p => p.role === 'アルケミスト' || p.role === 'ドクター');
+                        if (!gameState.greatHoleEventTriggered && hasFairySyrupForHole && hasNoAlchemistOrDoctor) {
+                            specialEvents.push({
+                                name: "大穴になあれ",
+                                func: foundGreatHole,
+                                weight: 1 // 低確率で発生
+                            });
+                        }
+                        // 「願いの少女」「祈りの少女」イベントの条件チェック
+                        const canTriggerWishPray = gameState.greatHoleEventTriggered &&
+                            gameState.floor >= gameState.greatHoleEventFloor + 30 &&
+                            gameState.party.some(p => p.height === 1) &&
+                            !gameState.wishPrayEventTriggered;
+                        if (canTriggerWishPray) {
+                            specialEvents.push({
+                                name: "再会",
+                                func: foundWishPrayGirl,
+                                weight: 1 // 低確率で発生
+                            });
+                        }
+                        // 「酒豪の怪物」イベントの条件チェック
+                        const hasGigantesAle = gameState.inventory.some(item => item.id === 'gigantes_ale' && item.quantity >= 2);
+                        const hasTallChar = gameState.party.some(p => p.currentHp > 0 && p.height >= 500);
+                        if (!gameState.drunkenMonsterEventTriggered && hasGigantesAle && hasTallChar) {
+                            specialEvents.push({
+                                name: "酒豪の怪物",
+                                func: foundDrunkenMonster,
+                                weight: 1 // 低確率で発生
+                            });
+                        }
+                        // 「木陰の迷宮」イベントの条件チェック
+                        const isAllTinyAndLocked = gameState.party.length > 0 && gameState.party.every(p => p.currentHp > 0 && p.height === 1 && p.heightLocked);
+                        if (!gameState.mazeOfShadeEventTriggered && isAllTinyAndLocked) {
+                            specialEvents.push({
+                                name: "木陰の迷宮",
+                                func: foundMazeOfShade,
+                                weight: 1 // 低確率で発生
+                            });
+                        }
+
+
+
 
                         const demeritEvents = [{
                             name: "身長が縮む罠",
@@ -5927,6 +6009,219 @@
                         const chosenEvent = getRandomEvent();
                         executeEvent(chosenEvent.func);
                     }
+
+                    async function foundGreatHole() {
+                        gameState.greatHoleEventTriggered = true; // イベントは一度しか発生しない
+                        gameState.greatHoleEventFloor = gameState.floor; // 発生階層を記録
+                        log("道の脇で、二人の冒険者の少女が泣いている…。");
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+
+                        celestiaEventTitle.textContent = "大穴になあれ";
+                        celestiaEventText.textContent = "少女「うぅ…大事なペンダントを、この小さな穴に落としちゃったの…」\n少女「小さくならないと取れないよぉ…」\n\n彼女たちにフェアリーシロップを2個渡しますか？";
+                        celestiaEventButtons.innerHTML = `
+                            <button id="greathole-give" class="action-button bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg">渡す</button>
+                            <button id="greathole-leave" class="action-button bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg">通り過ぎる</button>
+                        `;
+                        celestiaEventModal.classList.remove('hidden');
+
+                        document.getElementById('greathole-give').onclick = async() => {
+                            celestiaEventModal.classList.add('hidden');
+                            // フェアリーシロップを2個消費
+                            const syrup = gameState.inventory.find(item => item.id === 'fairy_syrup');
+                            syrup.quantity -= 2;
+
+                            log("フェアリーシロップを渡すと、少女たちは嬉しそうにそれを飲んだ！");
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                            log("二人の体はみるみる小さくなり、穴の中に飛び込んでいった。");
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                            log("しばらくして、ペンダントを抱えた二人が穴から出てきた。");
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                            log("少女「ありがとう！お姉さんたちのおかげだよ！お礼に、どっちか好きな方をあげる！」");
+
+                            eventChoiceButtons.innerHTML = `
+                                <button id="choice-elixir" class="action-button bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg">エリクサー</button>
+                                <button id="choice-gigant" class="action-button bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg">ギガントシロップ</button>
+                            `;
+                            eventChoiceModal.classList.remove('hidden');
+
+                            document.getElementById('choice-elixir').onclick = () => {
+                                eventChoiceModal.classList.add('hidden');
+                                addItemToInventory('elixir', 1);
+                                log("「エリクサー」を手に入れた！");
+                                dungeonCommands.classList.remove('hidden');
+                            };
+                            document.getElementById('choice-gigant').onclick = () => {
+                                eventChoiceModal.classList.add('hidden');
+                                addItemToInventory('gigant_syrup', 1);
+                                log("「ギガントシロップ」を手に入れた！");
+                                dungeonCommands.classList.remove('hidden');
+                            };
+                        };
+
+                        document.getElementById('greathole-leave').onclick = () => {
+                            celestiaEventModal.classList.add('hidden');
+                            log("一行は少女たちを後にして、先へ進んだ。");
+                            dungeonCommands.classList.remove('hidden');
+                        };
+                    }
+
+                    async function foundWishPrayGirl() {
+                        gameState.wishPrayEventTriggered = true; // イベントは一度しか発生しない
+                        const isWishGirl = Math.random() < 0.5;
+                        const girlName = isWishGirl ? "願いの少女" : "祈りの少女";
+                        const blessingId = isWishGirl ? "wish_girl" : "pray_girl";
+                        const blessing = blessings[blessingId];
+
+                        log("どこかで見覚えのある、小さな少女が駆け寄ってきた。");
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+
+                        celestiaEventTitle.textContent = "再会、そして…";
+                        celestiaEventText.textContent = `少女「あ、あの時のお姉さんたち！また会えて嬉しいな！」\n少女「私も、お姉さんたちみたいに強くなりたいの！お願い、一緒に冒険させて！」\n\n身長1cmの少女が、同行を申し出てきた。`;
+                        celestiaEventButtons.innerHTML = `
+                            <button id="wishpray-accept" class="action-button bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg">受け入れる</button>
+                            <button id="wishpray-decline" class="action-button bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg">断る</button>
+                        `;
+                        celestiaEventModal.classList.remove('hidden');
+
+                        document.getElementById('wishpray-accept').onclick = () => {
+                            celestiaEventModal.classList.add('hidden');
+                            log(`少女は嬉しそうに跳ねると、一人の仲間の方へ駆け寄った。`);
+
+                            showOneMemberSelectionModal(char => {
+                                log(`少女は${char.name}の肩にちょこんと乗り、その身に不思議な力を与えた！`);
+                                blessing.effect(char);
+                                log(`${char.name}は祝福「${blessing.name}」を授かった！`);
+                                flashCard(char, 'green');
+                                updatePartyStatus();
+                                dungeonCommands.classList.remove('hidden');
+                            }, `少女が力を貸したい仲間を選んでください。`);
+                        };
+
+                        document.getElementById('wishpray-decline').onclick = () => {
+                            celestiaEventModal.classList.add('hidden');
+                            log("少女は少し寂しそうにしたが、笑顔で手を振って見送ってくれた。");
+                            dungeonCommands.classList.remove('hidden');
+                        };
+                    }
+
+                    async function foundDrunkenMonster() {
+                        gameState.drunkenMonsterEventTriggered = true;
+                        log("ダンジョンの奥から、巨大な魔物がふらふらと歩いてきた…。");
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+
+                        celestiaEventTitle.textContent = "酒豪の怪物";
+                        celestiaEventText.textContent = "巨大な魔物「おぉ…お前さんたち、ギガンテスエールを…持っとらんか…？」\n\nギガンテスエールを2個、譲りますか？";
+                        celestiaEventButtons.innerHTML = `
+                            <button id="drunken-monster-give" class="action-button bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg">譲る</button>
+                            <button id="drunken-monster-refuse" class="action-button bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg">断る</button>
+                        `;
+                        celestiaEventModal.classList.remove('hidden');
+
+                        document.getElementById('drunken-monster-give').onclick = async() => {
+                            celestiaEventModal.classList.add('hidden');
+                            const aleItem = gameState.inventory.find(item => item.id === 'gigantes_ale');
+                            aleItem.quantity -= 2;
+
+                            const tallestChar = gameState.party.filter(p => p.currentHp > 0).sort((a, b) => b.height - a.height)[0];
+                            if (!tallestChar) {
+                                log("しかし、パーティに誰もいなかったため、魔物は寂しそうに去っていった。");
+                                dungeonCommands.classList.remove('hidden');
+                                return;
+                            }
+
+                            log(`魔物は嬉しそうにギガンテスエールを受け取ると、${tallestChar.name}に差し出した！`);
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                            log(`二人は豪快にギガンテスエールで乾杯し、親睦を深めた！`);
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+
+                            if (!tallestChar.heightLocked) {
+                                await animateStatChange(tallestChar, 'height', 100, 'increase');
+                                log(`${tallestChar.name}の身長が100cm伸びた！`);
+                            } else {
+                                log(`${tallestChar.name}の身長は固定されており、変化しなかった！`);
+                            }
+                            await new Promise(resolve => setTimeout(resolve, 1000));
+
+                            const blessing = blessings.giant_grounding;
+                            blessing.effect(tallestChar);
+                            log(`機嫌を良くした魔物から、${tallestChar.name}は祝福「${blessing.name}」を授かった！`);
+                            flashCard(tallestChar, 'green');
+                            updatePartyStatus();
+                            dungeonCommands.classList.remove('hidden');
+                        };
+
+                        document.getElementById('drunken-monster-refuse').onclick = () => {
+                            celestiaEventModal.classList.add('hidden');
+                            log("一行はギガンテスエールを譲らず、魔物は不機嫌そうに去っていった…。");
+                            dungeonCommands.classList.remove('hidden');
+                        };
+                    }
+
+                    async function foundMazeOfShade() {
+                        gameState.mazeOfShadeEventTriggered = true;
+                        log("ダンジョンに突風が吹き荒れ、小さな一行は木の葉のように舞い上がった！");
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        log("気づくと、一行は見知らぬ木陰に着地していた。目の前には、小さな獣道が続いている…。");
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+
+                        celestiaEventTitle.textContent = "木陰の迷宮";
+                        celestiaEventText.textContent = "この先に何があるかはわからない…。\n小道に入りますか？";
+                        celestiaEventButtons.innerHTML = `
+                            <button id="maze-enter" class="action-button bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg">入る</button>
+                            <button id="maze-leave" class="action-button bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg">やめておく</button>
+                        `;
+                        celestiaEventModal.classList.remove('hidden');
+
+                        document.getElementById('maze-enter').onclick = async() => {
+                            celestiaEventModal.classList.add('hidden');
+                            log("一行は覚悟を決め、小さな迷宮へと足を踏み入れた。");
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+
+                            let failedAttempts = 0;
+                            for (let i = 0; i < 3; i++) {
+                                log(`探索中… (${i + 1}/3)`);
+                                await new Promise(resolve => setTimeout(resolve, 1500));
+                                if (Math.random() < 0.5) { // 50%でアイテム獲得
+                                    const rareItemIds = Object.keys(itemBlueprints).filter(id => itemBlueprints[id].rare);
+                                    const foundItemId = rareItemIds[Math.floor(Math.random() * rareItemIds.length)];
+                                    addItemToInventory(foundItemId);
+                                    log(`キラリと光るものを見つけた！「${itemBlueprints[foundItemId].name}」を手に入れた！`);
+                                    flashCard(getRandomPartyMember(), 'yellow');
+                                } else {
+                                    log("物音に気づき身構えたが、何も見つからなかった…。");
+                                    failedAttempts++;
+                                }
+                                await new Promise(resolve => setTimeout(resolve, 1500));
+                            }
+
+                            if (failedAttempts > 0) {
+                                log(`探索を終えようとしたその時、背後から${failedAttempts}体の小さな気配が迫る！`);
+                                await new Promise(resolve => setTimeout(resolve, 2000));
+                                startBattle(false, false, 'micro', failedAttempts); // 特殊な敵との戦闘
+                            } else {
+                                log("幸運にも、危険なことにはならずに迷宮を抜け出すことができた。");
+                                dungeonCommands.classList.remove('hidden');
+                            }
+                        };
+
+                        document.getElementById('maze-leave').onclick = () => {
+                            celestiaEventModal.classList.add('hidden');
+                            log("一行は危険を察知し、小道には入らずに元の道へ戻った。");
+                            dungeonCommands.classList.remove('hidden');
+                        };
+                    }
+
+                    function getLineForHole(char, situation, otherChar) {
+                        const charConvos = conversations[char.name];
+                        if (charConvos && charConvos[situation] && charConvos[situation].length > 0) {
+                            const lines = charConvos[situation];
+                            let line = lines[Math.floor(Math.random() * lines.length)];
+                            return line.replace(/{name}/g, otherChar.name);
+                        }
+                        // デフォルトのセリフ
+                        return situation === 'high_mouse_hole_giant' ? "肩を貸すよ。" : "行ってくる！";
+                    }
+
 
                     async function foundLiberatedMonsterAttack() {
                         const liberatedMembers = gameState.party.filter(p => p.currentHp > 0 && p.isLiberatedStripped);
@@ -6747,6 +7042,7 @@
                                 animateStatChange(char1, 'height', growthAmount, 'increase');
                                 animateStatChange(char2, 'height', shrinkAmount, 'decrease');
                                 log(`眩い光の後、${char1.name}の身長は${growthAmount}cm伸び、${char2.name}の身長は1cmになった！`);
+                                dungeonCommands.classList.remove('hidden');
                             });
                         };
 
@@ -6767,6 +7063,7 @@
                                 animateStatChange(char1, 'height', change1, change1 >= 0 ? 'increase' : 'decrease');
                                 animateStatChange(char2, 'height', change2, change2 >= 0 ? 'increase' : 'decrease');
                                 log(`装置が作動し、二人の身長は平均化され、共に${newHeight}cmになった！`);
+                                dungeonCommands.classList.remove('hidden');
                             });
                         };
 
@@ -6780,6 +7077,7 @@
                                 }
                                 animateStatChange(char, 'height', 100, 'increase');
                                 log(`装置から光が溢れ、${char.name}の身長が100cm伸びた！`);
+                                dungeonCommands.classList.remove('hidden');
                             }, "身長を伸ばすキャラを1人選んでください。");
                         };
 
@@ -6797,6 +7095,7 @@
                                 char[statToUpgrade] += upgradeAmount;
                                 flashCard(char, 'green');
                                 log(`装置が作動し、${char.name}の${statToUpgrade === 'maxHp' ? '最大HP' : statToUpgrade === 'atk' ? '攻撃力' : '防御力'}が永続的に${upgradeAmount}上昇した！`);
+                                dungeonCommands.classList.remove('hidden');
                             }, "強化するキャラを1人選んでください。");
                         };
 
@@ -7069,6 +7368,7 @@
                                 await wish.effect(char);
                                 updatePartyStatus();
                                 // dungeonCommands.classList.remove('hidden'); // 各effect内で個別に対応
+                                dungeonCommands.classList.remove('hidden');
                             };
                             wishingStarOptions.appendChild(button);
                         });
@@ -7404,7 +7704,7 @@
                         return available[Math.floor(Math.random() * available.length)];
                     }
 
-                    function startBattle(isBoss = false, isEnhancedBoss = false) {
+                    function startBattle(isBoss = false, isEnhancedBoss = false, specialEnemyType = null, enemyCountOverride = null) {
                         log(isBoss ? "ボスの気配がする…！" : "敵が現れた！");
                         gameState.inBattle = true;
                         dungeonCommands.classList.add('hidden');
@@ -7425,14 +7725,14 @@
                         // 敵の数を計算（サマータイム・スペシャルライブ！では最大3体）
                         let maxEnemyCount = gameState.party.length + 2; // 味方の数 + 2 を上限とする
                         if (gameState.gameMode === 'summer_live') maxEnemyCount = 3;
-                        const baseEnemyCount = Math.floor(Math.random() * 2) + 1 + Math.floor(gameState.floor / 10);
-                        const enemyCount = isBoss ? 1 : Math.min(baseEnemyCount, maxEnemyCount);
+                        const baseEnemyCount = Math.floor(Math.random() * 2) + 1 + Math.floor(gameState.floor / 10); // 敵の数を計算
+                        const enemyCount = enemyCountOverride ? enemyCountOverride : (isBoss ? 1 : Math.min(baseEnemyCount, maxEnemyCount));
 
                         gameState.enemies = [];
                         if (isBoss && isEnhancedBoss === 'phantom_hero') {
                             gameState.enemies.push(createEnemy(true, 'phantom_hero'));
                         } else {
-                            for (let i = 0; i < enemyCount; i++) gameState.enemies.push(createEnemy(isBoss, isEnhancedBoss));
+                            for (let i = 0; i < enemyCount; i++) gameState.enemies.push(createEnemy(isBoss, isEnhancedBoss, specialEnemyType));
                         }
                         updateEnemyStatus();
 
@@ -7501,7 +7801,7 @@
                         return imitation;
                     }
 
-                    function createEnemy(isBoss, isEnhanced = false) {
+                    function createEnemy(isBoss, isEnhanced = false, specialEnemyType = null) {
                         let floor = gameState.floor;
 
                         // パーティ人数による敵ステータスの補正計算 (1人減るごとに10%低下)
@@ -7709,6 +8009,25 @@
                             // agiは補正対象外
 
                             // サマータイム・スペシャルライブ！の専用ボス
+                            // ボスのサイズバリエーション
+                            if (gameState.floor >= 16) {
+                                const variantRoll = Math.random();
+                                if (variantRoll < 0.1) { // 10%で巨大化
+                                    boss.name = `【巨体の】${boss.name}`;
+                                    boss.height = Math.ceil(boss.height * 1.5);
+                                    boss.atk = Math.ceil(boss.atk * 1.2);
+                                    boss.pDef = Math.ceil(boss.pDef * 1.2);
+                                    boss.mDef = Math.ceil(boss.mDef * 1.2);
+                                    boss.agi = Math.ceil(boss.agi * 0.8);
+                                } else if (variantRoll < 0.2) { // 10%で縮小化
+                                    boss.name = `【幼体】${boss.name}`;
+                                    boss.height = Math.ceil(boss.height * 0.5);
+                                    boss.atk = Math.ceil(boss.atk * 0.8);
+                                    boss.pDef = Math.ceil(boss.pDef * 0.8);
+                                    boss.mDef = Math.ceil(boss.mDef * 0.8);
+                                    boss.agi = Math.ceil(boss.agi * 1.2);
+                                }
+                            }
                             if (gameState.gameMode === 'summer_live') {
                                 if (floor === 30) {
                                     boss.name = 'ビーチシャーク';
@@ -7822,7 +8141,7 @@
                             floor = Math.floor(gameState.floor * 0.6);
                         }
 
-                        return {
+                        const enemy = {
                             name: blueprint.name,
                             maxHp: finalMaxHp,
                             currentHp: finalMaxHp,
@@ -7849,6 +8168,65 @@
                             mischiefUsed: false,
                             focusedTargetId: null,
                         };
+
+                        // 16階以降でサイズバリエーションを追加
+                        if (gameState.floor >= 16) {
+                            const variantRoll = Math.random() * 100; // 0-100の乱数
+                            if (variantRoll < 5) { // 5%
+                                enemy.name = `【狂暴な】${enemy.name}`;
+                                enemy.atk = Math.ceil(enemy.atk * 1.5);
+                                enemy.pDef = Math.ceil(enemy.pDef * 0.7);
+                                enemy.mDef = Math.ceil(enemy.mDef * 0.7);
+                            } else if (variantRoll < 10) { // 5%
+                                enemy.name = `【堅牢な】${enemy.name}`;
+                                enemy.pDef = Math.ceil(enemy.pDef * 1.5);
+                                enemy.mDef = Math.ceil(enemy.mDef * 1.5);
+                                enemy.agi = Math.ceil(enemy.agi * 0.7);
+                            } else if (variantRoll < 15) { // 5%
+                                enemy.name = `【俊敏な】${enemy.name}`;
+                                enemy.agi = Math.ceil(enemy.agi * 1.5);
+                                enemy.atk = Math.ceil(enemy.atk * 0.7);
+                            } else if (variantRoll < 20) { // 5%
+                                enemy.name = `【毒纏い】${enemy.name}`;
+                                // 特殊能力は enemyTurn で処理
+                            } else if (variantRoll < 25) { // 5%
+                                enemy.name = `【痺れる】${enemy.name}`;
+                                // 特殊能力は enemyTurn で処理
+                            } else if (variantRoll < 30) { // 5%
+                                enemy.name = `【輝く】${enemy.name}`;
+                                enemy.atk = Math.ceil(enemy.atk * 1.1);
+                                enemy.pDef = Math.ceil(enemy.pDef * 1.1);
+                                enemy.mDef = Math.ceil(enemy.mDef * 1.1);
+                                enemy.agi = Math.ceil(enemy.agi * 1.1);
+                                enemy.maxHp = Math.ceil(enemy.maxHp * 0.7);
+                                enemy.currentHp = enemy.maxHp;
+                            } else if (variantRoll < 35) { // 5%
+                                enemy.name = `【巨大な】${enemy.name}`;
+                                enemy.height = Math.ceil(enemy.height * 1.5);
+                                enemy.atk = Math.ceil(enemy.atk * 1.2);
+                                enemy.pDef = Math.ceil(enemy.pDef * 1.2);
+                                enemy.mDef = Math.ceil(enemy.mDef * 1.2);
+                                enemy.agi = Math.ceil(enemy.agi * 0.8);
+                            } else if (variantRoll < 40) { // 5%
+                                enemy.name = `【小さな】${enemy.name}`;
+                                enemy.height = Math.ceil(enemy.height * 0.5);
+                                enemy.atk = Math.ceil(enemy.atk * 0.8);
+                                enemy.pDef = Math.ceil(enemy.pDef * 0.8);
+                                enemy.mDef = Math.ceil(enemy.mDef * 0.8);
+                                enemy.agi = Math.ceil(enemy.agi * 1.2);
+                            }
+                        }
+                        return enemy;
+                    }
+
+                    // createEnemy の直後に配置
+                    function applyMicroModification(enemy) {
+                        enemy.name = `【ミクロ】${enemy.name}`;
+                        enemy.atk = Math.max(1, Math.ceil(enemy.atk * 0.1));
+                        enemy.pDef = Math.max(1, Math.ceil(enemy.pDef * 0.1));
+                        enemy.mDef = Math.max(1, Math.ceil(enemy.mDef * 0.1));
+                        enemy.agi = Math.ceil(enemy.agi * 3);
+                        enemy.height = 1;
                     }
 
                     function shrinkBeam(enemy) {
@@ -8058,6 +8436,46 @@
                             animateStatChange(currentActor, 'mp', 1, 'increase');
                         }
 
+                        // 祝福「願いの少女」「祈りの少女」の効果
+                        if (!currentActor.isEnemy && currentActor.blessings) {
+                            if (currentActor.blessings.wish_girl) {
+                                log(`${currentActor.name}の肩に乗った願いの少女が、星に願いをかける！`);
+                                await new Promise(resolve => setTimeout(resolve, 1000));
+                                const power = Math.max(0.1, (currentActor.height / 150) * 0.5); // 身長150cmで威力0.5
+                                const damagePromises = [];
+                                for (const enemy of gameState.enemies.filter(e => e.currentHp > 0)) {
+                                    const damage = calculateDamage(currentActor, enemy, {
+                                        type: 'physical',
+                                        power: power
+                                    });
+                                    damagePromises.push(dealDamage(enemy, damage));
+                                }
+                                await Promise.all(damagePromises);
+                                log(`流星群が敵全体を襲った！`);
+                                if (gameState.enemies.every(e => e.currentHp <= 0)) {
+                                    endBattle(true);
+                                    return;
+                                }
+                            } else if (currentActor.blessings.pray_girl) {
+                                log(`${currentActor.name}の肩に乗った祈りの少女が、天に祈りを捧げる！`);
+                                await new Promise(resolve => setTimeout(resolve, 1000));
+                                const power = Math.max(0.1, (150 / Math.max(1, currentActor.height)) * 1.5); // 身長1cmで威力225相当
+                                const damagePromises = [];
+                                for (const enemy of gameState.enemies.filter(e => e.currentHp > 0)) {
+                                    const damage = calculateDamage(currentActor, enemy, {
+                                        type: 'magic',
+                                        power: power
+                                    });
+                                    damagePromises.push(dealDamage(enemy, damage));
+                                }
+                                await Promise.all(damagePromises);
+                                log(`聖なる光が敵全体を浄化した！`);
+                                if (gameState.enemies.every(e => e.currentHp <= 0)) {
+                                    endBattle(true);
+                                    return;
+                                }
+                            }
+                        }
 
                         // バフのターン経過
                         if (currentActor.buffs) {
@@ -9934,6 +10352,7 @@
                                 // 完成品を追加
                                 addItemToInventory(recipe.itemId, 1);
                                 log(`調合に成功し、「${recipe.name}」を1個手に入れた！`);
+                                flashCard(gameState.party[0], 'yellow');
                                 alchemyModal.classList.add('hidden');
                                 dungeonCommands.classList.remove('hidden');
                             };
@@ -10521,6 +10940,26 @@
                                 log(`${enemy.name}の攻撃！ ${target.name}に${damage}のダメージ！`);
                             }
                         }
+
+                        // 接頭辞による追加効果
+                        if (enemy.name.startsWith('【毒纏い】') && !target.isWall && target !== gameState.golem && Math.random() < 0.2) {
+                            log(`${enemy.name}の攻撃から毒が放たれた！`);
+                            target.statusEffects.poison = {
+                                turns: 3
+                            };
+                            flashCard(target, 'yellow');
+                            log(`${target.name}は毒状態になった！`);
+                        }
+
+                        if (enemy.name.startsWith('【痺れる】') && !target.isWall && target !== gameState.golem && Math.random() < 0.2) {
+                            log(`${enemy.name}の攻撃から電撃が走った！`);
+                            target.statusEffects.paralysis = true;
+                            flashCard(target, 'yellow');
+                            log(`${target.name}は麻痺してしまった！`);
+                        }
+
+                        updatePartyStatus();
+
                     }
 
                     async function counterAttack(counterAttacker, originalAttacker, damage, isHpAbsorb = false) {
@@ -10685,6 +11124,14 @@
                             }
                             const defenderStats = getEffectiveStats(defender);
                             effectiveDefense = (attackType === 'magic') ? defenderStats.mDef : defenderStats.pDef;
+
+                            // 祝福: 巨躯の地ならし
+                            if (attacker.blessings && attacker.blessings.giant_grounding && !skill) { // 通常攻撃時のみ
+                                if (attacker.height > defender.height) {
+                                    log(`${attacker.name}の巨躯の地ならし！${defender.name}の防御力を無視する！`);
+                                    effectiveDefense = 0;
+                                }
+                            }
                         } else {
                             // 味方の場合、getEffectiveStatsで計算された防御力を使用し、防御状態を考慮
                             const defenderStats = getEffectiveStats(defender);
