@@ -628,6 +628,17 @@
             </div>
         </div>
 
+        <!-- 汎用イベントモーダル (テキスト＋選択肢) -->
+        <div id="general-event-modal" class="hidden absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-lg p-8 text-center shadow-2xl max-w-md w-full">
+                <h2 id="general-event-title" class="text-2xl font-bold mb-4"></h2>
+                <p id="general-event-text" class="mb-6 whitespace-pre-wrap"></p>
+                <div id="general-event-buttons" class="flex flex-col sm:flex-row justify-center gap-4">
+                    <!-- ボタンがここに挿入される -->
+                </div>
+            </div>
+        </div>
+
         <div id="item-modal" class="hidden absolute inset-0 bg-black/70 flex items-center justify-center z-40 p-4">
             <div class="bg-white rounded-lg p-6 text-left shadow-2xl max-w-md w-full">
                 <h2 class="text-2xl font-bold mb-4">アイテム</h2>
@@ -726,6 +737,7 @@
                         <button data-mode="brawling_belles" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-rose-500">闘争令嬢</strong><span class="block text-sm text-gray-600">特別なジョブ「アンドロイド」と「メイド」の2人で30階の踏破を目指す。クリアすると選抜チームに2人が追加される。</span></button>
                         <button data-mode="summer_live" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-sky-500">サマータイム・スペシャルライブ！</strong><span class="block text-sm text-gray-600">リリカ、ユイ、ミコ、リリィの4人で、ビーチと温泉を巡る特別な冒険に出る。60階踏破を目指せ。</span></button>
                         <button data-mode="secret_night" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-indigo-700">ヒミツの夜</strong><span class="block text-sm text-gray-600">リリカ、ユイ、ミコ、リリィ、フローラの誰かひとりで、静まったダンジョンを裸で歩く。物語重視のモード。</span></button>
+                        <button data-mode="size_up_gamble" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-orange-700">サイズアップ・ギャンブル！</strong><span class="block text-sm text-gray-600">ルナとコハルで、身長1000cmを目指すギャンブルに挑む。</span></button>
                     </div>
                     <!-- 終焉タブ -->
                     <div id="what-if-content-endgame" class="what-if-content space-y-3 hidden">
@@ -1045,6 +1057,11 @@
                     const alchemyModal = document.getElementById('alchemy-modal');
                     const alchemyOptions = document.getElementById('alchemy-options');
                     const alchemyCancelButton = document.getElementById('alchemy-cancel-button');
+                    // 汎用イベントモーダル
+                    const generalEventModal = document.getElementById('general-event-modal');
+                    const generalEventTitle = document.getElementById('general-event-title');
+                    const generalEventText = document.getElementById('general-event-text');
+                    const generalEventButtons = document.getElementById('general-event-buttons');
                     const heightLockConfirmModal = document.getElementById('height-lock-confirm-modal');
 
 
@@ -1069,7 +1086,7 @@
                         foundEquipment: [],
                         killCount: 0, // ネクロマンサー用
                         walls: [], // ガーディアン用 
-                        gameMode: 'normal', // normal, veterans, dwarves, brawl, solo, endgame, endless, indecent, enjoy, saint_march, fixed_path, uninhibited_souls, random_party, divine_trial, treasure_map, secret_night
+                        gameMode: 'normal', // normal, veterans, dwarves, brawl, solo, endgame, endless, indecent, enjoy, saint_march, fixed_path, uninhibited_souls, random_party, divine_trial, treasure_map, secret_night, size_up_gamble
                         triggeredSpecialConvos: [],
                         dungeonBackground: DEFAULT_DUNGEON_BG, // 背景画像をgameStateで管理
                         bellesPrivateCostumeEventTriggered: false, // 闘争令嬢プライベート衣装イベント用フラグ
@@ -1083,6 +1100,8 @@
                         nextBattleIsImitation: false, // 模倣の呪いフラグ
                         drunkenMonsterEventTriggered: false, // 「酒豪の怪物」イベント発生フラグ
                         mazeOfShadeEventTriggered: false, // 「木陰の迷宮」イベント発生フラグ
+                        sizeUpGambleGoalReached: false, // サイズアップ・ギャンブルの目標達成フラグ
+                        nextBattleIsGambleMaster: false, // サイズアップ・ギャンブルのボス戦フラグ
                     };
 
                     const allCharacterBlueprints = [{
@@ -4151,6 +4170,26 @@
                         }]
                     };
 
+                    const sizeUpGambleConversations = {
+                        floor1: [{
+                            char: 'ルナ',
+                            line: 'ここが噂の賭博場ね…なんだか、ゾクゾクするじゃない！'
+                        }, {
+                            char: 'コハル',
+                            line: 'ルナさん、本当に大丈夫なんですか？なんだか、変な予感がします…！'
+                        }, {
+                            char: '？？？',
+                            line: 'ようこそ、挑戦者たちよ。ここでは己の『サイズ』そのものを賭けてもらう'
+                        }, {
+                            char: '？？？',
+                            line: '見事、身長1000cmの頂きに達した者には、相応の報酬を与えよう…'
+                        }, {
+                            char: 'システム',
+                            line: '二人の体に、不思議な力が宿った！\n全員が祝福「賭博の魂」を授かった！(レベルアップ時に身長+100cm)'
+                        }]
+                    };
+
+
                     const saintMarchConversations = {
                         floor1: [{
                             char: 'セレスティア',
@@ -4207,6 +4246,11 @@
                             line: '見て、足元からお花が咲いたよ。このダンジョンも、私の力で綺麗にしちゃおうかな。'
                         }]
                     };
+
+                    // 1階イベントの後に祝福を付与する処理
+                    async function applySizeUpGambleBlessing() {
+                        gameState.party.forEach(char => blessings.gambling_soul.effect(char));
+                    }
 
                     const normalModeConversations = {
                         floor1: [{
@@ -4425,6 +4469,15 @@
                         type: 'special',
                         effect: (char) => {
                             char.blessings.twisted_memory = true;
+                        }
+                    };
+                    // サイズアップ・ギャンブル用
+                    blessings.gambling_soul = {
+                        name: "賭博の魂",
+                        description: "レベルが上がったとき、身長が100cm伸びる。",
+                        type: 'special',
+                        effect: (char) => {
+                            char.blessings.gambling_soul = true;
                         }
                     };
 
@@ -4905,6 +4958,7 @@
                         gameState.bellesPrivateCostumeEventTriggered = false; // イベントフラグをリセット
                         gameState.bellesReviveEventTriggered = false; // 復活イベントフラグをリセット
                         // ソロクリア情報を読み込む
+                        gameState.sizeUpGambleGoalReached = false; // モード専用フラグをリセット
                         const soloClearFlags = fromSave ? {} : JSON.parse(localStorage.getItem('sizeDungeonSoloClearFlags') || '{}');
 
                         // fromSaveがtrueの場合、gameStateの大部分はロード済みなので、ここで処理を中断
@@ -5187,13 +5241,21 @@
                         dungeonCommands.classList.add('hidden');
                         for (const part of conversation) {
                             const speaker = gameState.party.find(p => p.name === part.char);
-                            if (speaker && speaker.currentHp > 0) {
+                            // システムメッセージの場合
+                            if (part.char === 'システム' || !speaker) {
+                                log(part.line);
+                                await new Promise(resolve => setTimeout(resolve, 2500));
+                            } else if (speaker.currentHp > 0) {
                                 log(`${part.char}「${part.line}」`);
                                 await new Promise(resolve => setTimeout(resolve, 2500));
                             }
                         }
                         dungeonCommands.classList.remove('hidden');
                     }
+                    // playConversationの直後に配置
+                    conversations['システム'] = {
+                        default: [""]
+                    };
 
                     function updateFloorDisplay() {
                         if (!gameState.inBattle && gameState.floor > 0) {
@@ -5205,10 +5267,15 @@
                     let logHistory = [];
 
                     function log(message) {
-                        logQueue.push(message);
-                        if (!isProcessingLog) {
-                            processLogQueue();
-                        }
+                        return new Promise(resolve => {
+                            logQueue.push({
+                                message,
+                                resolve
+                            });
+                            if (!isProcessingLog) {
+                                processLogQueue();
+                            }
+                        });
                     }
 
                     function addLogToHistory(message) {
@@ -5218,6 +5285,25 @@
                         }
                     }
                     // Refactored updatePartyStatus to update existing elements or create new ones
+                    function processLogQueue() {
+                        if (logQueue.length === 0) {
+                            isProcessingLog = false;
+                            return;
+                        }
+                        isProcessingLog = true;
+                        const {
+                            message,
+                            resolve
+                        } = logQueue.shift();
+                        addLogToHistory(message);
+                        logMessage.textContent = message;
+
+                        setTimeout(() => {
+                            resolve(); // Promiseを解決して、呼び出し元のawaitを解放
+                            processLogQueue(); // 次のログ処理へ
+                        }, 700); // 0.7秒の遅延
+                    }
+
                     function updatePartyStatus() {
                         gameState.party.forEach((char, index) => {
                             let card = document.getElementById(`party-card-${index}`);
@@ -5560,6 +5646,20 @@
 
                     async function advanceFloor() {
                         gameState.party.forEach(p => {
+                            // 祝福「肥大する心身」「捻じ曲がった記憶」の効果
+                            if (!p.isEnemy && p.currentHp > 0 && !p.heightLocked) {
+                                if (p.blessings && p.blessings.twisted_memory) {
+                                    const newHeight = Math.max(1, Math.floor(p.height / 2));
+                                    const change = newHeight - p.height;
+                                    if (change !== 0) {
+                                        log(`${p.name}の捻じ曲がった記憶が、その体を蝕む…！`);
+                                        animateStatChange(p, 'height', change, 'decrease');
+                                    }
+                                }
+                            }
+                        });
+
+                        gameState.party.forEach(p => {
                             if (p.liberationCooldown > 0) {
                                 p.liberationCooldown--;
                             }
@@ -5568,18 +5668,43 @@
                         gameState.floor++;
                         updateFloorDisplay();
 
+                        // --- 1階の導入イベント (最優先でチェック) ---
+                        if (gameState.floor === 1) {
+                            // 「はじめから」モードの場合のみ導入会話を再生
+                            if (gameState.gameMode === 'normal') {
+                                await playConversation(normalModeConversations.floor1);
+                                return; // 導入会話を再生したら、他のイベントは発生させずに終了
+                            }
+                            if (gameState.gameMode === 'summer_live') {
+                                await playConversation(summerLiveConversations.floor1);
+                                return;
+                            }
+                            // サイズアップ・ギャンブル！ 1階イベント
+                            if (gameState.gameMode === 'size_up_gamble') {
+                                await playConversation(sizeUpGambleConversations.floor1);
+                            }
+                            // --- little_panic モードの会話イベント ---
+                            if (gameState.gameMode === 'little_panic') {
+                                await playConversation(littlePanicConversations.floor1);
+                                return; // イベントを発生させてターン終了
+                            }
+                        }
+
                         // 11階の固定イベント
                         if (gameState.floor === 11 && gameState.gameMode === 'summer_live') {
                             await triggerKanpaiJuiceEvent();
                             return; // イベントを発生させてターン終了
                         }
 
+                        // サイズアップ・ギャンブル！ 目標達成後イベント
+                        if (gameState.gameMode === 'size_up_gamble' && gameState.sizeUpGambleGoalReached) {
+                            await triggerSizeUpGambleGoalEvent();
+                            gameState.sizeUpGambleGoalReached = false; // イベントは一度きりなのでフラグをリセット
+                            return;
+                        }
                         // --- little_panic モードの会話イベント ---
                         if (gameState.gameMode === 'little_panic') {
-                            if (gameState.floor === 0) { // 1階に到達した直後
-                                await playConversation(littlePanicConversations.floor1);
-                                // この会話の後、通常のフロア進行処理に進む
-                            } else if (gameState.floor === 5) { // 6階に到達する前
+                            if (gameState.floor === 5) { // 6階に到達する前
                                 await playConversation(littlePanicConversations.floor6);
                             } else if (gameState.floor === 11) { // 12階に到達する前 // ファイター, ソーサラー, ナイト, メディック
                                 await playConversation(littlePanicConversations.floor12);
@@ -5591,14 +5716,16 @@
                         }
 
                         // --- saint_march モードの会話イベント ---
-                        if (gameState.gameMode === 'saint_march' && gameState.floor === 0) {
+                        if (gameState.gameMode === 'saint_march' && gameState.floor === 1) {
                             await playConversation(saintMarchConversations.floor1);
+                            return; // イベントを発生させてターン終了
                         }
 
                         // --- treasure_map モードの会話イベント ---
                         if (gameState.gameMode === 'treasure_map') {
-                            if (gameState.floor === 0) {
+                            if (gameState.floor === 1) {
                                 await playConversation(treasureMapConversations.floor1);
+                                return; // イベントを発生させてターン終了
                             } else if (gameState.floor === 5) { // 6階に到達する前
                                 const lily = gameState.party[0]; // リリィは常にパーティの0番目
                                 const conversationKey = lily.isTransformed ?
@@ -5610,27 +5737,12 @@
                             }
                         }
 
-
-                        // --- 1階の導入イベント ---
-                        if (gameState.floor === 1) {
-                            // 「はじめから」モードの場合のみ導入会話を再生
-                            if (gameState.gameMode === 'normal') {
-                                await playConversation(normalModeConversations.floor1);
-                                return;
-                            }
-                            if (gameState.gameMode === 'summer_live') {
-                                await playConversation(summerLiveConversations.floor1);
-                                return;
-                            }
-                            // 他のモードの1階イベントもここに追加可能
-                            const hasNoel = gameState.party.some(p => p.name === 'ノエル');
-                            const hasFlora = gameState.party.some(p => p.name === 'フローラ');
-                            if (hasNoel && hasFlora && gameState.gameMode !== 'brawling_belles' && !gameState.bellesPrivateCostumeEventTriggered) {
-                                gameState.bellesPrivateCostumeEventTriggered = true;
-                                triggerBellesPrivateCostumeEvent();
-                                return;
-                            }
+                        // --- サイズアップ・ギャンブル！ 特殊ゲームオーバー ---
+                        if (gameState.gameMode === 'size_up_gamble' && gameState.party.every(p => p.height === 1)) {
+                            await triggerSizeUpGambleGameOverEvent();
+                            return;
                         }
+
 
                         // --- サマータイム・スペシャルライブ！ 32階イベント ---
                         if (gameState.floor === 32 && gameState.gameMode === 'summer_live') {
@@ -5721,6 +5833,14 @@
 
                         // 特別な衣装変更イベントのチェック
                         if (floor === 1) {
+                            // 闘争令嬢プライベート衣装イベント
+                            const hasNoel = gameState.party.some(p => p.name === 'ノエル');
+                            const hasFlora = gameState.party.some(p => p.name === 'フローラ');
+                            if (hasNoel && hasFlora && gameState.gameMode !== 'brawling_belles' && !gameState.bellesPrivateCostumeEventTriggered) {
+                                gameState.bellesPrivateCostumeEventTriggered = true;
+                                triggerBellesPrivateCostumeEvent();
+                                return;
+                            }
                             const clearFlags = JSON.parse(localStorage.getItem('sizeDungeonClearFlags') || '{}');
                             const partyNames = gameState.party.map(p => p.name).sort();
                             const requiredNames = ['リリカ', 'ユイ', 'ミコ', 'リリィ'].sort();
@@ -5772,12 +5892,13 @@
                         }
 
                         // 通常の30階ボス
-                        if (floor === 30 && mode !== 'endless' && mode !== 'monster_march') {
+                        if (floor === 30 && mode !== 'endless' && mode !== 'monster_march' && mode !== 'size_up_gamble' && mode !== 'summer_live') {
                             startBattle(true);
                             return;
                         }
                         // その他のモードでのボス戦
                         if ((mode === 'endgame' && floor === 1) ||
+                            (mode === 'size_up_gamble' && gameState.nextBattleIsGambleMaster) ||
                             (mode === 'monster_march' && (floor === 30 || floor === 50)) ||
                             (mode === 'endless' && floor > 0 && floor % 30 === 0)) {
                             startBattle(true);
@@ -6251,50 +6372,65 @@
                         }
 
                         const baseSpecialEvents = [{
-                                name: "怪しげな祭壇",
-                                func: foundAltar,
-                                weight: gameState.gameMode === 'endgame_plus' ? 3 : 2 // 終焉モードでは少し出やすい
-                            }, {
-                                name: "装備発見",
-                                func: foundEquipment,
-                                weight: remainingEquipment.length > 0 ? 3 : 0
-                            }, {
-                                name: "怪しい装置",
-                                func: foundSuspiciousDevice,
-                                weight: gameState.party.length >= 2 ? (gameState.gameMode === 'endgame_plus' ? 1 : 2) : 0
-                            }, {
-                                name: "迷いの石像",
-                                func: foundBewilderingStatue,
-                                weight: 2
-                            }, {
-                                name: "人形の家",
-                                func: foundDollhouse,
-                                weight: 2
-                            }, {
-                                name: "ひび割れた巨岩",
-                                func: foundCrackedRock,
-                                weight: 2
-                            }, {
-                                name: "高所のネズミ穴",
-                                func: foundHighMouseHole,
-                                weight: gameState.party.some(p => p.height >= 200) && gameState.party.some(p => p.height <= 10) ? 2 : 0 // 大きいキャラと小さいキャラがいる場合のみ
-                            }, {
-                                name: "願い星",
-                                func: foundWishingStar,
-                                weight: gameState.gameMode === 'endgame_plus' ? 0 : 1 // 終焉モードでは発生しない
-                            }, {
-                                name: "調合",
-                                func: foundAlchemyEvent,
-                                weight: gameState.party.some(p => p.role === 'アルケミスト' || p.role === 'ドクター') ? 2 : 0
-                            },
-
-
-                            {
-                                name: "研ぎ澄まされた五感",
-                                func: foundLiberatedSenses,
-                                weight: gameState.party.some(p => p.isLiberatedStripped) ? 2 : 0 // 解放状態のキャラがいる場合のみ
-                            }
-                        ];
+                            name: "怪しげな祭壇",
+                            func: foundAltar,
+                            weight: gameState.gameMode === 'endgame_plus' ? 3 : 2 // 終焉モードでは少し出やすい
+                        }, {
+                            name: "装備発見",
+                            func: foundEquipment,
+                            weight: remainingEquipment.length > 0 ? 3 : 0
+                        }, {
+                            name: "怪しい装置",
+                            func: foundSuspiciousDevice,
+                            weight: gameState.party.length >= 2 ? (gameState.gameMode === 'endgame_plus' ? 1 : 2) : 0
+                        }, {
+                            name: "迷いの石像",
+                            func: foundBewilderingStatue,
+                            weight: 2
+                        }, {
+                            name: "人形の家",
+                            func: foundDollhouse,
+                            weight: 2
+                        }, {
+                            name: "ひび割れた巨岩",
+                            func: foundCrackedRock,
+                            weight: 2
+                        }, {
+                            name: "高所のネズミ穴",
+                            func: foundHighMouseHole,
+                            weight: gameState.party.some(p => p.height >= 200) && gameState.party.some(p => p.height <= 10) ? 2 : 0 // 大きいキャラと小さいキャラがいる場合のみ
+                        }, {
+                            name: "願い星",
+                            func: foundWishingStar,
+                            weight: gameState.gameMode === 'endgame_plus' ? 0 : 1 // 終焉モードでは発生しない
+                        }, {
+                            name: "調合",
+                            func: foundAlchemyEvent,
+                            weight: gameState.party.some(p => p.role === 'アルケミスト' || p.role === 'ドクター') ? 2 : 0
+                        }, {
+                            name: "ダブル『サイズ』アップ",
+                            func: foundDoubleSizeUp,
+                            weight: gameState.party.length > 0 ? 2 : 0 // パーティがいないと発生しない
+                        }, {
+                            name: "財宝の間",
+                            func: foundTreasureRoom,
+                            // トレジャーハンターがおらず、パーティが2人以上いる場合に低確率で発生
+                            weight: !gameState.party.some(p => p.role === 'トレジャーハンター') && gameState.party.length >= 2 ? 1 : 0
+                        }, {
+                            name: "研ぎ澄まされた五感",
+                            func: foundLiberatedSenses,
+                            weight: gameState.party.some(p => p.isLiberatedStripped) ? 2 : 0 // 解放状態のキャラがいる場合のみ
+                        }];
+                        // サイズアップ・ギャンブルモードでは発生率を上げる
+                        if (gameState.gameMode === 'size_up_gamble') {
+                            baseSpecialEvents.find(e => e.name === "ダブル『サイズ』アップ").weight = 10;
+                            // 他のイベントの発生率を下げるか、0にする
+                            baseSpecialEvents.find(e => e.name === "財宝の間").weight = 0;
+                            baseSpecialEvents.find(e => e.name === "研ぎ澄まされた五感").weight = 0;
+                            baseSpecialEvents.find(e => e.name === "怪しげな祭壇").weight = 1;
+                            baseSpecialEvents.find(e => e.name === "怪しい装置").weight = 1;
+                            baseSpecialEvents.find(e => e.name === "迷いの石像").weight = 1;
+                        }
 
                         const hasHolyCrystal = gameState.inventory.some(item => item.id === 'holy_crystal' && item.quantity > 0);
                         const hasEvilCrystal = gameState.inventory.some(item => item.id === 'evil_crystal' && item.quantity > 0);
@@ -7161,6 +7297,7 @@
                             log(`ゴゴゴ…！ ${breaker.name}は巨岩を粉々に打ち砕いた！`);
                             levelUpCharacter(breaker, false); // UIは表示せずにレベルアップ
                         }
+                        dungeonCommands.classList.remove('hidden');
                     }
 
                     async function foundBeachLiberation() {
@@ -7188,6 +7325,7 @@
                                 }
 
                                 gameState.party.forEach(p => { // ファイター, ソーサラー, ナイト, メディック
+                                    dungeonCommands.classList.remove('hidden');
                                     if (p.currentHp > 0 && !p.statusEffects.stripped && !p.isLiberatedStripped) {
                                         p.statusEffects.stripped = {
                                             turns: 0
@@ -7200,10 +7338,12 @@
                             document.getElementById('liberation-all-decline').onclick = () => {
                                 celestiaEventModal.classList.add('hidden');
                                 log("一行はなんとか理性を保ち、熱狂を抑え込んだ。");
+                                dungeonCommands.classList.remove('hidden');
                             };
                             return; // 全員解放イベントを実行したらここで終了
                         }
 
+                        dungeonCommands.classList.add('hidden');
                         const potentialTargets = gameState.party.filter(p => p.currentHp > 0 && !p.statusEffects.stripped && !p.isLiberatedStripped && (!p.liberationCooldown || p.liberationCooldown <= 0));
                         if (potentialTargets.length === 0) {
                             nothingHappened();
@@ -7228,11 +7368,13 @@
                             target.isLiberatedStripped = true;
                             log(`${target.name}は自ら服を脱ぎ捨て、解放状態になった！`);
                             updatePartyStatus();
+                            dungeonCommands.classList.remove('hidden');
                         };
                         document.getElementById('liberation-decline').onclick = () => {
                             celestiaEventModal.classList.add('hidden');
                             const stopLine = (conversations[target.name] && conversations[target.name].beach_liberation_stop && conversations[target.name].beach_liberation_stop[0]) || "ちぇっ、つまんないの。";
                             log(`${target.name}「${stopLine}」`);
+                            dungeonCommands.classList.remove('hidden');
                             target.liberationCooldown = 5; // 5フロアのクールダウンを設定
                         };
                     }
@@ -7262,6 +7404,7 @@
                                 }
 
                                 gameState.party.forEach(p => { // ファイター, ソーサラー, ナイト, メディック
+                                    dungeonCommands.classList.remove('hidden');
                                     if (p.currentHp > 0 && !p.statusEffects.stripped && !p.isLiberatedStripped) {
                                         p.statusEffects.stripped = {
                                             turns: 0
@@ -7274,10 +7417,12 @@
                             document.getElementById('liberation-all-decline').onclick = () => {
                                 celestiaEventModal.classList.add('hidden');
                                 log("一行はなんとか自制心を保ち、のぼせるのを防いだ。");
+                                dungeonCommands.classList.remove('hidden');
                             };
                             return; // 全員解放イベントを実行したらここで終了
                         }
 
+                        dungeonCommands.classList.add('hidden');
                         const potentialTargets = gameState.party.filter(p => p.currentHp > 0 && !p.statusEffects.stripped && !p.isLiberatedStripped && (!p.liberationCooldown || p.liberationCooldown <= 0));
                         if (potentialTargets.length === 0) {
                             nothingHappened();
@@ -7302,11 +7447,13 @@
                             target.isLiberatedStripped = true;
                             log(`${target.name}はタオルを外し、解放状態になった！`);
                             updatePartyStatus();
+                            dungeonCommands.classList.remove('hidden');
                         };
                         document.getElementById('liberation-decline').onclick = () => {
                             celestiaEventModal.classList.add('hidden');
                             const stopLine = (conversations[target.name] && conversations[target.name].onsen_liberation_stop && conversations[target.name].onsen_liberation_stop[0]) || "うん、わかった。もうちょっとだけこのままでいさせて。";
                             log(`${target.name}「${stopLine}」`);
+                            dungeonCommands.classList.remove('hidden');
                             target.liberationCooldown = 5; // 5フロアのクールダウンを設定
                             log(`（${target.name}はしばらくの間、大胆な気分にはならないだろう…）`);
                         };
@@ -7345,6 +7492,7 @@
 
                         const line = conversations[victim.name].onsen_towel_trouble[0];
                         log(`${victim.name}「${line}」`);
+                        dungeonCommands.classList.remove('hidden');
                     }
 
                     // --- サマータイム・スペシャルライブ！専用イベント ---
@@ -7365,6 +7513,7 @@
                                 await animateStatChange(p, 'hp', Math.ceil(p.maxHp * 0.2), 'increase');
                             }
                         } else { // 30%で失敗
+                            dungeonCommands.classList.remove('hidden');
                             const victim = gameState.party.filter(p => p.currentHp > 0 && p !== blindfolded)[Math.floor(Math.random() * (gameState.party.length - 1))];
                             log(`「こっちだよー！」という${victim.name}の声の方へ、${blindfolded.name}は進んでいき…`);
                             await new Promise(resolve => setTimeout(resolve, 2000));
@@ -7372,6 +7521,7 @@
                             await dealDamage(victim, 10);
                         }
                     }
+
 
                     async function foundSandcastle() {
                         log("みんなで砂の城を作ることにした。");
@@ -7396,6 +7546,7 @@
                                 await animateStatChange(p, 'mp', p.maxMp, 'increase');
                             }
                         }
+                        dungeonCommands.classList.remove('hidden');
                     }
 
                     async function foundOnsenPingPong() {
@@ -7409,6 +7560,7 @@
                         winner.def += 1;
                         winner.agi += 1;
                         flashCard(winner, 'green');
+                        dungeonCommands.classList.remove('hidden');
                     }
 
                     async function foundHotSpringsSoak() {
@@ -7420,6 +7572,7 @@
                             await animateStatChange(p, 'mp', Math.ceil(p.maxMp * 0.5), 'increase');
                             p.statusEffects = {}; // 脱衣以外をリセット
                         }
+                        dungeonCommands.classList.remove('hidden');
                     }
 
                     async function foundHighMouseHole() {
@@ -7450,7 +7603,10 @@
                             await new Promise(resolve => setTimeout(resolve, 2000));
                             if (char1 !== char2) {
                                 log(`${char2.name}「${getLine(char2)}」`);
+                                await new Promise(resolve => setTimeout(resolve, 2000));
                             }
+                            // コマンドを再表示する処理を追加
+                            dungeonCommands.classList.remove('hidden');
                         } else {
                             // 従来のシナリオ
                             const giantMembers = aliveParty.filter(p => p.height >= 200);
@@ -7484,6 +7640,7 @@
                             addItemToInventory(foundItemId);
                             log(`${tiny.name}は穴の中から、とても珍しい「${itemBlueprints[foundItemId].name}」を見つけてきた！`);
                             flashCard(giant, 'yellow');
+                            dungeonCommands.classList.remove('hidden');
                             flashCard(tiny, 'yellow');
                         }
                     }
@@ -7508,6 +7665,7 @@
                         });
                         log(`${target.name}の前に、耐久値${wallHp}の防壁が現れた！`);
                         flashCard(target, 'yellow');
+                        dungeonCommands.classList.remove('hidden');
                     }
 
                     function nothingHappened() {
@@ -7619,6 +7777,7 @@
                         deviceIgnoreButton.onclick = () => {
                             deviceModal.classList.add('hidden');
                             log("一行は怪しい装置を無視して、先へ進んだ。");
+                            dungeonCommands.classList.remove('hidden');
                         };
                     }
 
@@ -7639,6 +7798,7 @@
                         addItemToInventory(foundItemId);
                         log(`${explorer.name}は気配を頼りに、とても珍しい「${itemBlueprints[foundItemId].name}」を見つけ出した！`);
                         flashCard(explorer, 'green');
+                        dungeonCommands.classList.remove('hidden');
                     }
 
                     function foundDivineTrial() {
@@ -7911,6 +8071,7 @@
                                 // dungeonCommands.classList.remove('hidden'); // 各effect内で個別に対応
                                 dungeonCommands.classList.remove('hidden');
                             };
+
                             wishingStarOptions.appendChild(button);
                         });
                     }
@@ -8019,6 +8180,7 @@
                                         break;
                                     case 'level_up':
                                         log(`石像から溢れ出た光が${char.name}を包み込む！ なんとレベルアップした！`);
+                                        dungeonCommands.classList.remove('hidden');
                                         levelUpCharacter(char, false);
                                         break;
                                     case 'shrink_to_one':
@@ -8027,6 +8189,7 @@
                                         } else {
                                             log(`石像が禍々しい光を放ち、${char.name}の体がみるみる縮んでいく！`);
                                             animateStatChange(char, 'height', 1 - char.height, 'decrease');
+                                            dungeonCommands.classList.remove('hidden');
                                         }
                                         break;
                                     case 'average_height':
@@ -8038,11 +8201,13 @@
                                                 const change = avgHeight - char.height;
                                                 log(`石像のオーラが${char.name}を包み込み、仲間たちの平均身長になった！`);
                                                 animateStatChange(char, 'height', change, change >= 0 ? 'increase' : 'decrease');
+                                                dungeonCommands.classList.remove('hidden');
                                             } else {
                                                 // 他にメンバーがいない場合
                                                 const change = char.initialHeight - char.height;
                                                 log(`石像のオーラが${char.name}を包み込み、元の身長に戻った！`);
                                                 if (change !== 0) {
+                                                    dungeonCommands.classList.remove('hidden');
                                                     animateStatChange(char, 'height', change, change >= 0 ? 'increase' : 'decrease');
                                                 }
                                             }
@@ -8055,6 +8220,7 @@
                         statueLeaveButton.onclick = () => {
                             statueModal.classList.add('hidden');
                             log("一行は不気味な石像を無視して、先へ進んだ。");
+                            dungeonCommands.classList.remove('hidden');
                         };
                     }
 
@@ -8113,6 +8279,7 @@
                         const mpLoss = Math.ceil(victim.maxMp * 0.3);
                         dungeonCommands.classList.remove('hidden');
                         await animateStatChange(victim, 'mp', -mpLoss, 'decrease');
+
 
                         log(`(${victim.name}の防御力が下がり、MPが${mpLoss}減少した)`);
                     }
@@ -8234,10 +8401,158 @@
                                 }
                                 break;
                         }
+                        dungeonCommands.classList.remove('hidden');
                         log(message);
                         gameState.party.forEach(p => {
                             if (p.currentHp > 0) flashCard(p, 'green');
                         });
+                    }
+
+                    function foundDoubleSizeUp() {
+                        generalEventTitle.textContent = "ダブル『サイズ』アップ";
+                        generalEventText.textContent = "敵意のない魔物が現れ、ニヤリと笑いながら言った。\n「よう、そこのお嬢さんたち。運試しに自分の『サイズ』を賭けてみないかい？」";
+                        generalEventButtons.innerHTML = `
+                            <button id="gamble-accept" class="action-button bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg">賭ける</button>
+                            <button id="gamble-decline" class="action-button bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg">断る</button>
+                        `;
+                        generalEventModal.classList.remove('hidden');
+
+                        document.getElementById('gamble-accept').onclick = () => {
+                            generalEventModal.classList.add('hidden');
+                            showOneMemberSelectionModal(char => {
+                                startSizeGamble(char);
+                            }, "誰で勝負する？");
+                        };
+
+                        document.getElementById('gamble-decline').onclick = () => {
+                            generalEventModal.classList.add('hidden');
+                            log("一行は怪しい賭けに乗らず、先へ進んだ。");
+                            dungeonCommands.classList.remove('hidden');
+                        };
+                    }
+
+                    async function startSizeGamble(char, betHeight = 0, currentWin = 0) {
+                        // ギャンブラーの特殊処理
+                        if (char.role === 'ギャンブラー' && currentWin === 0) {
+                            log(`ルナは不敵に笑った。「面白いじゃない。この勝負、乗ったわ！」`);
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                            log(`ギャンブラーの血が騒ぎ、運命を手繰り寄せた！`);
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                            const growthAmount = char.height * 4;
+                            await animateStatChange(char, 'height', growthAmount, 'increase');
+                            log(`ルナの身長はなんと5倍になった！`);
+                            dungeonCommands.classList.remove('hidden');
+                            return;
+                        }
+
+                        // ダブルアップではない初回、またはダブルアップをキャンセルした場合
+                        if (betHeight === 0) {
+                            const choices = [{
+                                text: `半分 (${Math.floor(char.height / 2)}cm)`,
+                                value: Math.floor(char.height / 2)
+                            }, {
+                                text: `全部 (${char.height}cm)`,
+                                value: char.height
+                            }];
+                            showAmountChoiceModal('何を賭ける？', `${char.name}の身長を賭けて運試し！`, choices, (chosenBet) => {
+                                startSizeGamble(char, chosenBet, 0); // 初回なのでcurrentWinは0
+                            });
+                            return;
+                        }
+
+                        log(`${char.name}は身長${betHeight}cmを賭けて勝負に挑んだ！`);
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+
+                        if (Math.random() < 0.5) { // 勝利
+                            const winAmount = betHeight;
+                            const newCurrentWin = currentWin + winAmount;
+                            log(`勝利！ 賭けた身長が倍になって返ってきた！ (身長+${winAmount}cm)`);
+                            await animateStatChange(char, 'height', winAmount, 'increase');
+
+                            // 2000cmの上限チェック
+                            if (char.height + newCurrentWin >= 2000) {
+                                log(`これ以上は体がもたないようだ…！勝負はここで打ち止めとなった。`);
+                                dungeonCommands.classList.remove('hidden');
+                                return;
+                            }
+
+                            // ダブルアップの選択
+                            generalEventTitle.textContent = "ダブルアップ！";
+                            generalEventText.textContent = `魔物「やるじゃないか！勝った分(${newCurrentWin}cm)を全部賭けて、もう一度勝負するかい？」`;
+                            generalEventButtons.innerHTML = `
+                                <button id="doubleup-accept" class="action-button bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg">ダブルアップ！</button>
+                                <button id="doubleup-decline" class="action-button bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg">やめておく</button>
+                            `;
+                            generalEventModal.classList.remove('hidden');
+
+                            document.getElementById('doubleup-accept').onclick = () => {
+                                generalEventModal.classList.add('hidden');
+                                startSizeGamble(char, newCurrentWin, newCurrentWin);
+                            };
+                            document.getElementById('doubleup-decline').onclick = () => {
+                                generalEventModal.classList.add('hidden');
+                                log(`${char.name}は慎重に勝ち分を手にして、勝負を降りた。`);
+                                dungeonCommands.classList.remove('hidden');
+                            };
+
+                        } else { // 敗北
+                            log(`敗北…！ 賭けた身長を失ってしまった… (身長-${betHeight}cm)`);
+                            await animateStatChange(char, 'height', -betHeight, 'decrease');
+                            dungeonCommands.classList.remove('hidden');
+                        }
+                    }
+
+                    async function foundTreasureRoom() {
+                        log("突然、足元が大きく揺れた！ダンジョン全体が揺れているようだ！");
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        log("ゴゴゴ…！ 近くの壁が崩れ、隠されていた扉が現れた！");
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        log("扉の奥には、まばゆいばかりの財宝が山積みになっている！");
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+
+                        // 分岐条件：身長が初期身長の80%以上で、脱衣状態でないキャラが2人以上いるか
+                        const capableMembers = gameState.party.filter(p =>
+                            p.currentHp > 0 &&
+                            p.height >= p.initialHeight * 0.8 &&
+                            !p.statusEffects.stripped
+                        );
+
+                        if (capableMembers.length >= 2) {
+                            // アイテムを大量に取得する処理
+                            log("動ける者たちで手分けして、持ちきれるだけの財宝をバッグに詰めた！");
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+
+                            const itemsToGet = [{
+                                id: 'potion',
+                                quantity: 3
+                            }, {
+                                id: 'mana_potion',
+                                quantity: 2
+                            }, {
+                                id: 'cure_mist',
+                                quantity: 1
+                            }, {
+                                id: 'revive_herb',
+                                quantity: 1
+                            }];
+
+                            itemsToGet.forEach(item => addItemToInventory(item.id, item.quantity));
+
+                            const itemNames = itemsToGet.map(item => `${itemBlueprints[item.id].name}x${item.quantity}`).join('、');
+                            log(`大量のアイテムを手に入れた！ (${itemNames})`);
+                            gameState.party.forEach(p => flashCard(p, 'yellow'));
+
+                        } else {
+                            // 休憩する処理
+                            log("しかし、財宝を運び出せる状態の者がおらず、一行は山積みの財宝を前にしばし休憩することにした…。");
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                            log("全員のHPとMPが少し回復した。");
+                            for (const p of gameState.party.filter(p => p.currentHp > 0)) {
+                                await animateStatChange(p, 'hp', Math.ceil(p.maxHp * 0.2), 'increase');
+                                await animateStatChange(p, 'mp', Math.ceil(p.maxMp * 0.2), 'increase');
+                            }
+                        }
+                        dungeonCommands.classList.remove('hidden');
                     }
 
                     function getRandomPartyMember(aliveOnly = true) {
@@ -8266,6 +8581,13 @@
                         // 敵の数を計算（サマータイム・スペシャルライブ！では最大3体）
                         let maxEnemyCount = gameState.party.length + 2; // 味方の数 + 2 を上限とする
                         if (gameState.gameMode === 'summer_live') maxEnemyCount = 3;
+                        // サイズアップ・ギャンブル！では敵の数を調整
+                        if (gameState.gameMode === 'size_up_gamble') {
+                            // 1-2体にする
+                            maxEnemyCount = 2;
+                            // ボス戦フラグが立っている場合はボスを生成
+                            if (gameState.nextBattleIsGambleMaster) isBoss = true;
+                        }
                         const baseEnemyCount = Math.floor(Math.random() * 2) + 1 + Math.floor(gameState.floor / 10); // 敵の数を計算
                         let enemyCount = enemyCountOverride ? enemyCountOverride : (isBoss ? 1 : Math.min(baseEnemyCount, maxEnemyCount));
                         if (gameState.gameMode === 'secret_night') {
@@ -8276,6 +8598,9 @@
                         if (isBoss && isEnhancedBoss === 'phantom_hero') {
                             gameState.enemies.push(createEnemy(true, 'phantom_hero'));
                         } else {
+                            if (gameState.nextBattleIsGambleMaster) {
+                                gameState.enemies.push(createEnemy(true, 'gamble_master'));
+                            }
                             for (let i = 0; i < enemyCount; i++) gameState.enemies.push(createEnemy(isBoss, isEnhancedBoss, specialEnemyType));
                         }
                         updateEnemyStatus();
@@ -8395,6 +8720,31 @@
                                     func: heroicEndSkill
                                 }, ],
                                 specialAIType: 'phantom_hero'
+                            };
+                        }
+                        if (isBoss && isEnhanced === 'gamble_master') {
+                            return {
+                                name: 'ギャンブルマスター',
+                                maxHp: 3000 + floor * 40,
+                                currentHp: 3000 + floor * 40,
+                                atk: 60 + Math.floor(floor * 2.0),
+                                pDef: 30 + floor,
+                                mDef: 30 + floor,
+                                agi: 30 + Math.floor(floor / 2),
+                                height: 500,
+                                buffs: {},
+                                isEnemy: true,
+                                isBoss: true,
+                                statusEffects: {},
+                                skills: [{
+                                        name: 'オールイン',
+                                        func: (enemy, target) => handleTroubleMakerBox(enemy, true)
+                                    }, // 敵用のハプニングボックス
+                                    {
+                                        name: 'ハイリスク・ハイリターン',
+                                        func: highRiskHighReturnSkill
+                                    }
+                                ],
                             };
                         }
                         if (isBoss && isEnhanced === 'star_observer') {
@@ -12015,12 +12365,32 @@
                         targetCard.appendChild(popup);
                         setTimeout(() => popup.remove(), 1500);
                     }
+                    async function highRiskHighReturnSkill(enemy, target) {
+                        log(`${enemy.name}はハイリスク・ハイリターンを発動！`);
+                        if (Math.random() < 0.5) {
+                            log(`賭けに勝ち、${target.name}に超特大ダメージ！`);
+                            const damage = calculateDamage(enemy, target, {
+                                power: 4.0
+                            });
+                            await dealDamage(target, damage);
+                        } else {
+                            log(`賭けに負け、${enemy.name}は自滅した！`);
+                            await dealDamage(enemy, enemy.currentHp);
+                        }
+                    }
+
+
 
                     async function endBattle(isVictory) {
                         gameState.inBattle = false;
                         emergencyButton.classList.remove('battle-active'); // 緊急ボタンを無効化
 
                         // ゴーレムが残っている場合の処理
+                        // サイズアップ・ギャンブルのボス戦フラグをリセット
+                        if (gameState.nextBattleIsGambleMaster) {
+                            gameState.nextBattleIsGambleMaster = false;
+                        }
+
                         if (gameState.golem && gameState.golem.hp > 0) {
                             const summoner = gameState.party.find(p => p.role === 'サモナー' && p.currentHp > 0);
                             if (summoner) {
@@ -12065,6 +12435,21 @@
                         if (isVictory) {
                             // 「英雄の幻影」撃破ボーナス
                             if (gameState.enemies.some(e => e.name === '英雄の幻影')) {
+                                // サイズアップ・ギャンブル！モードの勝利時処理
+                                if (gameState.gameMode === 'size_up_gamble') {
+                                    log("勝利の報酬として、パーティの体が成長する！");
+                                    await new Promise(resolve => setTimeout(resolve, 1500));
+                                    for (const char of gameState.party.filter(p => p.currentHp > 0)) {
+                                        const growth = Math.floor(Math.random() * 51) + 50; // 50-100
+                                        await animateStatChange(char, 'height', growth, 'increase');
+                                        log(`${char.name}の身長が${growth}cm伸びた！`);
+                                    }
+                                    // 目標達成チェック
+                                    if (!gameState.sizeUpGambleGoalReached && gameState.party.some(p => p.height >= 1000)) {
+                                        gameState.sizeUpGambleGoalReached = true;
+                                        log("ついに目標の身長に到達した！次のフロアで何かが起こるだろう…！");
+                                    }
+                                }
                                 log("英雄の幻影を打ち破った！パーティ全員の魂が共鳴し、限界を超えて成長する！"); // ファイター, ソーサラー, ナイト, メディック
                                 gameState.party.forEach(p => {
                                     if (p.currentHp > 0) {
@@ -12097,7 +12482,6 @@
                                     await new Promise(resolve => setTimeout(resolve, 500)); // 各キャラのログ表示のための短い待機
                                 }
                             }
-
                             if (gameState.gameMode === 'monster_march') {
                                 if (gameState.floor === 50) {
                                     showModal("完全踏破", "絶え間ない戦いの果てに、あなたはついにダンジョンの最奥に到達し、元凶を打ち破りました。その行軍は、伝説として語り継がれるでしょう。");
@@ -12132,7 +12516,7 @@
                                 showModal("ゲームクリア？", "あなたはダンジョンの入り口で待ち構えていたボスを打ち破りました！…これでよかったのでしょうか？");
                                 gameState.gameOver = true;
                             } else if ((gameState.floor === 30 && gameState.gameMode !== 'endless' && gameState.gameMode !== 'monster_march') || (gameState.gameMode === 'endgame_plus' && gameState.floor === 90)) {
-                                let title = "ゲームクリア！";
+                                let title = "ゲームクリア！"; // ファイター, ソーサラー, ナイト, メディック
                                 let text = "おめでとう！あなたはダンジョンの最深部に到達し、ボスを打ち破りました！";
                                 switch (gameState.gameMode) {
                                     case 'normal':
@@ -12198,6 +12582,10 @@
                                         const bellesFlags = JSON.parse(localStorage.getItem('sizeDungeonClearFlags') || '{}');
                                         bellesFlags.brawlingBellesCleared = true;
                                         localStorage.setItem('sizeDungeonClearFlags', JSON.stringify(bellesFlags));
+                                        break;
+                                    case 'size_up_gamble':
+                                        title = "ギャンブルの果てに";
+                                        text = "ルナとコハルは、常識外れのサイズアップを成し遂げ、ギャンブルに勝利した！二人の挑戦は、伝説として語り継がれるだろう。";
                                         break;
                                     case 'unstable_bodies':
                                         text = "絶え間なく変化する肉体を乗りこなし、あなたは見事ボスを打ち破りました！その精神力は、もはや何物にも揺るがないでしょう。";
@@ -12375,6 +12763,13 @@
                         character.level += 1; // ファイター, ソーサラー, ナイト, メディック
                         // HP/MPを全回復
                         character.currentHp = character.maxHp;
+
+                        // 祝福「賭博の魂」の効果
+                        if (character.blessings && character.blessings.gambling_soul) {
+                            log(`${character.name}は賭博の魂の力で、身長が100cm伸びた！`);
+                            animateStatChange(character, 'height', 100, 'increase');
+                        }
+
                         character.currentMp = character.maxMp; // ファイター, ソーサラー, ナイト, メディック
 
                         character.skills.forEach(skill => {
@@ -13358,6 +13753,10 @@
                 if (mode === 'brawling_belles') {
                     selectedMembers = ['ノエル', 'フローラ'];
                 }
+                if (mode === 'size_up_gamble') {
+                    selectedMembers = ['ルナ', 'コハル'];
+                }
+
 
                 // メンバー選択が必要なモードで、まだメンバーが選ばれていない場合 (聖女の行進は除く)
                 const toggleSelectTeam = document.getElementById('toggle-select-team');
@@ -13495,23 +13894,7 @@
                 updatePartyStatus();
             }
 
-                    let logQueue = [];
-                    let isProcessingLog = false;
 
-                    function processLogQueue() {
-                        if (logQueue.length === 0) {
-                            isProcessingLog = false;
-                            return;
-                        }
-                        isProcessingLog = true;
-                        const message = logQueue.shift();
-                        addLogToHistory(message); // ログを履歴に追加
-                        logMessage.textContent = message;
-
-                        // メッセージ表示後に次のメッセージを表示するまでの遅延
-                        const delay = 700; // 0.7秒
-                        setTimeout(processLogQueue, delay);
-                    }
 
             nextFloorButton.addEventListener('click', () => {
                 if (!gameState.inBattle && !gameState.gameOver) advanceFloor();
@@ -13959,7 +14342,43 @@
             checkSaveData(); // セーブデータチェックを実行
             setupDebugControls(); // デバッグ関連のセットアップを実行
             updateDebugButtons(); // デバッグボタンの初期表示を更新
-        });
+            // 1階の会話再生後に祝福を付与する処理
+            const originalPlayConversation = window.playConversation;
+            window.playConversation = async function(conversation) {
+                await originalPlayConversation(conversation);
+                if (gameState.gameMode === 'size_up_gamble' && gameState.floor === 1) {
+                    applySizeUpGambleBlessing();
+                }
+            };
+        }); // DOMContentLoadedの閉じ括弧
+    </script>
+    <script>
+        // 新しいモード用の関数をこちらに分離
+        async function triggerSizeUpGambleGoalEvent() {
+            dungeonCommands.classList.add('hidden');
+            log("？？？「見事だ、挑戦者よ！そのサイズ、まさに天を突くようだ！」");
+            await new Promise(resolve => setTimeout(resolve, 2500));
+            log("？？？「だが、本当のギャンブルはここからだ。次の戦いで、お前たちの運命を決めさせてもらう…！」");
+            await new Promise(resolve => setTimeout(resolve, 2500));
+            log("（次の戦闘で、とてつもなく強大な気配が待ち受けている…！）");
+            gameState.nextBattleIsGambleMaster = true;
+            dungeonCommands.classList.remove('hidden');
+        }
+
+        async function triggerSizeUpGambleGameOverEvent() {
+            dungeonCommands.classList.add('hidden');
+            log("ルナ「…ちょっと、これはマズいんじゃない？」");
+            await new Promise(resolve => setTimeout(resolve, 2500));
+            log("コハル「ふぇぇ…！二人とも、アリさんみたいになっちゃいました…！」");
+            await new Promise(resolve => setTimeout(resolve, 2500));
+            log("？？？「おやおや、賭けに負けて全てを失ってしまったようだね」");
+            await new Promise(resolve => setTimeout(resolve, 2500));
+            log("？？？「残念だが、君たちの冒険はここでおしまいだ」");
+            await new Promise(resolve => setTimeout(resolve, 2500));
+
+            showModal("ゲームオーバー", "賭けに負け、全てを失った二人は、ダンジョンの塵と消えた…。");
+            gameState.gameOver = true;
+        }
     </script>
 </body>
 
