@@ -422,6 +422,11 @@
         .bg-char-flora-a {
             --char-bg-image: url('sgd_20a.png');
         }
+        /* 転生者用 */
+        
+        .bg-char-shiro {
+            --char-bg-image: url('sgd_21.png');
+        }
         /* サマータイム・スペシャルライブ用 */
         
         .bg-char-ririka-a {
@@ -547,7 +552,7 @@
                     <button id="rule-button" class="action-button bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg text-lg">ルール説明</button>
                 </div>
             </div>
-            <div id="debug-controls" class="absolute bottom-4 right-4 bg-black/50 p-2 rounded-lg flex flex-col gap-2 text-xs">
+            <div id="debug-controls" class="absolute bottom-4 right-4 bg-black/50 p-2 rounded-lg flex flex-col gap-2 text-xs z-30">
                 <button id="debug-saint-button" class="text-white p-1 rounded"></button>
                 <button id="debug-treasure-button" class="text-white p-1 rounded"></button>
                 <button id="debug-summer-button" class="text-white p-1 rounded"></button>
@@ -737,6 +742,7 @@
                         <button data-mode="brawling_belles" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-rose-500">闘争令嬢</strong><span class="block text-sm text-gray-600">特別なジョブ「アンドロイド」と「メイド」の2人で30階の踏破を目指す。クリアすると選抜チームに2人が追加される。</span></button>
                         <button data-mode="summer_live" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-sky-500">サマータイム・スペシャルライブ！</strong><span class="block text-sm text-gray-600">リリカ、ユイ、ミコ、リリィの4人で、ビーチと温泉を巡る特別な冒険に出る。60階踏破を目指せ。</span></button>
                         <button data-mode="secret_night" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-indigo-700">ヒミツの夜</strong><span class="block text-sm text-gray-600">リリカ、ユイ、ミコ、リリィ、フローラの誰かひとりで、静まったダンジョンを裸で歩く。物語重視のモード。</span></button>
+                        <button data-mode="tensei_kikou" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-slate-500">外界：転生紀行</strong><span class="block text-sm text-gray-600">特別なジョブ「転生者」ひとりで無限のダンジョンを進む。彼女はイベントを通じて仲間たちのスキルを学習していく。</span></button>
                         <button data-mode="size_up_gamble" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition"><strong class="text-orange-700">サイズアップ・ギャンブル！</strong><span class="block text-sm text-gray-600">ルナとコハルで、身長1000cmを目指すギャンブルに挑む。</span></button>
                     </div>
                     <!-- 終焉タブ -->
@@ -1072,6 +1078,7 @@
                     const DEFAULT_DUNGEON_BG = "url('https://image.pollinations.ai/prompt/fantasy%20rpg%20dungeon,%20dark,%20mysterious,%20glowing%20runes,%20stone%20columns,%20roots,%20moss,%20pathway,%20digital%20painting')";
                     const SUMMER_BEACH_BG = "url('https://image.pollinations.ai/prompt/beautiful%20anime%20style%20beach,%20sparkling%20ocean,%20white%20sand,%20blue%20sky,%20summer,%20palm%20trees,%20digital%20painting')";
                     const SUMMER_ONSEN_BG = "url('https://image.pollinations.ai/prompt/Japanese%20open-air%20onsen,%20steam%20rising%20from%20the%20water,%20bamboo%20fences,%20stone%20lanterns,%20night,%20starry%20sky,%20anime%20style,%20digital%20painting')";
+                    const FANTASY_FOREST_BG = "url('https://image.pollinations.ai/prompt/fantasy%20forest,%20glowing%20mushrooms,%20ancient%20trees,%20mysterious,%20misty,%20digital%20painting')";
 
                     let gameState = {
                         floor: 0,
@@ -1085,7 +1092,7 @@
                         golem: null, // ファイター, ソーサラー, ナイト, メディック
                         foundEquipment: [],
                         killCount: 0, // ネクロマンサー用
-                        walls: [], // ガーディアン用 
+                        walls: [], // ガーディアン用
                         gameMode: 'normal', // normal, veterans, dwarves, brawl, solo, endgame, endless, indecent, enjoy, saint_march, fixed_path, uninhibited_souls, random_party, divine_trial, treasure_map, secret_night, size_up_gamble
                         triggeredSpecialConvos: [],
                         dungeonBackground: DEFAULT_DUNGEON_BG, // 背景画像をgameStateで管理
@@ -1146,6 +1153,10 @@
                             },
                             bgClass: 'bg-char-akari',
                             themeColor: 'red',
+                            growthBonus: {
+                                stat: 'atk',
+                                value: 2
+                            } // 攻撃力が追加で2上昇
                         }, {
                             name: 'ヒカリ',
                             role: 'ソーサラー',
@@ -1188,6 +1199,10 @@
                             },
                             bgClass: 'bg-char-hikari',
                             themeColor: 'purple',
+                            growthBonus: {
+                                stat: 'maxMp',
+                                value: 3
+                            } // 最大MPが追加で3上昇
                         }, {
                             name: 'シズカ',
                             role: 'ナイト',
@@ -1228,6 +1243,10 @@
                             },
                             bgClass: 'bg-char-shizuka',
                             themeColor: 'amber',
+                            growthBonus: {
+                                stat: 'def',
+                                value: 2
+                            } // 防御力が追加で2上昇
                         }, {
                             name: 'ユイ',
                             role: 'メディック',
@@ -1270,6 +1289,10 @@
                             },
                             bgClass: 'bg-char-yui',
                             themeColor: 'green',
+                            growthBonus: {
+                                stat: 'maxHp',
+                                value: 5
+                            } // 最大HPが追加で5上昇
                         }, {
                             name: 'ベアトリス',
                             role: 'アルケミスト',
@@ -1312,6 +1335,10 @@
                             },
                             bgClass: 'bg-char-beatrice',
                             themeColor: 'indigo',
+                            growthBonus: {
+                                stat: 'maxMp',
+                                value: 3
+                            } // 最大MPが追加で3上昇
                         }, {
                             name: 'リリカ',
                             role: 'ダンサー',
@@ -1353,6 +1380,10 @@
                             },
                             bgClass: 'bg-char-ririka',
                             themeColor: 'pink',
+                            growthBonus: {
+                                stat: 'maxHp',
+                                value: 5
+                            } // 最大HPが追加で5上昇
                         }, {
                             name: 'サクヤ',
                             role: 'サムライ',
@@ -1394,6 +1425,10 @@
                             },
                             bgClass: 'bg-char-sakuya',
                             themeColor: 'cyan',
+                            growthBonus: {
+                                stat: 'atk',
+                                value: 2
+                            } // 攻撃力が追加で2上昇
                         }, {
                             name: 'シャオメイ',
                             role: 'モンク',
@@ -1437,6 +1472,10 @@
                             },
                             bgClass: 'bg-char-shaomei',
                             themeColor: 'orange',
+                            growthBonus: {
+                                stat: 'atk',
+                                value: 2
+                            } // 攻撃力が追加で2上昇
                         }, {
                             name: 'エリザ',
                             role: 'ドクター',
@@ -1479,6 +1518,10 @@
                             },
                             bgClass: 'bg-char-eriza',
                             themeColor: 'teal',
+                            growthBonus: {
+                                stat: 'maxMp',
+                                value: 3
+                            } // 最大MPが追加で3上昇
                         }, {
                             name: 'ルナ',
                             role: 'ギャンブラー',
@@ -1519,6 +1562,9 @@
                             },
                             bgClass: 'bg-char-runa',
                             themeColor: 'fuchsia',
+                            growthBonus: {
+                                type: 'random'
+                            } // ランダムなステータスが上昇
                         }, {
                             name: 'クロエ',
                             role: 'リーパー',
@@ -1561,6 +1607,10 @@
                             },
                             bgClass: 'bg-char-chloe',
                             themeColor: 'slate',
+                            growthBonus: {
+                                stat: 'atk',
+                                value: 2
+                            } // 攻撃力が追加で2上昇
                         }, {
                             name: 'ミコ',
                             role: 'サモナー',
@@ -1604,6 +1654,10 @@
                             },
                             bgClass: 'bg-char-miko',
                             themeColor: 'lime',
+                            growthBonus: {
+                                stat: 'maxMp',
+                                value: 3
+                            } // 最大MPが追加で3上昇
                         }, {
                             name: 'レンカ',
                             role: 'ネクロマンサー',
@@ -1646,6 +1700,10 @@
                             },
                             bgClass: 'bg-char-renka',
                             themeColor: 'gray',
+                            growthBonus: {
+                                stat: 'maxMp',
+                                value: 3
+                            } // 最大MPが追加で3上昇
                         }, {
                             name: 'イオリ',
                             role: 'ガーディアン',
@@ -1687,6 +1745,10 @@
                             },
                             bgClass: 'bg-char-iori',
                             themeColor: 'stone',
+                            growthBonus: {
+                                stat: 'def',
+                                value: 2
+                            } // 防御力が追加で2上昇
                         }, {
                             name: 'コハル',
                             role: 'トラブルメーカー',
@@ -1727,6 +1789,9 @@
                             },
                             bgClass: 'bg-char-koharu',
                             themeColor: 'rose',
+                            growthBonus: {
+                                type: 'random'
+                            } // ランダムなステータスが上昇
                         }, {
                             name: 'オリビア',
                             role: 'シスター',
@@ -1768,6 +1833,10 @@
                             },
                             bgClass: 'bg-char-olivia',
                             themeColor: 'sky',
+                            growthBonus: {
+                                stat: 'maxHp',
+                                value: 5
+                            } // 最大HPが追加で5上昇
                         }, {
                             name: 'セレスティア',
                             role: '聖女',
@@ -1811,6 +1880,10 @@
                             },
                             bgClass: 'bg-char-celestia',
                             themeColor: 'yellow',
+                            growthBonus: {
+                                stat: 'atk',
+                                value: 2
+                            } // 攻撃力が追加で2上昇
                         }, {
                             name: 'リリィ',
                             role: 'トレジャーハンター',
@@ -1988,6 +2061,10 @@
                             },
                             bgClass: 'bg-char-noel',
                             themeColor: 'rose',
+                            growthBonus: {
+                                stat: 'atk',
+                                value: 2
+                            } // 攻撃力が追加で2上昇
                         }, {
                             name: 'フローラ',
                             role: 'メイド',
@@ -2027,6 +2104,35 @@
                             },
                             bgClass: 'bg-char-flora',
                             themeColor: 'emerald',
+                            growthBonus: {
+                                stat: 'def',
+                                value: 2
+                            } // 防御力が追加で2上昇
+                        }, {
+                            name: 'シロ',
+                            role: '転生者',
+                            hp: 90,
+                            mp: 80,
+                            atk: 28,
+                            def: 12,
+                            agi: 15,
+                            height: 100,
+                            description: '誰もが見惚れる白い髪と天使の羽を持った大人しい少女。',
+                            skills: [{
+                                name: 'ヴァニッシュ',
+                                cost: 10, // HP cost
+                                type: 'hp_cost_instant_death',
+                                targetType: 'enemy',
+                                description: '最大HPを10消費し、対象を一撃で葬る。最大HPが20以上ないと使えない。'
+                            }],
+                            unlockableSkill: null,
+                            unlockableSkillLv4: null,
+                            bgClass: 'bg-char-shiro',
+                            themeColor: 'slate',
+                            growthBonus: {
+                                stat: 'maxMp',
+                                value: 5
+                            } // 防御力が追加で2上昇
                         },
 
                     ];
@@ -4188,7 +4294,21 @@
                             line: '二人の体に、不思議な力が宿った！\n全員が祝福「賭博の魂」を授かった！(レベルアップ時に身長+100cm)'
                         }]
                     };
-
+                    const tenseiKikouConversations = {
+                        floor1: [{
+                            char: 'シロ',
+                            line: '…ここは、どこ…？'
+                        }, {
+                            char: 'シロ',
+                            line: '（見知らぬダンジョン…どうして、私がここに…？）'
+                        }, {
+                            char: 'シロ',
+                            line: '（思い出せない…でも、進むしかないみたい…）'
+                        }, {
+                            char: 'システム',
+                            line: 'シロは、失われた記憶の断片を探して、無限に続くダンジョンへと足を踏み入れた。'
+                        }]
+                    };
 
                     const saintMarchConversations = {
                         floor1: [{
@@ -4331,20 +4451,12 @@
                                 char.blessings.last_stand = true;
                             }
                         },
-                        physical_shield: {
-                            name: "物理シールド",
-                            description: "物理攻撃による被ダメージを30%軽減する。",
+                        elemental_shield: {
+                            name: "エレメンタルシールド",
+                            description: "全ての被ダメージを25%軽減する。",
                             type: 'defense',
                             effect: (char) => {
-                                char.blessings.physical_shield = true;
-                            }
-                        },
-                        magic_shield: {
-                            name: "魔法シールド",
-                            description: "魔法攻撃による被ダメージを30%軽減する。",
-                            type: 'defense',
-                            effect: (char) => {
-                                char.blessings.magic_shield = true;
+                                char.blessings.elemental_shield = true;
                             }
                         },
                         low_height_evade: {
@@ -4408,7 +4520,8 @@
                             name: "祈りの少女",
                             description: "ターン開始時、身長が低いほど威力が上がる全体魔法攻撃を行う。",
                             type: 'special',
-                            effect: (char) => {
+                            eventOnly: true, // イベント限定
+                            effect: (char) => { // ファイター, ソーサラー, ナイト, メディック
                                 char.blessings.pray_girl = {
                                     name: "祈りの少女",
                                     description: "ターン開始時、身長が低いほど威力が上がる全体魔法攻撃を行う。"
@@ -4419,7 +4532,8 @@
                             name: "願いの少女",
                             description: "ターン開始時、身長が高いほど威力が上がる全体物理攻撃を行う。",
                             type: 'special',
-                            effect: (char) => {
+                            eventOnly: true, // イベント限定
+                            effect: (char) => { // ファイター, ソーサラー, ナイト, メディック
                                 char.blessings.wish_girl = {
                                     name: "願いの少女",
                                     description: "ターン開始時、身長が高いほど威力が上がる全体物理攻撃を行う。"
@@ -4443,6 +4557,7 @@
                         name: "妖精の加護",
                         description: "身長が1cmのとき、スキルダメージが3倍になる。",
                         type: 'special',
+                        eventOnly: true, // イベント限定
                         effect: (char) => {
                             char.blessings.fairy_grace = true;
                         }
@@ -4451,6 +4566,7 @@
                         name: "龍神の加護",
                         description: "身長が1000cmを超えているとき、毒、麻痺、鈍化にかからない。",
                         type: 'special',
+                        eventOnly: true, // イベント限定
                         effect: (char) => {
                             char.blessings.dragon_god_grace = true;
                         }
@@ -4459,6 +4575,7 @@
                         name: "肥大する心身",
                         description: "ターンが回ってきたとき、身長が倍になる。",
                         type: 'special',
+                        eventOnly: true, // イベント限定
                         effect: (char) => {
                             char.blessings.swelling_body = true;
                         }
@@ -4467,6 +4584,7 @@
                         name: "捻じ曲がった記憶",
                         description: "ターンが回ってきたとき、身長が半分(小数点切り捨て)になる。「肥大する心身」と同時に取得した場合、こちらが優先される。",
                         type: 'special',
+                        eventOnly: true, // イベント限定
                         effect: (char) => {
                             char.blessings.twisted_memory = true;
                         }
@@ -4476,6 +4594,7 @@
                         name: "賭博の魂",
                         description: "レベルが上がったとき、身長が100cm伸びる。",
                         type: 'special',
+                        eventOnly: true, // イベント限定
                         effect: (char) => {
                             char.blessings.gambling_soul = true;
                         }
@@ -4484,20 +4603,52 @@
 
 
 
-                    function applyLevelUp(character, levels) {
+                    function applyLevelUp(character, levels = 1) {
+                        let bonusGrowthInfo = null;
                         for (let i = 0; i < levels; i++) {
+                            // 基本成長
                             character.maxHp += 5;
                             character.maxMp += 3; // ファイター, ソーサラー
                             character.atk += 1;
                             character.def += 1;
                             character.agi += 1; // ファイター, ソーサラー
                             character.level += 1;
+
+                            // 追加成長
+                            if (character.growthBonus) {
+                                if (character.growthBonus.type === 'random') {
+                                    const stats = ['maxHp', 'maxMp', 'atk', 'def'];
+                                    const randomStat = stats[Math.floor(Math.random() * stats.length)];
+                                    const growthValue = (randomStat === 'maxHp') ? 5 : (randomStat === 'maxMp') ? 3 : 2;
+                                    character[randomStat] += growthValue;
+                                    bonusGrowthInfo = {
+                                        stat: randomStat,
+                                        value: growthValue
+                                    };
+                                } else {
+                                    const {
+                                        stat,
+                                        value
+                                    } = character.growthBonus;
+                                    character[stat] += value;
+                                    bonusGrowthInfo = {
+                                        stat,
+                                        value
+                                    };
+                                }
+                            }
+
+                            // スキル威力成長
                             character.skills.forEach(skill => {
                                 if (skill.power) skill.power = parseFloat((skill.power * 1.05).toFixed(2));
                             });
+
+                            // スキル習得
                             if (character.level === 2 && character.unlockableSkill) character.skills.push(character.unlockableSkill);
                             if (character.level === 4 && character.unlockableSkillLv4) character.skills.push(character.unlockableSkillLv4);
                         }
+                        // 成長情報を返す
+                        return bonusGrowthInfo;
                     }
 
                     function generateConversation() {
@@ -5061,6 +5212,27 @@
                                 delete char.isLiberatedStripped;
                             }
                         });
+                        // 転生紀行モードの初期スキル設定
+                        if (gameState.gameMode === 'endless' && gameState.party.some(p => p.role === '転生者') && !fromSave) {
+                            const shiro = gameState.party.find(p => p.name === 'シロ');
+                            if (shiro) {
+                                const lilyTransformSkills = ['サキュバスモード', 'フェアリーモード', 'アルラウネモード'];
+                                const shiroSkillNames = shiro.skills.map(s => s.name);
+
+                                const skillPool = allCharacterBlueprints
+                                    .flatMap(c => [...c.skills, c.unlockableSkill, c.unlockableSkillLv4])
+                                    .filter(skill =>
+                                        skill &&
+                                        !lilyTransformSkills.includes(skill.name) &&
+                                        !shiroSkillNames.includes(skill.name)
+                                    );
+
+                                if (skillPool.length > 0) {
+                                    const randomSkill = skillPool[Math.floor(Math.random() * skillPool.length)];
+                                    shiro.skills.push(randomSkill);
+                                }
+                            }
+                        }
                         // ヒミツの夜モードの初期設定
                         if (gameState.gameMode === 'secret_night' && gameState.party.length === 1) {
                             const char = gameState.party[0];
@@ -5083,6 +5255,26 @@
 
 
 
+                    }
+
+                    function applyShiroTenseiData(data) {
+                        const shiro = gameState.party.find(p => p.role === '転生者');
+                        if (shiro) {
+                            shiro.maxHp = data.maxHp;
+                            shiro.currentHp = data.maxHp;
+                            shiro.maxMp = data.maxMp;
+                            shiro.currentMp = data.maxMp;
+                            shiro.atk = data.atk;
+                            shiro.def = data.def;
+                            shiro.agi = data.agi;
+                            shiro.height = data.height;
+                            shiro.skills = data.skills;
+                            shiro.blessings = data.blessings || {};
+                            updatePartyStatus();
+                            log("シロは過去の記憶を取り戻し、その力を継承した！");
+                        }
+                        localStorage.removeItem('shiroTenseiData');
+                        generalEventModal.classList.add('hidden');
                     }
 
                     function setupDungeonUI() {
@@ -5265,6 +5457,8 @@
                     }
 
                     let logHistory = [];
+                    let logQueue = [];
+                    let isProcessingLog = false;
 
                     function log(message) {
                         return new Promise(resolve => {
@@ -5669,9 +5863,15 @@
                         updateFloorDisplay();
 
                         // --- 1階の導入イベント (最優先でチェック) ---
+                        const isTenseiKikou = gameState.party.some(p => p.role === '転生者');
                         if (gameState.floor === 1) {
                             // 「はじめから」モードの場合のみ導入会話を再生
-                            if (gameState.gameMode === 'normal') {
+                            // 転生紀行モードの1階イベント
+                            if (gameState.gameMode === 'endless' && isTenseiKikou) {
+                                await playConversation(tenseiKikouConversations.floor1);
+                                return;
+                            }
+                            if (gameState.gameMode === 'normal' || gameState.gameMode === 'trial') {
                                 await playConversation(normalModeConversations.floor1);
                                 return; // 導入会話を再生したら、他のイベントは発生させずに終了
                             }
@@ -5689,7 +5889,11 @@
                                 return; // イベントを発生させてターン終了
                             }
                         }
-
+                        // 転生者モードの2階イベント
+                        if (isTenseiKikou && gameState.floor === 2) {
+                            executeEvent(foundAdaptation);
+                            return;
+                        }
                         // 11階の固定イベント
                         if (gameState.floor === 11 && gameState.gameMode === 'summer_live') {
                             await triggerKanpaiJuiceEvent();
@@ -6254,6 +6458,20 @@
 
                         dungeonCommands.classList.remove('hidden');
                     }
+                    // 身長固定確認モーダルのボタンにイベントリスナーを追加
+                    const heightLockConfirmButton = document.getElementById('height-lock-confirm-button');
+                    const heightLockCancelButton = document.getElementById('height-lock-cancel-button');
+
+                    heightLockConfirmButton.addEventListener('click', () => {
+                        // 「はい」がクリックされたときの処理をここに記述
+                        // 例: handleHeightLockConfirm(true);
+                        document.getElementById('height-lock-confirm-modal').classList.add('hidden');
+                    });
+
+                    heightLockCancelButton.addEventListener('click', () => {
+                        // 「いいえ」がクリックされたときの処理をここに記述
+                        document.getElementById('height-lock-confirm-modal').classList.add('hidden');
+                    });
 
                     async function triggerSummerLiveRirikaEvent() {
                         dungeonCommands.classList.add('hidden');
@@ -6422,6 +6640,18 @@
                             weight: gameState.party.some(p => p.isLiberatedStripped) ? 2 : 0 // 解放状態のキャラがいる場合のみ
                         }];
                         // サイズアップ・ギャンブルモードでは発生率を上げる
+                        // 転生者モードの専用イベント
+                        if (gameState.gameMode === 'tensei_kikou') {
+                            baseSpecialEvents.push({
+                                name: "順応",
+                                func: foundAdaptation,
+                                weight: 2
+                            }, {
+                                name: "覚醒",
+                                func: foundAwakening,
+                                weight: 3
+                            });
+                        }
                         if (gameState.gameMode === 'size_up_gamble') {
                             baseSpecialEvents.find(e => e.name === "ダブル『サイズ』アップ").weight = 10;
                             // 他のイベントの発生率を下げるか、0にする
@@ -6621,8 +6851,28 @@
 
                         if (partyRolesWithRemainingEquipment.length === 0) {
                             // 装備を見つけられるキャラがいない場合は別のイベントを再抽選
-                            nothingHappened();
-                            return;
+                            const aliveParty = gameState.party.filter(p => p.currentHp > 0);
+                            if (aliveParty.length > 0) {
+                                const targetCharacter = aliveParty[Math.floor(Math.random() * aliveParty.length)];
+                                const statsToUpgrade = ['atk', 'def', 'agi'];
+                                const statToUpgrade = statsToUpgrade[Math.floor(Math.random() * statsToUpgrade.length)];
+                                const statJp = {
+                                    'atk': '攻撃力',
+                                    'def': '防御力',
+                                    'agi': '素早さ'
+                                };
+
+                                targetCharacter[statToUpgrade] += 1;
+
+                                log(`宝箱は空だったが、${targetCharacter.name}は鍛錬の末、${statJp[statToUpgrade]}が1上がった！`);
+                                flashCard(targetCharacter, 'yellow');
+                                updatePartyStatus();
+
+                            } else {
+                                nothingHappened();
+                            }
+                            dungeonCommands.classList.remove('hidden');
+                            return; // ここで処理を終了
                         }
 
                         // 装備を見つけられる可能性のあるロールからランダムに一つ選ぶ
@@ -7855,201 +8105,211 @@
                         const immuneToStripRoles = ['ナイト', 'サムライ', '聖女', 'アンドロイド'];
 
                         const wishPool = [{
-                            id: 'level_up',
-                            text: '強くなりたい',
-                            description: 'レベルが1上がる。',
-                            effect: (c) => {
-                                levelUpCharacter(c, false);
-                                log(`${c.name}は星に願った…「強くなりたい！」`);
-                            },
-                            condition: (c) => true
-                        }, {
-                            id: 'full_recover',
-                            text: '元気になりたい',
-                            description: '全員のHPとMPが全回復する。',
-                            effect: async(c) => {
-                                log(`${c.name}は星に願った…「みんなが元気になりますように！」`);
-                                for (const p of gameState.party) {
-                                    if (p.currentHp > 0) {
-                                        await animateStatChange(p, 'hp', p.maxHp, 'increase');
-                                        await animateStatChange(p, 'mp', p.maxMp, 'increase');
-                                    }
-                                }
-                            },
-                            condition: (c) => true
-                        }, {
-                            id: 'permanent_stats',
-                            text: '装備を整えたい',
-                            description: '攻撃力と防御力が永続的に2ずつ上がる。',
-                            effect: (c) => {
-                                c.atk += 2;
-                                c.def += 2;
-                                log(`${c.name}は星に願った…「もっといい装備が欲しい！」\n星の光が${c.name}の体を包み、力がみなぎる！`);
-                            },
-                            condition: (c) => true
-                        }, {
-                            id: 'become_doll',
-                            text: 'お人形さんになりたい',
-                            description: '身長が20cmになる。(身長固定は解除)',
-                            effect: async(c) => {
-                                c.heightLocked = false;
-                                await animateStatChange(c, 'height', 20 - c.height, 'decrease');
-                                log(`${c.name}は星に願った…「お人形さんみたいになりたい！」\n体が小さくなり、身長が20cmになった！`);
-                            },
-                            condition: (c) => true
-                        }, {
-                            id: 'grow_big',
-                            text: '大きくなりたい',
-                            description: '身長が2倍になる。',
-                            effect: async(c) => {
-                                await animateStatChange(c, 'height', c.height, 'increase');
-                                log(`${c.name}は星に願った…「大きくなりたい！」\n体がぐんぐん伸びて、身長が2倍になった！`);
-                            },
-                            condition: (c) => c.height > c.initialHeight / 2 && !c.heightLocked
-                        }, {
-                            id: 'grow_reset',
-                            text: '大きくなりたい',
-                            description: '身長が初期身長まで戻る。',
-                            effect: async(c) => {
-                                const growth = c.initialHeight - c.height;
-                                await animateStatChange(c, 'height', growth, 'increase');
-                                log(`${c.name}は星に願った…「元の大きさに戻りたい！」\n体がぐんぐん伸びて、元の身長に戻った！`);
-                            },
-                            condition: (c) => c.height <= c.initialHeight / 2 && !c.heightLocked
-                        }, {
-                            id: 'liberate',
-                            text: 'すべてさらけ出したい',
-                            description: '解放状態になり、今後、服発見イベントが発生しなくなる。',
-                            effect: (c) => {
-                                c.statusEffects.stripped = {
-                                    turns: 0
-                                };
-                                c.isLiberatedStripped = true;
-                                gameState.wishingStarNoClothes = true;
-                                log(`${c.name}は星に願った…「すべてをさらけ出したい！」\n${c.name}は自ら服を脱ぎ捨て、解放状態になった！`);
-                                dungeonCommands.classList.remove('hidden');
-                            },
-                            condition: (c) => !immuneToStripRoles.includes(c.role) && !c.isLiberatedStripped
-                        }, {
-                            id: 'all_tiny',
-                            text: '違う世界が見たい',
-                            description: '全員の身長が1cmになる。',
-                            effect: async(c) => {
-                                log(`${c.name}は星に願った…「違う世界が見たい！」\n星の光がパーティを包み、全員の身長が1cmになった！`);
-                                for (const p of gameState.party) {
-                                    if (p.currentHp > 0) await animateStatChange(p, 'height', 1 - p.height, 'decrease');
-                                }
-                                dungeonCommands.classList.remove('hidden');
-                            },
-                            condition: (c) => !gameState.party.some(p => p.heightLocked)
-                        }, {
-                            id: 'get_supplies',
-                            text: '強敵に備えたい',
-                            description: 'ポーションx3, マナポーションx3, リバイブハーブx2を入手。',
-                            effect: (c) => {
-                                addItemToInventory('potion', 3);
-                                addItemToInventory('mana_potion', 3);
-                                addItemToInventory('revive_herb', 2);
-                                dungeonCommands.classList.remove('hidden');
-                                log(`${c.name}は星に願った…「強敵に備えたい！」\n足元に便利なアイテムがたくさん現れた！`);
-                            },
-                            condition: (c) => true
-                        }, {
-                            id: 'get_ale',
-                            text: 'エールで乾杯したい',
-                            description: 'ギガンテスエールをパーティの人数分入手する。',
-                            effect: (c) => {
-                                const count = gameState.party.filter(p => p.currentHp > 0).length;
-                                addItemToInventory('gigantes_ale', count);
-                                log(`${c.name}は星に願った…「みんなでエールで乾杯したい！」\n人数分のギガンテスエールを手に入れた！`);
-                                dungeonCommands.classList.remove('hidden');
-                            },
-                            condition: (c) => true
-                        }, {
-                            id: 'get_crystals',
-                            text: '英雄と手合わせ願いたい',
-                            description: '聖結晶と邪結晶を1個ずつ入手する。',
-                            effect: (c) => {
-                                addItemToInventory('holy_crystal', 1);
-                                addItemToInventory('evil_crystal', 1);
-                                log(`${c.name}は星に願った…「英雄と手合わせ願いたい！」\n聖と邪、二つの結晶が目の前に現れた！`);
-                                dungeonCommands.classList.remove('hidden');
-                            },
-                            condition: (c) => gameState.gameMode === 'endless'
-                        }, {
-                            id: 'hp_to_mp',
-                            text: '魔力と一体化したい',
-                            description: '最大HPが半分になり、その分最大MPが上昇する。',
-                            effect: (c) => {
-                                const hpLoss = Math.floor(c.maxHp / 2);
-                                c.maxHp -= hpLoss;
-                                c.currentHp = Math.min(c.currentHp, c.maxHp);
-                                c.maxMp += hpLoss;
-                                dungeonCommands.classList.remove('hidden');
-                                log(`${c.name}は星に願った…「魔力と一体になりたい！」\n${c.name}の生命力が魔力に変換された！`);
-                            },
-                            condition: (c) => c.maxHp > 1
-                        }, {
-                            id: 'mp_to_hp',
-                            text: '強靭な肉体を手にしたい',
-                            description: '最大MPが半分になり、その分最大HPが上昇する。',
-                            effect: (c) => {
-                                const mpLoss = Math.floor(c.maxMp / 2);
-                                c.maxMp -= mpLoss;
-                                c.currentMp = Math.min(c.currentMp, c.maxMp);
-                                c.maxHp += mpLoss;
-                                dungeonCommands.classList.remove('hidden');
-                                log(`${c.name}は星に願った…「強靭な肉体が欲しい！」\n${c.name}の魔力が生命力に変換された！`);
-                            },
-                            condition: (c) => c.maxMp > 1
-                        }, {
-                            id: 'get_blessing',
-                            text: '才能が欲しい',
-                            description: 'ランダムな祝福を一つ授かる。',
-                            effect: (c) => {
-                                const available = Object.values(blessings).filter(b => !Object.values(c.blessings).some(owned => owned.name === b.name));
-                                if (available.length > 0) {
-                                    const chosenBlessing = available[Math.floor(Math.random() * available.length)];
-                                    chosenBlessing.effect(c);
-                                    log(`${c.name}は星に願った…「新しい才能が欲しい！」\n${c.name}は祝福「${chosenBlessing.name}」を授かった！`);
-                                } else {
-                                    log(`${c.name}は既に全ての祝福を授かっていた！代わりにレベルが上がった！`);
+                                id: 'level_up',
+                                text: '強くなりたい',
+                                description: 'レベルが1上がる。',
+                                effect: (c) => {
                                     levelUpCharacter(c, false);
+                                    log(`${c.name}は星に願った…「強くなりたい！」`);
+                                },
+                                condition: (c) => true
+                            }, {
+                                id: 'full_recover',
+                                text: '元気になりたい',
+                                description: '全員のHPとMPが全回復する。',
+                                effect: async(c) => {
+                                    log(`${c.name}は星に願った…「みんなが元気になりますように！」`);
+                                    for (const p of gameState.party) {
+                                        if (p.currentHp > 0) {
+                                            await animateStatChange(p, 'hp', p.maxHp, 'increase');
+                                            await animateStatChange(p, 'mp', p.maxMp, 'increase');
+                                        }
+                                    }
+                                },
+                                condition: (c) => true
+                            }, {
+                                id: 'permanent_stats',
+                                text: '装備を整えたい',
+                                description: '攻撃力と防御力が永続的に2ずつ上がる。',
+                                effect: (c) => {
+                                    c.atk += 2;
+                                    c.def += 2;
+                                    log(`${c.name}は星に願った…「もっといい装備が欲しい！」\n星の光が${c.name}の体を包み、力がみなぎる！`);
+                                },
+                                condition: (c) => true
+                            }, {
+                                id: 'become_doll',
+                                text: 'お人形さんになりたい',
+                                description: '身長が20cmになる。(身長固定は解除)',
+                                effect: async(c) => {
+                                    c.heightLocked = false;
+                                    await animateStatChange(c, 'height', 20 - c.height, 'decrease');
+                                    log(`${c.name}は星に願った…「お人形さんみたいになりたい！」\n体が小さくなり、身長が20cmになった！`);
+                                },
+                                condition: (c) => true
+                            }, {
+                                id: 'grow_big',
+                                text: '大きくなりたい',
+                                description: '身長が2倍になる。',
+                                effect: async(c) => {
+                                    await animateStatChange(c, 'height', c.height, 'increase');
+                                    log(`${c.name}は星に願った…「大きくなりたい！」\n体がぐんぐん伸びて、身長が2倍になった！`);
+                                },
+                                condition: (c) => c.height > c.initialHeight / 2 && !c.heightLocked
+                            }, {
+                                id: 'grow_reset',
+                                text: '大きくなりたい',
+                                description: '身長が初期身長まで戻る。',
+                                effect: async(c) => {
+                                    const growth = c.initialHeight - c.height;
+                                    await animateStatChange(c, 'height', growth, 'increase');
+                                    log(`${c.name}は星に願った…「元の大きさに戻りたい！」\n体がぐんぐん伸びて、元の身長に戻った！`);
+                                },
+                                condition: (c) => c.height <= c.initialHeight / 2 && !c.heightLocked
+                            }, {
+                                id: 'liberate',
+                                text: 'すべてさらけ出したい',
+                                description: '解放状態になり、今後、服発見イベントが発生しなくなる。',
+                                effect: (c) => {
+                                    c.statusEffects.stripped = {
+                                        turns: 0
+                                    };
+                                    c.isLiberatedStripped = true;
+                                    gameState.wishingStarNoClothes = true;
+                                    log(`${c.name}は星に願った…「すべてをさらけ出したい！」\n${c.name}は自ら服を脱ぎ捨て、解放状態になった！`);
                                     dungeonCommands.classList.remove('hidden');
-                                }
-                            },
-                            condition: (c) => true
-                        }, {
-                            id: 'fight_observer',
-                            text: 'あなたを超える',
-                            description: 'そこにメリットはない。',
-                            effect: (c) => {
-                                log(`${c.name}は星に願った…「お前を超えてやる！」\n声の主は不敵に笑い、姿を現した！`);
-                                startBattle(true, 'star_observer');
-                            },
-                            condition: (c) => true
-                        }, {
-                            id: 'average_all_height',
-                            text: 'みんなと同じになりたい',
-                            description: 'パーティ全員の身長が平均化される。',
-                            effect: async(c) => {
-                                const aliveParty = gameState.party.filter(p => p.currentHp > 0);
-                                const totalHeight = aliveParty.reduce((sum, p) => sum + p.height, 0);
-                                const avgHeight = Math.floor(totalHeight / aliveParty.length);
-                                log(`${c.name}は星に願った…「みんなと同じになりたい！」\n星の光がパーティを包み、全員の身長が${avgHeight}cmになった！`);
-                                for (const p of aliveParty) {
-                                    const change = avgHeight - p.height;
-                                    if (change !== 0) {
-                                        await animateStatChange(p, 'height', change, change >= 0 ? 'increase' : 'decrease');
+                                },
+                                condition: (c) => !immuneToStripRoles.includes(c.role) && !c.isLiberatedStripped
+                            }, {
+                                id: 'all_tiny',
+                                text: '違う世界が見たい',
+                                description: '全員の身長が1cmになる。',
+                                effect: async(c) => {
+                                    log(`${c.name}は星に願った…「違う世界が見たい！」\n星の光がパーティを包み、全員の身長が1cmになった！`);
+                                    for (const p of gameState.party) {
+                                        if (p.currentHp > 0) await animateStatChange(p, 'height', 1 - p.height, 'decrease');
                                     }
                                     dungeonCommands.classList.remove('hidden');
+                                },
+                                condition: (c) => !gameState.party.some(p => p.heightLocked)
+                            }, {
+                                id: 'get_supplies',
+                                text: '強敵に備えたい',
+                                description: 'ポーションx3, マナポーションx3, リバイブハーブx2を入手。',
+                                effect: (c) => {
+                                    addItemToInventory('potion', 3);
+                                    addItemToInventory('mana_potion', 3);
+                                    addItemToInventory('revive_herb', 2);
+                                    dungeonCommands.classList.remove('hidden');
+                                    log(`${c.name}は星に願った…「強敵に備えたい！」\n足元に便利なアイテムがたくさん現れた！`);
+                                },
+                                condition: (c) => true
+                            }, {
+                                id: 'get_ale',
+                                text: 'エールで乾杯したい',
+                                description: 'ギガンテスエールをパーティの人数分入手する。',
+                                effect: (c) => {
+                                    const count = gameState.party.filter(p => p.currentHp > 0).length;
+                                    addItemToInventory('gigantes_ale', count);
+                                    log(`${c.name}は星に願った…「みんなでエールで乾杯したい！」\n人数分のギガンテスエールを手に入れた！`);
+                                    dungeonCommands.classList.remove('hidden');
+                                },
+                                condition: (c) => true
+                            }, {
+                                id: 'get_crystals',
+                                text: '英雄と手合わせ願いたい',
+                                description: '聖結晶と邪結晶を1個ずつ入手する。',
+                                effect: (c) => {
+                                    addItemToInventory('holy_crystal', 1);
+                                    addItemToInventory('evil_crystal', 1);
+                                    log(`${c.name}は星に願った…「英雄と手合わせ願いたい！」\n聖と邪、二つの結晶が目の前に現れた！`);
+                                    dungeonCommands.classList.remove('hidden');
+                                },
+                                condition: (c) => gameState.gameMode === 'endless'
+                            }, {
+                                id: 'hp_to_mp',
+                                text: '未来を夢見たい',
+                                description: '現在の強さを記憶に刻み、新たな旅に出る。',
+                            effect: (c) => saveShiroTenseiData(c, false),
+                                condition: (c) => c.role === '転生者'
+                            },
+
+
+                            {
+                                id: 'hp_to_mp',
+                                text: '魔力と一体化したい',
+                                description: '最大HPが半分になり、その分最大MPが上昇する。',
+                                effect: (c) => {
+                                    const hpLoss = Math.floor(c.maxHp / 2);
+                                    c.maxHp -= hpLoss;
+                                    c.currentHp = Math.min(c.currentHp, c.maxHp);
+                                    c.maxMp += hpLoss;
+                                    dungeonCommands.classList.remove('hidden');
+                                    log(`${c.name}は星に願った…「魔力と一体になりたい！」\n${c.name}の生命力が魔力に変換された！`);
+                                },
+                                condition: (c) => c.maxHp > 1
+                            }, {
+                                id: 'mp_to_hp',
+                                text: '強靭な肉体を手にしたい',
+                                description: '最大MPが半分になり、その分最大HPが上昇する。',
+                                effect: (c) => {
+                                    const mpLoss = Math.floor(c.maxMp / 2);
+                                    c.maxMp -= mpLoss;
+                                    c.currentMp = Math.min(c.currentMp, c.maxMp);
+                                    c.maxHp += mpLoss;
+                                    dungeonCommands.classList.remove('hidden');
+                                    log(`${c.name}は星に願った…「強靭な肉体が欲しい！」\n${c.name}の魔力が生命力に変換された！`);
+                                },
+                                condition: (c) => c.maxMp > 1
+                            }, {
+                                id: 'get_blessing',
+                                text: '才能が欲しい',
+                                description: 'ランダムな祝福を一つ授かる。',
+                                effect: (c) => {
+                                    const available = Object.values(blessings).filter(b => !Object.values(c.blessings).some(owned => owned.name === b.name));
+                                    if (available.length > 0) {
+                                        const chosenBlessing = available[Math.floor(Math.random() * available.length)];
+                                        chosenBlessing.effect(c);
+                                        log(`${c.name}は星に願った…「新しい才能が欲しい！」\n${c.name}は祝福「${chosenBlessing.name}」を授かった！`);
+                                    } else {
+                                        log(`${c.name}は既に全ての祝福を授かっていた！代わりにレベルが上がった！`);
+                                        levelUpCharacter(c, false);
+                                        dungeonCommands.classList.remove('hidden');
+                                    }
+                                },
+                                condition: (c) => true
+                            }, {
+                                id: 'fight_observer',
+                                text: 'あなたを超える',
+                                description: 'そこにメリットはない。',
+                                effect: (c) => {
+                                    log(`${c.name}は星に願った…「お前を超えてやる！」\n声の主は不敵に笑い、姿を現した！`);
+                                    startBattle(true, 'star_observer');
+                                },
+                                condition: (c) => true
+                            }, {
+                                id: 'average_all_height',
+                                text: 'みんなと同じになりたい',
+                                description: 'パーティ全員の身長が平均化される。',
+                                effect: async(c) => {
+                                    const aliveParty = gameState.party.filter(p => p.currentHp > 0);
+                                    const totalHeight = aliveParty.reduce((sum, p) => sum + p.height, 0);
+                                    const avgHeight = Math.floor(totalHeight / aliveParty.length);
+                                    log(`${c.name}は星に願った…「みんなと同じになりたい！」\n星の光がパーティを包み、全員の身長が${avgHeight}cmになった！`);
+                                    for (const p of aliveParty) {
+                                        const change = avgHeight - p.height;
+                                        if (change !== 0) {
+                                            await animateStatChange(p, 'height', change, change >= 0 ? 'increase' : 'decrease');
+                                        }
+                                        dungeonCommands.classList.remove('hidden');
+                                    }
+                                },
+                                condition: (c) => {
+                                    const aliveParty = gameState.party.filter(p => p.currentHp > 0);
+                                    return aliveParty.length >= 2 && !aliveParty.some(p => p.heightLocked) && !aliveParty.every(p => p.height === aliveParty[0].height);
                                 }
                             },
-                            condition: (c) => {
-                                const aliveParty = gameState.party.filter(p => p.currentHp > 0);
-                                return aliveParty.length >= 2 && !aliveParty.some(p => p.heightLocked) && !aliveParty.every(p => p.height === aliveParty[0].height);
-                            }
-                        }, ];
+                        ];
 
                         const choices = [];
                         const availableWishes = wishPool.filter(w => w.condition(char));
@@ -8399,6 +8659,12 @@
                                 for (const p of gameState.party) {
                                     if (p.currentHp > 0) await animateStatChange(p, 'hp', Math.ceil(p.maxHp * 0.3), 'increase');
                                 }
+                                break;
+                            case '転生者':
+                                const hpIncrease = 30;
+                                prayer.maxHp += hpIncrease;
+                                await animateStatChange(prayer, 'hp', hpIncrease, 'increase');
+                                message = `シロの祈りが天に届き、その身に生命力が満ち溢れる！ (最大HP+${hpIncrease})`;
                                 break;
                         }
                         dungeonCommands.classList.remove('hidden');
@@ -9959,6 +10225,165 @@
                         }
                     }
 
+                    // 順応イベント専用スキル
+                    const adaptationOnlySkills = [{
+                        name: 'ソウルコンバート',
+                        cost: 0, // MPコストは処理内で計算
+                        type: 'soul_convert',
+                        targetType: 'self',
+                        description: '自身のMPを半分消費し、HPを全回復する。'
+                    }, {
+                        name: 'マギアコンバート',
+                        cost: 0, // HPコストは処理内で計算
+                        type: 'magia_convert',
+                        targetType: 'self',
+                        description: '自身のHPを半分消費し、MPを全回復する。'
+                    }, {
+                        name: 'ヘビースラッシュ',
+                        cost: 15,
+                        power: 2.5,
+                        type: 'heavy_slash',
+                        targetType: 'enemy',
+                        description: '敵ひとりに高威力の物理攻撃。自身の身長が高いほどダメージにボーナス。'
+                    }, {
+                        name: 'チェインスペル',
+                        cost: 15,
+                        power: 4.5,
+                        type: 'chain_spell',
+                        targetType: 'enemy',
+                        description: '敵ひとりに高威力の魔法攻撃。自身の身長が低いほどダメージにボーナス。'
+                    }, {
+                        name: 'メイクドール',
+                        cost: 20,
+                        power: 50, // 縮小量
+                        type: 'make_doll',
+                        targetType: 'enemy',
+                        description: '敵ひとりの身長を縮め、攻撃力と防御力を低下させる。'
+                    }, {
+                        name: 'クラッシュハグ',
+                        cost: 18,
+                        power: 1.8,
+                        type: 'crush_hug',
+                        targetType: 'enemy',
+                        description: '敵ひとりを抱きしめる物理攻撃。敵より身長が高いほどダメージにボーナス。'
+                    }];
+
+                    // 転生者専用イベント
+                    function foundAdaptation() {
+                        const shiro = gameState.party[0];
+                        if (!shiro || shiro.role !== '転生者') {
+                            nothingHappened();
+                            return;
+                        }
+
+                        // リリィの変身スキルと、既に習得済みのスキルを除外
+                        const lilyTransformSkills = ['サキュバスモード', 'フェアリーモード', 'アルラウネモード'];
+                        const shiroSkillNames = shiro.skills.map(s => s.name);
+
+                        const skillPool = allCharacterBlueprints
+                            .flatMap(c => [...c.skills, c.unlockableSkill, c.unlockableSkillLv4])
+                            .filter(skill =>
+                                skill &&
+                                !lilyTransformSkills.includes(skill.name) && // リリィの変身スキルを除外
+                                !adaptationOnlySkills.some(s => s.name === skill.name) && // 順応スキルを重複させない
+                                !shiroSkillNames.includes(skill.name)
+                            );
+
+                        if (skillPool.length < 3) {
+                            log("シロは新たな力を感じ取れなかった…。");
+                            return;
+                        }
+                        // 順応専用スキルをプールに追加
+                        skillPool.push(...adaptationOnlySkills);
+                        // 3つのユニークなスキルをランダムに選ぶ
+                        const choices = []; // 選択肢を4つに増やす
+                        while (choices.length < 4 && skillPool.length > 0) {
+                            const randomIndex = Math.floor(Math.random() * skillPool.length);
+                            choices.push(skillPool.splice(randomIndex, 1)[0]);
+                        }
+
+                        generalEventTitle.textContent = "順応";
+                        generalEventText.textContent = "シロは周囲の魔力に順応し、新たな力を学習できそうだ。\nどの力を取り込みますか？";
+                        generalEventButtons.innerHTML = ''; // ボタンをクリア
+                        generalEventButtons.className = 'grid grid-cols-2 gap-4'; // 2列グリッドに変更
+
+                        choices.forEach(skill => {
+                            const button = document.createElement('button');
+                            button.className = 'action-button bg-slate-500 hover:bg-slate-600 text-white font-bold py-4 px-4 rounded-lg shadow-lg text-center';
+                            button.innerHTML = `<strong class="text-lg">${skill.name}</strong>`; // 説明を削除
+                            button.onclick = async() => {
+                                generalEventModal.classList.add('hidden');
+                                if (shiro.skills.length >= 4) {
+                                    // スキル交換処理
+                                    const replaceableSkills = shiro.skills.filter(s => s.name !== 'ヴァニッシュ');
+                                    const skillButtons = replaceableSkills.map(s => ({
+                                        text: s.name,
+                                        value: s.name,
+                                    }));
+                                    showAmountChoiceModal('スキル交換', `どのスキルと「${skill.name}」を交換しますか？`, skillButtons, async(skillNameToReplace) => {
+                                        const skillIndex = shiro.skills.findIndex(s => s.name === skillNameToReplace);
+                                        if (skillIndex !== -1) {
+                                            shiro.skills[skillIndex] = skill;
+                                            await log(`シロは「${skillNameToReplace}」を忘れ、新たに「${skill.name}」を習得した！`);
+                                            await log("シロは新たな力を感じている…");
+                                        }
+                                        dungeonCommands.classList.remove('hidden');
+                                    });
+                                } else {
+                                    // スキル追加処理
+                                    shiro.skills.push(skill);
+                                    await log(`シロは新たなスキル「${skill.name}」を習得した！`);
+                                    await log("シロは新たな力を感じている…");
+                                    dungeonCommands.classList.remove('hidden');
+                                }
+                            };
+                            generalEventButtons.appendChild(button);
+                        });
+
+                        // 「何もしない」ボタン
+                        const cancelButton = document.createElement('button');
+                        cancelButton.className = 'action-button bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg mt-2 col-span-2'; // 2列にまたがるように
+                        cancelButton.textContent = '何もしない';
+                        cancelButton.onclick = () => {
+                            generalEventModal.classList.add('hidden');
+                            log("シロは力の取り込みを見送った。");
+                            dungeonCommands.classList.remove('hidden');
+                        };
+                        generalEventButtons.appendChild(cancelButton);
+
+                        generalEventModal.classList.remove('hidden');
+                    }
+
+                    function foundAwakening() {
+                        const shiro = gameState.party[0];
+                        if (!shiro || shiro.role !== '転生者') {
+                            nothingHappened();
+                            return;
+                        }
+                        const stats = [{
+                            name: '最大HP',
+                            key: 'maxHp',
+                            value: 15
+                        }, {
+                            name: '最大MP',
+                            key: 'maxMp',
+                            value: 10
+                        }, {
+                            name: '攻撃力',
+                            key: 'atk',
+                            value: 3
+                        }, {
+                            name: '防御力',
+                            key: 'def',
+                            value: 3
+                        }];
+                        const chosenStat = stats[Math.floor(Math.random() * stats.length)];
+
+                        shiro[chosenStat.key] += chosenStat.value;
+                        log(`シロはダンジョンの魔力を取り込み、覚醒した！\n${chosenStat.name}が永続的に${chosenStat.value}上昇した！`);
+                        flashCard(shiro, 'green');
+                    }
+
                     async function handleSkill(caster, target, skill) {
                         switch (skill.type) {
                             case 'growth_physical':
@@ -9969,6 +10394,74 @@
                                     // 永続的な威力上昇
                                     skill.power = parseFloat((skill.power + 0.1).toFixed(2));
                                     log(`${caster.name}の「${skill.name}」が少し強くなった！`);
+                                    break;
+                                }
+                            case 'hp_cost_instant_death':
+                                { // ヴァニッシュ
+                                    if (caster.maxHp < 20) {
+                                        log(`最大HPが足りず、${skill.name}を使えなかった！`);
+                                        break;
+                                    }
+                                    // 消費HPを現在HPからではなく最大HPから引く
+                                    caster.maxHp -= skill.cost;
+                                    // 現在HPが最大HPを超えている場合は調整
+                                    if (caster.currentHp > caster.maxHp) {
+                                        caster.currentHp = caster.maxHp;
+                                    }
+                                    log(`${caster.name}は${skill.name}を放った…！`);
+                                    flashCard(caster, 'red');
+                                    await new Promise(resolve => setTimeout(resolve, 1000));
+                                    log(`${target.name}は光の中に消滅した…`);
+                                    await dealDamage(target, target.currentHp);
+                                    break;
+                                }
+                            case 'soul_convert':
+                                {
+                                    const mpCost = Math.ceil(caster.currentMp / 2);
+                                    if (caster.currentMp < 1) {
+                                        log(`MPが足りず、${skill.name}を使えなかった！`);
+                                        break;
+                                    }
+                                    await animateStatChange(caster, 'mp', -mpCost, 'decrease');
+                                    await animateStatChange(caster, 'hp', caster.maxHp, 'increase');
+                                    log(`${caster.name}は${skill.name}で魂を燃やし、HPを全回復した！`);
+                                    break;
+                                }
+                            case 'magia_convert':
+                                {
+                                    const hpCost = Math.ceil(caster.currentHp / 2);
+                                    if (caster.currentHp <= hpCost) {
+                                        log(`HPが足りず、${skill.name}を使えなかった！`);
+                                        break;
+                                    }
+                                    await animateStatChange(caster, 'hp', -hpCost, 'decrease');
+                                    await animateStatChange(caster, 'mp', caster.maxMp, 'increase');
+                                    log(`${caster.name}は${skill.name}で生命を魔力に変換し、MPを全回復した！`);
+                                    break;
+                                }
+                            case 'heavy_slash':
+                            case 'chain_spell':
+                            case 'crush_hug':
+                                {
+                                    const damage = calculateDamage(caster, target, skill);
+                                    await dealDamage(target, damage);
+                                    log(`${caster.name}は${skill.name}を放った！ ${target.name}に${damage}のダメージ！`);
+                                    break;
+                                }
+                            case 'make_doll':
+                                {
+                                    log(`${caster.name}は${skill.name}を放った！`);
+                                    if (target.isBoss) {
+                                        log(`しかし、${target.name}には効果がなかった！`);
+                                    } else {
+                                        target.height = Math.max(1, target.height - skill.power);
+                                        target.buffs = target.buffs || {};
+                                        target.buffs.atk_down = 3;
+                                        target.buffs.def_down = 3;
+                                        flashCard(target, 'red');
+                                        log(`${target.name}は小さなお人形さんのようになり、弱体化した！`);
+                                        // 敵の身長はUIに直接表示されないため、ログで通知
+                                    }
                                     break;
                                 }
                             case 'physical':
@@ -12096,7 +12589,27 @@
                                 const heightBonus = Math.max(0, (attacker.height - 150) / 150); // 150cmを基準に、150cmごとに100%ボーナス
                                 baseDamage *= (1 + heightBonus);
                             }
+                            // 新スキル: ヘビースラッシュ
+                            if (skill && skill.type === 'heavy_slash') {
+                                const heightBonus = Math.max(0, (attacker.height - attacker.initialHeight) * 0.2); // 身長が高いほどボーナス
+                                baseDamage += heightBonus;
+                            }
+                            // 新スキル: チェインスペル
+                            if (skill && skill.type === 'chain_spell') {
+                                const heightBonus = Math.max(0, (attacker.initialHeight - attacker.height) * 0.3); // 身長が低いほどボーナス
+                                baseDamage += heightBonus;
+                            }
+                            // 新スキル: クラッシュハグ
+                            if (skill && skill.type === 'crush_hug') {
+                                const heightDifference = attacker.height - defender.height;
+                                if (heightDifference > 0) {
+                                    const hugBonus = heightDifference * 0.5; // 身長差が大きいほどボーナス
+                                    baseDamage += hugBonus;
+                                    log(`${attacker.name}は${defender.name}を力強く抱きしめた！`);
+                                }
+                            }
                             // 祝福: 妖精の加護
+
                             if (attacker.blessings && attacker.blessings.fairy_grace && attacker.height === 1 && skill) {
                                 log(`${attacker.name}の妖精の加護がスキルを強化する！`);
                                 baseDamage *= 3;
@@ -12126,20 +12639,6 @@
                             }
                         }
 
-                        // 祝福: 物理/魔法シールド
-                        if (defender.blessings && defender.blessings.physical_shield && (!skill || skill.type === 'physical' || skill.type.includes('physical'))) {
-                            baseDamage *= 0.7;
-                        }
-                        // フェアリーのワンダーカーニバル
-                        if (skill && skill.name === 'ワンダーカーニバル') {
-                            const defenderStats = getEffectiveStats(defender);
-                            effectiveDefense = Math.min(defenderStats.pDef, defenderStats.mDef);
-                            baseDamage = attackerStats.atk * skill.power; // 攻撃力ベースで計算
-                        }
-                        if (defender.blessings && defender.blessings.magic_shield && skill && (skill.type === 'magic' || skill.type.includes('magic'))) {
-                            baseDamage *= 0.7;
-                        }
-
                         // モンクの破砕拳は防御無視
                         if (skill && skill.type === 'def_ignore_physical') {
                             effectiveDefense = 0;
@@ -12154,6 +12653,17 @@
 
                         // ダメージから防御力を減算
                         baseDamage -= effectiveDefense;
+
+                        // 祝福: エレメンタルシールド
+                        if (defender.blessings && defender.blessings.elemental_shield) {
+                            baseDamage *= 0.75;
+                        }
+                        // フェアリーのワンダーカーニバル
+                        if (skill && skill.name === 'ワンダーカーニバル') {
+                            const defenderStats = getEffectiveStats(defender);
+                            effectiveDefense = Math.min(defenderStats.pDef, defenderStats.mDef);
+                            baseDamage = attackerStats.atk * skill.power; // 攻撃力ベースで計算
+                        }
 
                         // ダンサーの回避判定 (スポットライト効果中)
                         if (defender.buffs && defender.buffs.evade_up) {
@@ -12379,7 +12889,57 @@
                         }
                     }
 
+                    function saveShiroTenseiData(character, withPenalty = false) {
+                        let dataToSave = {
+                            maxHp: character.maxHp,
+                            maxMp: character.maxMp,
+                            atk: character.atk,
+                            def: character.def,
+                            agi: character.agi,
+                            height: character.height,
+                            skills: character.skills,
+                            blessings: character.blessings
+                        };
+                        let modalTitle = "未来への夢";
+                        let modalText = "シロは仲間たちとの冒険で得た力を記憶に刻み、満足げに微笑んだ。\n「また、会えるよね…？」\nそう呟くと、彼女の体は光の粒子となって消えていった。\nこの記憶は、次なる転生で彼女を導くだろう。";
 
+                        if (withPenalty) {
+                            dataToSave.maxHp = Math.max(1, Math.floor(dataToSave.maxHp * 0.8));
+                            dataToSave.maxMp = Math.max(1, Math.floor(dataToSave.maxMp * 0.8));
+                            dataToSave.atk = Math.max(1, Math.floor(dataToSave.atk * 0.8));
+                            dataToSave.def = Math.max(1, Math.floor(dataToSave.def * 0.8));
+                            dataToSave.height = Math.max(1, Math.floor(dataToSave.height * 0.9));
+                            modalTitle = "途切れた記憶";
+                            modalText = "シロは力尽き、その場に崩れ落ちた。\n薄れゆく意識の中、彼女は強く願う。\n「まだ、終わりたくない…」\n\nその願いは、不完全ながらも記憶の欠片となって残り、次なる転生へと引き継がれる。";
+                        }
+
+                        localStorage.setItem('shiroTenseiData', JSON.stringify(dataToSave));
+                        showModal(modalTitle, modalText);
+                        gameState.gameOver = true;
+                    }
+
+                    function showTenseiGameOverModal() {
+                        const shiro = gameState.party.find(p => p.role === '転生者');
+                        if (!shiro) return;
+
+                        generalEventTitle.textContent = "転生の選択";
+                        generalEventText.textContent = "シロは力尽きてしまった…\nどうしますか？";
+                        generalEventButtons.innerHTML = `
+                            <button id="tensei-continue" class="action-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg">記憶を刻んで転生する<br><span class="text-xs">(ステータスは少し劣化します)</span></button>
+                            <button id="tensei-end" class="action-button bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg">安らかに眠る</button>
+                        `;
+                        generalEventModal.classList.remove('hidden');
+
+                        document.getElementById('tensei-continue').onclick = () => {
+                            generalEventModal.classList.add('hidden');
+                            saveShiroTenseiData(shiro, true);
+                        };
+                        document.getElementById('tensei-end').onclick = () => {
+                            generalEventModal.classList.add('hidden');
+                            showModal("ゲームオーバー", "シロの冒険はここで終わった…");
+                            gameState.gameOver = true;
+                        };
+                    }
 
                     async function endBattle(isVictory) {
                         gameState.inBattle = false;
@@ -12639,11 +13199,16 @@
                                 showLevelUpModal(false);
                             }
                         } else {
-                            if (gameState.party.length === 1) {
-                                const characterName = gameState.party[0].name;
-                                showModal("ゲームオーバー", `${characterName}は力尽きてしまった...`);
+                            // 転生紀行モードでのゲームオーバー処理
+                            if (gameState.gameMode === 'endless' && gameState.party.some(p => p.role === '転生者')) {
+                                showTenseiGameOverModal();
                             } else {
-                                showModal("ゲームオーバー", "パーティは全滅してしまった...");
+                                if (gameState.party.length === 1) {
+                                    const characterName = gameState.party[0].name;
+                                    showModal("ゲームオーバー", `${characterName}は力尽きてしまった...`);
+                                } else {
+                                    showModal("ゲームオーバー", "パーティは全滅してしまった...");
+                                }
                             }
                             gameState.gameOver = true;
                         }
@@ -12754,13 +13319,9 @@
                     }
 
                     function levelUpCharacter(character, showUI = true, isEndless = false) {
-                        // ステータスアップ
-                        character.maxHp += 5;
-                        character.maxMp += 3;
-                        character.atk += 1;
-                        character.def += 1;
-                        character.agi += 1;
-                        character.level += 1; // ファイター, ソーサラー, ナイト, メディック
+                        // applyLevelUpを呼び出してステータスを成長させ、追加成長情報を取得
+                        const bonusGrowthInfo = applyLevelUp(character);
+
                         // HP/MPを全回復
                         character.currentHp = character.maxHp;
 
@@ -12772,19 +13333,26 @@
 
                         character.currentMp = character.maxMp; // ファイター, ソーサラー, ナイト, メディック
 
-                        character.skills.forEach(skill => {
-                            if (skill.power) skill.power = parseFloat((skill.power * 1.05).toFixed(2)); // 威力を5%上昇
-                        });
+                        // ログメッセージの組み立て
+                        let logMessageText = `${character.name}は強くなった！`;
+                        if (bonusGrowthInfo) {
+                            const statJp = {
+                                'maxHp': '最大HP',
+                                'maxMp': '最大MP',
+                                'atk': '攻撃力',
+                                'def': '防御力'
+                            };
+                            logMessageText += ` さらに、${statJp[bonusGrowthInfo.stat]}が${bonusGrowthInfo.value}上がった！`;
+                        }
+
                         // 新スキル習得
                         if (character.level === 2 && character.unlockableSkill) {
-                            character.skills.push(character.unlockableSkill);
-                            log(`${character.name}は強くなった！ さらに、新しいスキル「${character.unlockableSkill.name}」を覚えた！`);
+                            logMessageText += `\n新しいスキル「${character.unlockableSkill.name}」を覚えた！`;
                         } else if (character.level === 4 && character.unlockableSkillLv4) {
-                            character.skills.push(character.unlockableSkillLv4);
-                            log(`${character.name}は大きく成長した！ 奥義「${character.unlockableSkillLv4.name}」を習得！`);
-                        } else {
-                            log(`${character.name}は強くなった！`);
+                            logMessageText = `${character.name}は大きく成長した！ 奥義「${character.unlockableSkillLv4.name}」を習得！`;
                         }
+                        log(logMessageText);
+
                         if (showUI) {
                             levelUpModal.classList.add('hidden');
                             updatePartyStatus();
@@ -12950,7 +13518,7 @@
                             id: 'getBlessing',
                             text: (target) => `${target.name}に神々の祝福を授ける`,
                             effect: (target) => {
-                                const blessingPool = Object.values(blessings);
+                                const blessingPool = Object.values(blessings).filter(b => !b.eventOnly);
                                 const available = blessingPool.filter(b => !Object.values(target.blessings).some(owned => owned.name === b.name));
 
                                 if (available.length === 0) {
@@ -13523,6 +14091,8 @@
                     // 変身状態を考慮してブループリントを一度だけ取得する
                     const blueprint = allCharacterBlueprints.find(c => c.name === (target.isTransformed ? 'リリィ' : target.name));
                     let skillHtml = target.skills.map(skill => {
+                        // スキルが存在しない、または説明がない場合は空文字を返す
+                        if (!skill || !skill.description) return '';
                         return `<div class="p-2 bg-gray-100 rounded-md">
                                    <p class="font-bold">${skill.name} <span class="text-sm font-normal text-gray-600">(${skill.type && skill.type.includes('hp_cost') ? 'HP' : 'MP'}:${skill.cost})</span></p>
                                    <p class="text-sm">${skill.description}</p>
@@ -13727,6 +14297,7 @@
 
             function startGame(mode = 'normal', selectedMembers = null, fromSave = false) {
                 gameState.gameMode = mode;
+                let backgroundSet = false;
 
                 // 新しいモード「運命の出会い」の処理
                 if (mode === 'random_party') {
@@ -13752,6 +14323,35 @@
                 }
                 if (mode === 'brawling_belles') {
                     selectedMembers = ['ノエル', 'フローラ'];
+                }
+                // 転生者モード
+                if (mode === 'tensei_kikou') {
+                    selectedMembers = ['シロ'];
+                        // 転生紀行モードの背景を設定
+                        gameState.dungeonBackground = FANTASY_FOREST_BG;
+                        dungeonView.style.backgroundImage = gameState.dungeonBackground;
+                        backgroundSet = true; // 他の背景設定を上書きしないようにフラグを立てる
+
+                    gameState.gameMode = 'endless'; // 無限モードのルールを適用
+
+                    // 転生紀行の記憶引き継ぎイベント (UI要素定義後に移動)
+                    const shiroData = localStorage.getItem('shiroTenseiData');
+                    if (shiroData && !fromSave) {
+                        generalEventTitle.textContent = "過去の記憶";
+                        generalEventText.textContent = "シロの脳裏に、過去の自分の記憶が流れ込んでくる…\nこの記憶を呼び覚ましますか？";
+                        generalEventButtons.innerHTML = `
+                            <button id="inherit-yes" class="action-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg">はい</button>
+                            <button id="inherit-no" class="action-button bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg">いいえ</button>
+                        `;
+                        generalEventModal.classList.remove('hidden');
+
+                        document.getElementById('inherit-yes').onclick = () => applyShiroTenseiData(JSON.parse(shiroData));
+                        document.getElementById('inherit-no').onclick = () => {
+                            localStorage.removeItem('shiroTenseiData');
+                            generalEventModal.classList.add('hidden');
+                            log("シロは過去の記憶を振り払い、新たな一歩を踏み出した。");
+                        };
+                    }
                 }
                 if (mode === 'size_up_gamble') {
                     selectedMembers = ['ルナ', 'コハル'];
@@ -13793,7 +14393,6 @@
                 initGame(selectedMembers, fromSave);
 
                 // initGame の後にモード別の特殊設定を適用
-                let backgroundSet = false;
                 if (!fromSave) {
                     if (mode === 'little_panic') {
                         gameState.party.forEach(char => {
@@ -13883,11 +14482,6 @@
                 dungeonView.style.backgroundImage = gameState.dungeonBackground;
 
                 setupDungeonUI();
-                        // ログキューを初期化
-                        logQueue = [];
-                        isProcessingLog = false;
-                        logMessage.textContent = '';
-
                 dungeonCommands.classList.remove('hidden');
                 battleCommands.classList.add('hidden');
                 enemyContainer.innerHTML = '';
@@ -13966,12 +14560,11 @@
             document.querySelectorAll('.what-if-content button').forEach(button => {
                 button.addEventListener('click', (e) => {
                     const mode = e.currentTarget.dataset.mode;
-                    whatIfModal.classList.add('hidden'); // モーダルを閉じる処理を追加
                     // startGameを呼び出す。メンバー選択が必要なら中で処理される
                     startGame(mode);
+                    whatIfModal.classList.add('hidden');
                 });
             });
-
             // リトルパニックモードのスキル定義
             const littlePanicSkills = {
                 holySphere: {
@@ -14307,16 +14900,6 @@
                 debugBellesButton.addEventListener('click', () => toggleClearFlag('brawlingBellesCleared'));
                 debugEndgameButton.addEventListener('click', () => toggleClearFlag('endgameCleared'));
             }
-            // ログ履歴表示のイベントリスナー
-            logContainer.addEventListener('mouseenter', () => {
-                if (logHistory.length > 0) {
-                    const recentLogs = logHistory.slice(-5).reverse(); // 最新5件を新しい順に取得
-                    logTooltip.innerHTML = recentLogs.map((log, index) => 
-                        `<p class="${index === 0 ? 'font-bold' : 'text-gray-300'}">${log}</p>`
-                    ).join('');
-                    logTooltip.classList.remove('hidden');
-                }
-            });
 
             logContainer.addEventListener('mouseleave', () => {
                 logTooltip.classList.add('hidden');
@@ -14330,15 +14913,27 @@
                 logTooltip.classList.add('hidden');
             });
 
+            // ログ履歴表示のイベントリスナー
+            logContainer.addEventListener('mouseenter', () => {
+                if (logHistory.length > 0) {
+                    const recentLogs = logHistory.slice(-5).reverse(); // 最新5件を新しい順に取得
+                    logTooltip.innerHTML = recentLogs.map((log, index) =>
+                        `<p class="${index === 0 ? 'font-bold' : 'text-gray-300'}">${log}</p>`
+                    ).join('');
+                    logTooltip.classList.remove('hidden');
+                }
+            });
+
             // --- 初期化処理 ---
             // セーブデータの有無をチェックし、「つづきから」ボタンの表示を制御
             function checkSaveData() {
-                if (localStorage.getItem('sizeDungeonSaveData')) {
+                if (localStorage.getItem('sizeDungeonSaveData')) { // ファイター, ソーサラー, ナイト, メディック
                     loadButton.classList.remove('hidden');
                 } else {
                     loadButton.classList.add('hidden');
                 }
             }
+
             checkSaveData(); // セーブデータチェックを実行
             setupDebugControls(); // デバッグ関連のセットアップを実行
             updateDebugButtons(); // デバッグボタンの初期表示を更新
