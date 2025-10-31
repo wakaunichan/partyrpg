@@ -14688,6 +14688,11 @@
                         const secretNightChars = ['リリカ', 'ユイ', 'ミコ', 'リリィ', 'フローラ'];
                         return secretNightChars.includes(char.name);
                     }
+                    // 転生紀行モード以外では転生者を選択不可にする
+                    if (mode !== 'tensei_kikou' && char.role === '転生者') {
+                        // ただし、転生紀行モード自体はチーム選択画面を通らないので、このチェックは他モード用
+                        return false;
+                    }
                     if (char.role === 'メイド' && !clearFlags.brawlingBellesCleared) return false;
                     return true; // ファイター, ソーサラー, ナイト, メディック
                 }); // ファイター, ソーサラー, ナイト, メディック
