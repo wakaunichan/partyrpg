@@ -1,0 +1,541 @@
+body {
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    touch-action: manipulation;
+}
+
+.hud-gradient {
+    background-image: linear-gradient(to top, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.8));
+}
+
+.log-gradient {
+    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.8));
+}
+
+.action-button {
+    transition: all 0.2s ease-in-out;
+}
+
+.action-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.action-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.hp-bar-inner,
+.mp-bar-inner {
+    transition: width 0.5s ease-in-out;
+}
+
+.character-card {
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    min-height: 140px;
+    /* 少し高さを増やして見栄えを調整 */
+    position: relative;
+    overflow: hidden;
+    /* 疑似要素をはみ出させない */
+    background-image: linear-gradient(to bottom, #fffbeb, #fef3c7);
+    /* 羊皮紙のような背景 */
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1), 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    /* 内側に影を追加して立体感を出す */
+    display: flex;
+    align-items: flex-end;
+    /* 子要素を下揃えにする */
+}
+
+.character-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: var(--char-bg-image);
+    /* 画像URL */
+    background-color: white;
+    background-size: var(--char-bg-size, cover);
+    /* サイズ (JSで変更) */
+    background-position: var(--char-bg-position, center bottom);
+    /* 位置 (JSで変更) */
+    background-repeat: no-repeat;
+    opacity: 0.6;
+    /* 背景画像の透明度を調整 */
+    z-index: 0;
+    transition: background-size 0.5s ease-in-out, background-position 0.5s ease-in-out;
+}
+
+.character-card.targeted {
+    border-color: #3b82f6;
+}
+
+.character-stats {
+    position: relative;
+    /* 疑似要素より手前に表示 */
+    z-index: 1;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    /* 文字の視認性確保のためにテキストシャドウを追加 */
+    text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.7), -1px -1px 3px rgba(255, 255, 255, 0.7), 1px -1px 3px rgba(255, 255, 255, 0.7), -1px 1px 3px rgba(255, 255, 255, 0.7);
+}
+
+.targeted {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(255, 100, 100, 0.8);
+    /* 敵選択時のスタイル */
+    border-color: #ef4444;
+}
+
+.enemy-card {
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+.damage-popup {
+    position: absolute;
+    top: 25%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: red;
+    text-shadow: 1px 1px 2px white;
+    animation: floatUp 1.5s ease-out forwards;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.heal-popup {
+    color: #22c55e;
+}
+
+@keyframes floatUp {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -150%) scale(1.5);
+        opacity: 0;
+    }
+}
+
+.flash-red {
+    animation: flash-red 0.5s ease-out;
+}
+
+.flash-green {
+    animation: flash-green 0.5s ease-out;
+}
+
+.flash-yellow {
+    animation: flash-yellow 0.5s ease-out;
+}
+
+@keyframes flash-red {
+    0%,
+    100% {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 25px 8px rgba(255, 59, 59, 0.8);
+        transform: scale(1.05);
+    }
+}
+
+@keyframes flash-green {
+    0%,
+    100% {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 25px 8px rgba(34, 197, 94, 0.8);
+        transform: scale(1.05);
+    }
+}
+
+@keyframes flash-yellow {
+    0%,
+    100% {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 25px 8px rgba(253, 224, 71, 0.9);
+        transform: scale(1.05);
+    }
+}
+
+.enemy-card.flash-red {
+    animation: flash-red-enemy 0.5s ease-out;
+}
+
+.enemy-card.flash-green {
+    animation: flash-green-enemy 0.5s ease-out;
+}
+
+.enemy-card.flash-yellow {
+    animation: flash-yellow-enemy 0.5s ease-out;
+}
+
+@keyframes flash-red-enemy {
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    }
+    50% {
+        box-shadow: 0 0 25px 8px rgba(255, 59, 59, 0.8);
+        transform: scale(1.05);
+    }
+}
+
+@keyframes flash-green-enemy {
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    }
+    50% {
+        box-shadow: 0 0 25px 8px rgba(34, 197, 94, 0.8);
+        transform: scale(1.05);
+    }
+}
+
+@keyframes flash-yellow-enemy {
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    }
+    50% {
+        box-shadow: 0 0 25px 8px rgba(253, 224, 71, 0.9);
+        transform: scale(1.05);
+    }
+}
+
+.stat-flash-increase {
+    animation: flash-stat-green 0.8s ease-out;
+    border-radius: 0.25rem;
+}
+
+.stat-flash-decrease {
+    animation: flash-stat-red 0.8s ease-out;
+    border-radius: 0.25rem;
+}
+
+@keyframes flash-stat-green {
+    0%,
+    100% {
+        background-color: transparent;
+    }
+    50% {
+        background-color: rgba(34, 197, 94, 0.5);
+    }
+}
+
+@keyframes flash-stat-red {
+    0%,
+    100% {
+        background-color: transparent;
+    }
+    50% {
+        background-color: rgba(239, 68, 68, 0.5);
+    }
+}
+
+.status-icon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-left: 4px;
+}
+
+.fade-out-down {
+    animation: fade-out-down 1s ease-out forwards;
+}
+
+@keyframes fade-out-down {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+}
+/* ゴーレムと防壁のオーバーレイ表示 */
+
+.golem-status-container,
+.wall-status-container {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    right: 4px;
+    z-index: 2;
+    /* character-stats(z-index:1)より手前に表示 */
+    pointer-events: none;
+    /* 下の要素をクリックできるように */
+}
+
+.golem-card-inner,
+.wall-card-inner {
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 2px 4px;
+    border-radius: 4px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+/* キャラクター背景画像 */
+
+.bg-char-akari {
+    --char-bg-image: url('sgd_1.png');
+}
+
+.bg-char-hikari {
+    --char-bg-image: url('sgd_2.png');
+}
+
+.bg-char-shizuka {
+    --char-bg-image: url('sgd_3.png');
+}
+
+.bg-char-yui {
+    --char-bg-image: url('sgd_4.png');
+}
+
+.bg-char-beatrice {
+    --char-bg-image: url('sgd_5.png');
+}
+
+.bg-char-ririka {
+    --char-bg-image: url('sgd_6.png');
+}
+
+.bg-char-sakuya {
+    --char-bg-image: url('sgd_7.png');
+}
+
+.bg-char-shaomei {
+    --char-bg-image: url('sgd_8.png');
+}
+
+.bg-char-eriza {
+    --char-bg-image: url('sgd_9.png');
+}
+
+.bg-char-runa {
+    --char-bg-image: url('sgd_10.png');
+}
+
+.bg-char-chloe {
+    --char-bg-image: url('sgd_11.png');
+}
+
+.bg-char-miko {
+    --char-bg-image: url('sgd_12.png');
+}
+
+.bg-char-renka {
+    --char-bg-image: url('sgd_13.png');
+}
+
+.bg-char-iori {
+    --char-bg-image: url('sgd_14.png');
+}
+
+.bg-char-koharu {
+    --char-bg-image: url('sgd_15.png');
+}
+
+.bg-char-olivia {
+    --char-bg-image: url('sgd_16.png');
+}
+
+.bg-char-celestia {
+    --char-bg-image: url('sgd_17.png');
+}
+/* リトルパニック用 */
+
+.bg-char-hikari-a {
+    --char-bg-image: url('sgd_2a.png');
+}
+
+.bg-char-beatrice-a {
+    --char-bg-image: url('sgd_5a.png');
+}
+
+.bg-char-koharu-a {
+    --char-bg-image: url('sgd_15a.png');
+}
+
+.bg-char-olivia-a {
+    --char-bg-image: url('sgd_16a.png');
+}
+/* トレジャーハンター用 */
+
+.bg-char-lily {
+    --char-bg-image: url('sgd_18.png');
+}
+
+.bg-char-lily-succubus {
+    --char-bg-image: url('sgd_18-1.png');
+}
+
+.bg-char-lily-fairy {
+    --char-bg-image: url('sgd_18-2.png');
+}
+
+.bg-char-lily-alraune {
+    --char-bg-image: url('sgd_18-3.png');
+}
+/* 闘争令嬢用 */
+
+.bg-char-noel {
+    --char-bg-image: url('sgd_19.png');
+}
+
+.bg-char-flora {
+    --char-bg-image: url('sgd_20.png');
+}
+/* 闘争令嬢プライベート衣装用 */
+
+.bg-char-noel-a {
+    --char-bg-image: url('sgd_19a.png');
+}
+
+.bg-char-flora-a {
+    --char-bg-image: url('sgd_20a.png');
+}
+/* 転生者用 */
+
+.bg-char-shiro {
+    --char-bg-image: url('sgd_21.png');
+}
+/* サマータイム・スペシャルライブ用 */
+
+.bg-char-ririka-a {
+    --char-bg-image: url('sgd_6a.png');
+}
+
+.bg-char-yui-a {
+    --char-bg-image: url('sgd_4a.png');
+}
+
+.bg-char-miko-a {
+    --char-bg-image: url('sgd_12a.png');
+}
+
+.bg-char-lily-fairy-a {
+    --char-bg-image: url('sgd_18-2a.png');
+}
+
+.bg-char-ririka-b {
+    --char-bg-image: url('sgd_6b.png');
+}
+
+.bg-char-yui-b {
+    --char-bg-image: url('sgd_4b.png');
+}
+
+.bg-char-miko-b {
+    --char-bg-image: url('sgd_12b.png');
+}
+
+.bg-char-lily-b {
+    --char-bg-image: url('sgd_18b.png');
+}
+/* サマータイム・スペシャルライブ衣装（リリィ変身後） */
+
+.bg-char-lily-a {
+    --char-bg-image: url('sgd_18a.png');
+}
+
+.bg-char-lily-succubus-a {
+    --char-bg-image: url('sgd_18-1a.png');
+}
+
+.bg-char-lily-alraune-a {
+    --char-bg-image: url('sgd_18-3a.png');
+}
+
+.bg-char-lily-succubus-b {
+    --char-bg-image: url('sgd_18-1b.png');
+}
+
+.bg-char-lily-fairy-b {
+    --char-bg-image: url('sgd_18-2b.png');
+}
+
+.bg-char-lily-alraune-b {
+    --char-bg-image: url('sgd_18-3b.png');
+}
+/* 緊急ボタンの表示制御 */
+
+#emergency-button {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    transform: translateY(-10px);
+}
+/* 戦闘中にメニューエリアをホバーした時 */
+
+#menu-area:hover #emergency-button.battle-active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+/* ログ履歴ツールチップ */
+
+#log-tooltip {
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+    transform: translateY(10px);
+    opacity: 0;
+    pointer-events: none;
+}
+
+#log-container:hover+#log-tooltip {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+/* もしもの物語モーダルのタブスタイル */
+
+.what-if-tab {
+    padding: 8px 16px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    color: #6b7280;
+    /* gray-500 */
+    transition: all 0.2s ease-in-out;
+}
+
+.what-if-tab:hover {
+    color: #111827;
+    /* gray-900 */
+}
+
+.what-if-tab.active-tab {
+    color: #3b82f6;
+    /* blue-500 */
+    border-bottom-color: #3b82f6;
+    /* blue-500 */
+}
+
+/* トグルスイッチのスタイル */
+
+.toggle-checkbox:checked {
+    right: 0;
+    border-color: #4f46e5;
+    /* indigo-600 */
+}
+
+.toggle-checkbox:checked+.toggle-label {
+    background-color: #4f46e5;
+    /* indigo-600 */
+}
